@@ -23,7 +23,7 @@ export default defineConfig({
       // 获取路径中含'/api'的请求
       '/api': {
         // 后台服务所在的源
-        target: 'http://localhost:8080',
+        target: 'http://localhost:48080',
         // target: 'http://127.0.0.1:4523/m1/6495443-6195651-default',
         // 是否修改源
         changeOrigin: true,
@@ -39,8 +39,8 @@ export default defineConfig({
       // 获取路径中含'/api'的请求
       '/api': {
         // 后台服务所在的源
-        // target: 'http://localhost:8080',
-        target: 'http://127.0.0.1:4523/m1/6495443-6195651-default',
+        target: 'http://localhost:48080',
+        // target: 'http://127.0.0.1:4523/m1/6495443-6195651-default',
         // 是否修改源
         changeOrigin: true,
         // 重写路径

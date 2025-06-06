@@ -14,14 +14,14 @@
           <div v-if="topic.type === 'input'">
             <!-- {{ topic.topic }} -->
             <div class="input-container">
-              <input required="" id="input" type="text" v-model="submitData[topic.id]" autocomplete="off" />
+              <input required id="input" type="text" v-model="submitData[topic.id]" autocomplete="off" />
               <label class="label" for="input">{{ index + 1 }}. {{ topic.topic }}</label>
               <div class="underline"></div>
             </div>
             <div style="height: 50px;"></div>
           </div>
 
-          <div v-if="topic.type === 'redio'">
+          <div v-if="topic.type === 'radio'">
             {{ index + 1 }}. {{ topic.topic }}
             <div class="radio-button-container">
               <div class="radio-button" v-for="(option, index) in topic.options">
@@ -59,7 +59,7 @@ import { ref, onMounted } from 'vue'
 
 interface TopicOption {
   id: number
-  type: 'input' | 'redio' | 'checkbox'
+  type: 'input' | 'radio' | 'checkbox'
   topic: string
   options?: string[]
 }
@@ -102,7 +102,9 @@ import { getMsqVO } from '../api/MsqView.js'
 
 // 使用异步函数获取数据
 const fetchData = async () => {
+  console.log('使用异步函数获取数据')
   const response = await getMsqVO(1);
+  console.log('res: ', response);
   topic.value = response.data
   console.log('res: ', response.data);
   
@@ -113,6 +115,22 @@ const fetchData = async () => {
     }
   })
 }
+
+// const fetchData =  () => {
+//   console.log('使用异步函数获取数据')
+//   getMsqVO(1).then(response =>{
+//     console.log('[p]res: ', response);
+//     topic.value = response.data
+//     console.log('[1]res: ', response.data);
+    
+//     // 在数据加载完成后初始化多选框数据
+//     topic.value.topics.forEach(item => {
+//       if (item.type === 'checkbox') {
+//         submitData.value[item.id] = []
+//       }
+//     })
+//   })
+// }
 
 // 在组件挂载时获取数据
 onMounted(() => {
@@ -158,7 +176,7 @@ const handleCheckboxChange = (event, topicId) => {
 //     },
 //     {
 //       id: 2,
-//       type: 'redio',
+//       type: 'radio',
 //       topic: '你的性别',
 //       options: ['男', '女', '草履虫', '沃尔玛购物袋', '其他']
 //     },
