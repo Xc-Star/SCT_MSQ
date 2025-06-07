@@ -33,8 +33,8 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
      * @throws Exception
      */
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        return true;
-        /*//判断当前拦截到的是Controller的方法还是其他资源
+//        return true;
+        //判断当前拦截到的是Controller的方法还是其他资源
         if (!(handler instanceof HandlerMethod)) {
             //当前拦截到的不是动态方法，直接放行
             return true;
@@ -47,16 +47,26 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         try {
             log.info("jwt校验:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
-            log.info("当前员工id：", empId);
-            // 将当前登录用户的id保存到ThreadLocal中
-            BaseContext.setCurrentId(empId);
+            Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
+            String username = claims.get(JwtClaimsConstant.USERNAME).toString();
+            log.info("当前管理员id：{}, 用户名：{}", userId, username);
+            // 将当前登录管理员的id保存到ThreadLocal中
+            BaseContext.setCurrentId(userId);
+            BaseContext.setUsername(username);
             //3、通过，放行
             return true;
         } catch (Exception ex) {
             //4、不通过，响应401状态码
             response.setStatus(401);
             return false;
-        }*/
+        }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) throws Exception {
+        // 请求完成后清理ThreadLocal数据，防止内存泄漏
+        BaseContext.removeCurrentId();
+        BaseContext.removeUsername();
     }
 }

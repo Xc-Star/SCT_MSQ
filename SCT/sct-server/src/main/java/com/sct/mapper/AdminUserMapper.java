@@ -3,6 +3,7 @@ package com.sct.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sct.entity.AdminUser;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @Title: AdminUserMapper
@@ -13,4 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface AdminUserMapper extends BaseMapper<AdminUser> {
+
+    @Select("select * from admin_user where username = #{username} AND deleted = 0")
+    AdminUser getUserByUsername(String username);
 }

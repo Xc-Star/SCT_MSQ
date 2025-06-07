@@ -3,7 +3,7 @@
 //导入axios  npm install axios
 import axios from 'axios';
 import { ElMessage } from 'element-plus'
-// import { useTokenStore } from '../stores/token'
+import { useTokenStore } from '../stores/token'
 
 /* import { useRouter } from 'vue-router'
 const router = useRouter(); */
@@ -18,11 +18,11 @@ const instance = axios.create({baseURL})
 //添加请求拦截器
 instance.interceptors.request.use(
     config=>{
-        // let tokenStore = useTokenStore();
-        // //判断token是否存在
-        // if(tokenStore.token){
-        //     config.headers.Authorization = tokenStore.token;
-        // }
+        let tokenStore = useTokenStore();
+        // 判断token是否存在
+        if(tokenStore.token){
+            config.headers.Authorization = tokenStore.token;
+        }
         return config;
     },
     err=>{
@@ -37,7 +37,7 @@ instance.interceptors.response.use(
         if(result.data.code===0){
             // 操作成功
             return result.data;
-        } else{
+        } else {
             // 操作失败
             // alert(result.data.msg ? result.data.msg : '服务异常');
             ElMessage.error(result.data.message ? result.data.message : '服务异常');
@@ -49,7 +49,7 @@ instance.interceptors.response.use(
         if(err.response.status===401){
             //跳转到登录页面
             ElMessage.error('请先登录');
-            router.push('/login')
+            router.push('/admin/login')
         } else {
             ElMessage.error('服务异常');
             return Promise.reject(err);//异步的状态转化成失败的状态

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MsqView from '../views/MsqView.vue'
 import IndexView from '../views/index.vue';
+import Login from '../views/admin/Login.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
       path: '/msq',
       name: 'msq',
       component: MsqView
+    },
+    {
+      path: '/admin/login',
+      name: 'adminLogin',
+      component: Login
     }
   ]
 })

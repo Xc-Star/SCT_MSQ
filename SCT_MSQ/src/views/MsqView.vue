@@ -1,7 +1,12 @@
 <template>
   <div class="msq-container">
     <div class="container">
-      <form class="msq-form">
+      <div v-if="error" class="error-message">
+        <h3>加载失败</h3>
+        <p>{{ error }}</p>
+        <button class="button2" @click="retryFetch">重试</button>
+      </div>
+      <form v-else class="msq-form">
         <div class="title" style="margin-bottom: 64px;">
           <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: black;">{{ topic.name }}</h2>
           <span style="text-align: center; color: #666; display: block;">
@@ -98,39 +103,31 @@ const topic = ref<Topic>({
 
 const submitData = ref<SubmitData>({})
 
-import { getMsqVO } from '../api/MsqView.js'
+import { getMsqVO } from '@/api/MsqView.js'
+
+const error = ref<string | null>(null)
 
 // 使用异步函数获取数据
 const fetchData = async () => {
-  console.log('使用异步函数获取数据')
-  const response = await getMsqVO(1);
-  console.log('res: ', response);
-  topic.value = response.data
-  console.log('res: ', response.data);
-  
-  // 在数据加载完成后初始化多选框数据
-  topic.value.topics.forEach(item => {
-    if (item.type === 'checkbox') {
-      submitData.value[item.id] = []
-    }
-  })
+  try {
+    error.value = null
+    const response = await getMsqVO(1);
+    topic.value = response.data
+    // 在数据加载完成后初始化多选框数据
+    topic.value.topics.forEach(item => {
+      if (item.type === 'checkbox') {
+        submitData.value[item.id] = []
+      }
+    })
+  } catch (err) {
+    console.error('获取数据失败:', err)
+    error.value = '获取问卷数据失败，请稍后重试'
+  }
 }
 
-// const fetchData =  () => {
-//   console.log('使用异步函数获取数据')
-//   getMsqVO(1).then(response =>{
-//     console.log('[p]res: ', response);
-//     topic.value = response.data
-//     console.log('[1]res: ', response.data);
-    
-//     // 在数据加载完成后初始化多选框数据
-//     topic.value.topics.forEach(item => {
-//       if (item.type === 'checkbox') {
-//         submitData.value[item.id] = []
-//       }
-//     })
-//   })
-// }
+const retryFetch = () => {
+  fetchData()
+}
 
 // 在组件挂载时获取数据
 onMounted(() => {
@@ -479,5 +476,20 @@ const handleCheckboxChange = (event, topicId) => {
     flex-direction: column;
     gap: 4px;
   }
+}
+
+.error-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-message h3 {
+  color: #ff4d4f;
+  margin-bottom: 16px;
+}
+
+.error-message p {
+  color: #666;
+  margin-bottom: 24px;
 }
 </style> 
