@@ -6,7 +6,8 @@
                 <el-button type="primary" @click="handleAdd">新增问卷</el-button>
             </div>
             
-            <el-table :data="tableData" style="width: 100%" v-loading="loading">
+            <!-- PC端表格 -->
+            <el-table :data="tableData" style="width: 100%" v-loading="loading" class="pc-table">
                 <el-table-column prop="id" label="ID" width="80" align="center" />
                 <el-table-column prop="name" label="问卷名称" align="center" />
                 <el-table-column prop="type" label="类型" width="120" align="center">
@@ -37,11 +38,41 @@
                 </el-table-column>
             </el-table>
 
+            <!-- 移动端列表 -->
+            <div class="mobile-list">
+                <div v-for="item in tableData" :key="item.id" class="mobile-item" v-loading="loading">
+                    <div class="item-header">
+                        <span class="item-name">{{ item.name }}</span>
+                        <el-tag :type="getTypeTagType(item.type)" size="small">
+                            {{ getTypeLabel(item.type) }}
+                        </el-tag>
+                    </div>
+                    <div class="item-content">
+                        <p class="description">{{ item.description }}</p>
+                        <p class="update-time">更新时间：{{ item.updateTime }}</p>
+                        <p class="remark" v-if="item.remark">备注：{{ item.remark }}</p>
+                    </div>
+                    <div class="item-footer">
+                        <el-switch
+                            v-model="item.status"
+                            :active-value="1"
+                            :inactive-value="0"
+                            @change="handleStatusChange(item)"
+                        />
+                        <div class="operations">
+                            <el-button size="small" @click="handleEdit(item)">编辑</el-button>
+                            <el-button size="small" type="danger" @click="handleDelete(item)">删除</el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 新增/编辑对话框 -->
             <el-dialog
                 v-model="dialogVisible"
                 :title="dialogType === 'add' ? '新增问卷' : '编辑问卷'"
-                width="500px"
+                width="90%"
+                class="mobile-dialog"
             >
                 <el-form :model="form" label-width="80px">
                     <el-form-item label="问卷名称">
@@ -256,5 +287,85 @@ h2 {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+}
+
+/* 移动端适配样式 */
+@media screen and (max-width: 768px) {
+    .questionnaire-manage {
+        padding: 10px;
+    }
+
+    .content {
+        padding: 10px;
+    }
+
+    .pc-table {
+        display: none;
+    }
+
+    .mobile-list {
+        display: block;
+    }
+
+    .mobile-item {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .item-name {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .item-content {
+        margin: 10px 0;
+    }
+
+    .description {
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .update-time, .remark {
+        font-size: 12px;
+        color: #999;
+        margin: 5px 0;
+    }
+
+    .item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .operations {
+        display: flex;
+        gap: 8px;
+    }
+
+    .mobile-dialog :deep(.el-dialog) {
+        width: 90% !important;
+        margin: 0 auto;
+    }
+}
+
+/* PC端样式 */
+@media screen and (min-width: 769px) {
+    .mobile-list {
+        display: none;
+    }
 }
 </style> 
