@@ -28,4 +28,29 @@ public class MsqServiceImpl implements MsqService {
     public List<Msq> list() {
         return msqMapper.selectList(null);
     }
+
+    @Override
+    public void saveMsq(Msq msq) {
+        msqMapper.insert(msq);
+    }
+
+    @Override
+    public void updateMsq(Msq msq) {
+        msqMapper.updateById(msq);
+    }
+
+    @Override
+    public void updateStatus(Long id, Integer status) {
+        msqMapper.updateById(Msq.builder().id(id).status(status).build());
+    }
+
+    @Override
+    public Msq getById(Long id) {
+        return msqMapper.selectById(id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        msqMapper.deleteById(id);
+    }
 }

@@ -2,7 +2,9 @@ package com.sct.service.impl;
 
 import com.sct.constant.JwtClaimsConstant;
 import com.sct.constant.MessageConstant;
+import com.sct.context.BaseContext;
 import com.sct.dto.AdminLoginDTO;
+import com.sct.dto.UpdatePasswordDTO;
 import com.sct.entity.AdminUser;
 import com.sct.exception.BaseException;
 import com.sct.mapper.AdminUserMapper;
@@ -50,5 +52,17 @@ public class AuthServiceImpl implements AuthService {
         map.put(JwtClaimsConstant.USER_ID, user.getId());
         map.put(JwtClaimsConstant.USERNAME, user.getUsername());
         return JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), map);
+    }
+
+    @Override
+    public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
+
+        Long currentId = BaseContext.getCurrentId();
+        AdminUser user = adminUserMapper.selectById(currentId);
+        if (!PasswordUtil.matches(updatePasswordDTO.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("旧密码错误");
+        }
+
+        user.setPassword(PasswordUtil.encode(updatePasswordDTO.getNewPassword()));
     }
 }

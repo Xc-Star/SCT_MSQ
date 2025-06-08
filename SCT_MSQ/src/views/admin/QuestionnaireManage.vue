@@ -60,7 +60,7 @@
                     <el-form-item label="描述">
                         <el-input v-model="form.description" type="textarea" />
                     </el-form-item>
-                    <el-form-item label="状态">
+                    <!-- <el-form-item label="状态">
                         <el-switch
                             v-model="form.status"
                             :active-value="1"
@@ -71,7 +71,7 @@
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input v-model="form.remark" type="textarea" />
-                    </el-form-item>
+                    </el-form-item> -->
                 </el-form>
                 <template #footer>
                     <span class="dialog-footer">
@@ -101,6 +101,8 @@ import {
     ElOption,
     ElTag
 } from 'element-plus'
+
+import { getMsqList, addMsq, getMsq, updateMsq, updateStatus, deleteMsq } from '@/api/AdminMsq'
 
 interface Questionnaire {
     id: number
@@ -150,10 +152,8 @@ const form = ref<Questionnaire>({
 })
 
 // 获取问卷列表
-import { getMsqList } from '@/api/AdminMsq'
 const getList = async () => {
     loading.value = true
-    // TODO: 调用后端API获取数据
     const response = await getMsqList()
     tableData.value = response.data
     // 这里使用模拟数据
@@ -174,12 +174,12 @@ const getList = async () => {
 const handleAdd = () => {
     dialogType.value = 'add'
     form.value = {
-        id: 0,
+        id: undefined,
         name: '',
         type: 1,
         description: '',
         updateTime: '',
-        remark: '',
+        remark: undefined,
         status: 1
     }
     dialogVisible.value = true
@@ -197,38 +197,33 @@ const handleDelete = (row: Questionnaire) => {
     ElMessageBox.confirm('确认删除该问卷吗？', '提示', {
         type: 'warning'
     }).then(async () => {
-        try {
-            // TODO: 调用后端API删除数据
-            ElMessage.success('删除成功')
-            getList()
-        } catch (error) {
-            ElMessage.error('删除失败')
-        }
+        // 调用后端API删除数据
+        await deleteMsq(row.id)
+        ElMessage.success('删除成功')
+        getList()
     })
 }
 
 // 提交表单
 const handleSubmit = async () => {
-    try {
-        // TODO: 调用后端API保存数据
-        ElMessage.success(dialogType.value === 'add' ? '新增成功' : '编辑成功')
-        dialogVisible.value = false
-        getList()
-    } catch (error) {
-        ElMessage.error(dialogType.value === 'add' ? '新增失败' : '编辑失败')
+    form.value.updateTime = undefined
+    // 调用后端API保存数据
+    if (dialogType.value === 'add') {
+        await addMsq(form.value)
+    } else {
+        await updateMsq(form.value)
     }
+    
+    ElMessage.success(dialogType.value === 'add' ? '新增成功' : '编辑成功')
+    dialogVisible.value = false
+    getList()
 }
 
 // 状态变更处理
 const handleStatusChange = async (row: Questionnaire) => {
-    try {
-        // TODO: 调用后端API更新状态
-        ElMessage.success('状态更新成功: ' + row.status)
-    } catch (error) {
-        // 如果更新失败，恢复原状态
-        row.status = row.status === 1 ? 0 : 1
-        ElMessage.error('状态更新失败')
-    }
+    // 调用后端API更新状态
+    await updateStatus({id: row.id, status: row.status})
+    ElMessage.success('状态更新成功: ' + row.status)
 }
 
 onMounted(() => {

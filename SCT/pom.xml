@@ -21,6 +21,7 @@
 <!--        <mybatis.spring>2.2.0</mybatis.spring>-->
         <jbcrypt>0.4</jbcrypt>
         <mybatis.plus>3.5.2</mybatis.plus>
+        <hutool-5.version>5.8.35</hutool-5.version>
         <lombok>1.18.20</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
@@ -45,6 +46,12 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis.plus}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool-5.version}</version>
             </dependency>
 
             <dependency>

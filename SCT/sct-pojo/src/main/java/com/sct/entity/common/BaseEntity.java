@@ -18,12 +18,10 @@ public class BaseEntity {
     /**
      * 创建时间
      */
-    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     /**
      * 备注
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE, jdbcType = JdbcType.VARCHAR)
     private String remark;
     /**
      * 逻辑删除

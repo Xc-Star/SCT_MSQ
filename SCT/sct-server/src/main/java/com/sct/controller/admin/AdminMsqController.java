@@ -1,11 +1,10 @@
 package com.sct.controller.admin;
 
+import com.sct.dto.MsqUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.result.Result;
 import com.sct.service.MsqService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -27,5 +26,34 @@ public class AdminMsqController {
     @GetMapping("/list")
     public Result<List<Msq>> list() {
         return Result.success(msqService.list());
+    }
+
+    @PostMapping("/save")
+    public Result<?> saveMsq(@RequestBody Msq msq) {
+        msqService.saveMsq(msq);
+        return Result.success();
+    }
+
+    @GetMapping("/get/{id}")
+    public Result<Msq> get(@PathVariable Long id) {
+        return Result.success(msqService.getById(id));
+    }
+
+    @PutMapping("/update")
+    public Result<?> updateMsq(@RequestBody Msq msq) {
+        msqService.updateMsq(msq);
+        return Result.success();
+    }
+
+    @PutMapping("/updateStatus")
+    public Result<?> updateStatus(@RequestBody MsqUpdateStatusDTO dto) {
+        msqService.updateStatus(dto.getId(), dto.getStatus());
+        return Result.success();
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public Result<?> delete(@PathVariable Long id) {
+        msqService.deleteById(id);
+        return Result.success();
     }
 }
