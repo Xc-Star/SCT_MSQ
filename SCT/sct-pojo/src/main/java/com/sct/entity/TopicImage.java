@@ -1,5 +1,6 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -19,6 +20,12 @@ import lombok.*;
 @ToString(callSuper = true)
 @TableName("topic_image")
 public class TopicImage extends BaseEntity {
+
+    /**
+     * id
+     */
+    @TableId
+    private Long id;
 
     /**
      * 题目id

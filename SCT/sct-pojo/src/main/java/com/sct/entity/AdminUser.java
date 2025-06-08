@@ -1,5 +1,6 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -21,6 +22,12 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 @TableName("admin_user")
 public class AdminUser extends BaseEntity {
+
+    /**
+     * id
+     */
+    @TableId
+    private Long id;
 
     /**
      * 用户名

@@ -13,6 +13,7 @@ import com.sct.utils.PasswordUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
         if (!PasswordUtil.matches(adminLoginDTO.getPassword(), user.getPassword())) {
             throw new BaseException(MessageConstant.PASSWORD_ERROR);
         }
+
+        user.setLastLoginTime(LocalDateTime.now());
+        adminUserMapper.updateById(user);
 
         Map<String, Object> map = new HashMap<>();
         map.put(JwtClaimsConstant.USER_ID, user.getId());

@@ -1,7 +1,12 @@
 package com.sct.service.impl;
 
+import com.sct.entity.Msq;
+import com.sct.mapper.MsqMapper;
 import com.sct.service.MsqService;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Title: MsqServiceImpl
@@ -12,4 +17,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MsqServiceImpl implements MsqService {
+
+    @Resource
+    private MsqMapper msqMapper;
+
+    /**
+     * 获取所有问卷
+     * @return
+     */
+    public List<Msq> list() {
+        return msqMapper.selectList(null);
+    }
 }

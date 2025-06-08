@@ -1,5 +1,6 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -21,6 +22,12 @@ import java.util.List;
 @ToString(callSuper = true)
 @TableName("topic_result")
 public class TopicResult extends BaseEntity {
+
+    /**
+     * id
+     */
+    @TableId
+    private Long id;
 
     /**
      * 问卷id

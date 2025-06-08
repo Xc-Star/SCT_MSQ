@@ -1,7 +1,8 @@
 package com.sct.entity.common;
 
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.apache.ibatis.type.JdbcType;
 
 import java.time.LocalDateTime;
 
@@ -15,20 +16,18 @@ import java.time.LocalDateTime;
 @Data
 public class BaseEntity {
     /**
-     * 主键
-     */
-    @TableId
-    private Long id;
-    /**
      * 创建时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     /**
      * 备注
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE, jdbcType = JdbcType.VARCHAR)
     private String remark;
     /**
      * 逻辑删除
      */
+    @TableLogic
     private Boolean deleted;
 }

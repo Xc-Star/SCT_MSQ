@@ -21,7 +21,9 @@
 import { ref } from 'vue'
 import { login } from '@/api/Login.js'
 import { useTokenStore } from '@/stores/token.js';
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const store = useTokenStore()
 
 const username = ref('')
@@ -60,6 +62,7 @@ const submit = async (e: Event) =>  {
         }
         const response = await login(loginData.value)
         store.setToken(response.data)
+        router.push('/admin/main')
     }
 }
 </script>
@@ -71,7 +74,7 @@ const submit = async (e: Event) =>  {
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    margin-top: -100px;
+    /* margin-top: -100px; */
 }
 
 /* From Uiverse.io by VitorBaraoDias */ 

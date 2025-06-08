@@ -1,5 +1,6 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -22,6 +23,12 @@ public class MsqResult extends BaseEntity {
     public static final Integer STATUS_WAITING = 0; // 等待审核
     public static final Integer STATUS_PASS = 1; // 通过
     public static final Integer STATUS_FAIL = 2; // 未通过
+
+    /**
+     * id
+     */
+    @TableId
+    private Long id;
 
     /**
      * 回答者

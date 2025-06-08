@@ -1,5 +1,6 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -25,6 +26,12 @@ public class Topic extends BaseEntity {
     public static final String TYPE_INPUT = "input";
     public static final String TYPE_RADIO = "radio";
     public static final String TYPE_CHECKBOX = "checkbox";
+
+    /**
+     * id
+     */
+    @TableId
+    private Long id;
 
     /**
      * 问卷id

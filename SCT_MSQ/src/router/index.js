@@ -2,6 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MsqView from '../views/MsqView.vue'
 import IndexView from '../views/index.vue';
 import Login from '../views/admin/Login.vue'
+import Main from '../views/admin/Main.vue'
+import QuestionnaireReview from '../views/admin/QuestionnaireReview.vue'
+import QuestionnaireManage from '../views/admin/QuestionnaireManage.vue'
+import ImageManage from '../views/admin/ImageManage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +24,29 @@ const router = createRouter({
       path: '/admin/login',
       name: 'adminLogin',
       component: Login
+    },
+    {
+      path: '/admin/main',
+      name: 'adminMain',
+      component: Main,
+      redirect: '/admin/main/questionnaire-review',
+      children: [
+        {
+          path: 'questionnaire-review',
+          name: 'questionnaireReview',
+          component: QuestionnaireReview
+        },
+        {
+          path: 'questionnaire-manage',
+          name: 'questionnaireManage',
+          component: QuestionnaireManage
+        },
+        {
+          path: 'image-manage',
+          name: 'imageManage',
+          component: ImageManage
+        }
+      ]
     }
   ]
 })
