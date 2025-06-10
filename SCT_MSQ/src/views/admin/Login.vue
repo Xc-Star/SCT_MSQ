@@ -21,10 +21,12 @@
 import { ref } from 'vue'
 import { login } from '@/api/Login.js'
 import { useTokenStore } from '@/stores/token.js';
+import useUserInfoStore from '@/stores/userInfo.js'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const store = useTokenStore()
+const userInfoStore = useUserInfoStore()
 
 const username = ref('')
 const password = ref('')
@@ -61,7 +63,8 @@ const submit = async (e: Event) =>  {
             password: password.value
         }
         const response = await login(loginData.value)
-        store.setToken(response.data)
+        store.setToken(response.data.token)
+        userInfoStore.setInfo(response.data.userInfo)
         router.push('/admin/main')
     }
 }

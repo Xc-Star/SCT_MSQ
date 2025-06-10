@@ -40,6 +40,11 @@ public class AdminUser extends BaseEntity {
     private String password;
 
     /**
+     * 头像
+     */
+    private String avatar;
+
+    /**
      * 最后登录时间
      */
     private LocalDateTime lastLoginTime;

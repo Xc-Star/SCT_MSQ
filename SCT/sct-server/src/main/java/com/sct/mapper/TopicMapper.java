@@ -3,6 +3,9 @@ package com.sct.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sct.entity.Topic;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @Title: TopicMapper
@@ -13,4 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface TopicMapper extends BaseMapper<Topic> {
+
+    @Select("select * from topic where id < 0")
+    List<Topic> getTopicParent();
 }

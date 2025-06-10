@@ -5,11 +5,11 @@
             v-if="isMobile && isCollapsed" 
             @click="toggleSidebar"
         >
-            <el-icon>
-                <template v-if="showButton">菜单</template>
-                <template v-else>></template>
+            <!-- <el-icon class="menu-icon">
                 <component :is="isCollapsed ? 'Expand' : 'Fold'" />
-            </el-icon>
+            </el-icon> -->
+            <span v-if="showButton" class="menu-text">菜单</span>
+            <span v-else>></span>
         </div>
         <div class="sidebar" :class="{ 'sidebar-collapsed': isCollapsed }">
             <div class="logo">
@@ -31,6 +31,23 @@
             </nav>
         </div>
         <div class="main-content" :class="{ 'main-content-expanded': isCollapsed }" @click="handleMainContentClick">
+            <div class="user-info">
+                <el-dropdown trigger="click" @command="handleCommand">
+                    <div class="user-dropdown-link">
+                        <el-avatar :size="32" :src="userInfo.avatar || ''">
+                            {{ userInfo.username ? userInfo.username.charAt(0) : 'U' }}
+                        </el-avatar>
+                        <span class="username">{{ userInfo.username || '未登录' }}</span>
+                        <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                    </div>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item command="changePassword">修改密码</el-dropdown-item>
+                            <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
+            </div>
             <router-view></router-view>
         </div>
         <div class="sidebar-mask" v-if="isMobile && !isCollapsed" @click="toggleSidebar"></div>
@@ -39,7 +56,21 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Expand, Fold } from '@element-plus/icons-vue'
+import { Expand, Fold, ArrowDown } from '@element-plus/icons-vue'
+import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElAvatar, ElIcon, ElMessageBox } from 'element-plus'
+import { useTokenStore } from '@/stores/token.js';
+import useUserInfoStore from '@/stores/userInfo'
+import { useRouter } from 'vue-router'
+
+interface UserInfo {
+    username?: string;
+    avatar?: string;
+}
+
+const store = useTokenStore()
+const router = useRouter()
+const userInfoStore = useUserInfoStore()
+const userInfo = userInfoStore.info as UserInfo
 
 const isCollapsed = ref(false)
 const isMobile = ref(false)
@@ -78,6 +109,29 @@ const handleMainContentClick = () => {
 const handleMenuClick = () => {
     if (isMobile.value) {
         isCollapsed.value = true
+    }
+}
+
+const handleCommand = (command: string) => {
+    switch (command) {
+        case 'changePassword':
+            // TODO: 实现修改密码功能
+            break
+        case 'logout':
+            ElMessageBox.confirm(
+                '确定要退出登录吗？',
+                '提示',
+                {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }
+            ).then(() => {
+                store.removeToken()
+                userInfoStore.removeInfo()
+                router.push('/admin/login')
+            }).catch(() => {})
+            break
     }
 }
 
@@ -184,7 +238,6 @@ onUnmounted(() => {
     z-index: 1001;
     background-color: #304156;
     color: #fff;
-    width: 80px;
     height: 40px;
     border-radius: 4px;
     display: flex;
@@ -193,23 +246,24 @@ onUnmounted(() => {
     cursor: pointer;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     transition: all 0.3s ease;
+    padding: 0 15px;
 }
 
 .mobile-menu-btn-scrolled {
     width: 20px;
-    height: 40px;
+    padding: 0;
     left: 0;
     border-radius: 0 4px 4px 0;
     background-color: rgba(48, 65, 86, 0.9);
 }
 
-.mobile-menu-btn-scrolled .el-icon {
-    font-size: 24px;
-}
-
-.mobile-menu-btn .el-icon {
+.menu-icon {
     font-size: 20px;
     color: white !important;
+}
+
+.menu-text {
+    font-size: 14px;
 }
 
 .sidebar-mask {
@@ -220,6 +274,35 @@ onUnmounted(() => {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
+}
+
+.user-info {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+}
+
+.user-dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.user-dropdown-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.username {
+    color: #606266;
+    font-size: 14px;
 }
 
 @media screen and (max-width: 768px) {
@@ -247,6 +330,11 @@ onUnmounted(() => {
 
     .collapse-btn {
         display: block;
+    }
+
+    .user-info {
+        top: 10px;
+        right: 10px;
     }
 }
 </style>

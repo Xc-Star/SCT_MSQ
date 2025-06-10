@@ -18,8 +18,8 @@
                     </template>
                 </el-table-column>
                 <el-table-column prop="description" label="描述" align="center" />
-                <el-table-column prop="updateTime" label="更新时间" width="180" align="center" />
-                <el-table-column prop="remark" label="备注" align="center" />
+                <el-table-column prop="updateTime" label="修改时间" width="180" align="center" />
+                <el-table-column prop="remark" label="修改人" align="center" />
                 <el-table-column prop="status" label="状态" width="100" align="center">
                     <template #default="scope">
                         <el-switch
@@ -49,8 +49,8 @@
                     </div>
                     <div class="item-content">
                         <p class="description">{{ item.description }}</p>
-                        <p class="update-time">更新时间：{{ item.updateTime }}</p>
-                        <p class="remark" v-if="item.remark">备注：{{ item.remark }}</p>
+                        <p class="update-time">修改时间：{{ item.updateTime }}</p>
+                        <p class="remark" v-if="item.remark">修改人：{{ item.remark }}</p>
                     </div>
                     <div class="item-footer">
                         <el-switch
@@ -71,10 +71,11 @@
             <el-dialog
                 v-model="dialogVisible"
                 :title="dialogType === 'add' ? '新增问卷' : '编辑问卷'"
-                width="90%"
+                :width="dialogType === 'add' ? (isMobile ? '90%' : '500px') : (isMobile ? '90%' : '1200px')"
                 class="mobile-dialog"
+                destroy-on-close
             >
-                <el-form :model="form" label-width="80px">
+                <el-form :model="form" label-width="80px" v-if="dialogType === 'add'">
                     <el-form-item label="问卷名称">
                         <el-input v-model="form.name" />
                     </el-form-item>
@@ -91,31 +92,23 @@
                     <el-form-item label="描述">
                         <el-input v-model="form.description" type="textarea" />
                     </el-form-item>
-                    <!-- <el-form-item label="状态">
-                        <el-switch
-                            v-model="form.status"
-                            :active-value="1"
-                            :inactive-value="0"
-                            active-text="启用"
-                            inactive-text="禁用"
-                        />
-                    </el-form-item>
-                    <el-form-item label="备注">
-                        <el-input v-model="form.remark" type="textarea" />
-                    </el-form-item> -->
                 </el-form>
-                <template #footer>
+                <template #footer v-if="dialogType === 'add'">
                     <span class="dialog-footer">
                         <el-button @click="dialogVisible = false">取消</el-button>
                         <el-button type="primary" @click="handleSubmit">确定</el-button>
                     </span>
                 </template>
+                <div v-if="dialogType === 'edit'" class="edit-container">
+                    <MsqEditView :id="form.id" @save-success="handleSaveSuccess" />
+                </div>
             </el-dialog>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import MsqEditView from './components/MsqEditView.vue'
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -138,7 +131,7 @@ import { getMsqList, addMsq, getMsq, updateMsq, updateStatus, deleteMsq } from '
 interface Questionnaire {
     id: number
     name: string
-    type: number
+    type: number | string
     description: string
     updateTime: string
     remark: string
@@ -147,23 +140,26 @@ interface Questionnaire {
 
 // 问卷类型选项
 const typeOptions = [
+    { value: '', label: '请选择问卷类型' },
     { value: 1, label: '红石问卷' },
     { value: 2, label: '建筑问卷' },
-    { value: 3, label: '其他' }
+    { value: 3, label: '后勤问卷' },
+    { value: 4, label: '其他' }
 ]
 
 // 获取类型标签
-const getTypeLabel = (type: number) => {
+const getTypeLabel = (type: number | string) => {
     const option = typeOptions.find(item => item.value === type)
     return option ? option.label : '未知类型'
 }
 
 // 获取类型标签样式
-const getTypeTagType = (type: number): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
-    const typeMap: Record<number, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
-        1: 'primary',    // 红石问卷 - 蓝色
-        2: 'success',    // 建筑问卷 - 绿色
-        3: 'info'        // 其他 - 灰色
+const getTypeTagType = (type: number | string): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
+    const typeMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
+        '1': 'primary',    // 红石问卷 - 蓝色
+        '2': 'success',    // 建筑问卷 - 绿色
+        '3': 'warning',    // 后勤问卷 - 黄色
+        '4': 'info'        // 其他 - 灰色
     }
     return typeMap[type] || 'info'
 }
@@ -175,11 +171,19 @@ const dialogType = ref<'add' | 'edit'>('add')
 const form = ref<Questionnaire>({
     id: 0,
     name: '',
-    type: 1,
+    type: '',
     description: '',
     updateTime: '',
     remark: '',
     status: 1
+})
+
+// 添加移动端检测
+const isMobile = ref(window.innerWidth <= 768)
+
+// 监听窗口大小变化
+window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth <= 768
 })
 
 // 获取问卷列表
@@ -187,18 +191,7 @@ const getList = async () => {
     loading.value = true
     const response = await getMsqList()
     tableData.value = response.data
-    // 这里使用模拟数据
-    // tableData.value = [
-    //     {
-    //         id: 1,
-    //         name: '示例问卷1',
-    //         type: 1,
-    //         description: '这是一个示例问卷',
-    //         updateTime: '2024-03-20 10:00:00',
-    //         remark: '测试备注',
-    //         status: 1
-    //     }
-    // ]
+    loading.value = false
 }
 
 // 新增问卷
@@ -207,7 +200,7 @@ const handleAdd = () => {
     form.value = {
         id: undefined,
         name: '',
-        type: 1,
+        type: '',
         description: '',
         updateTime: '',
         remark: undefined,
@@ -219,15 +212,27 @@ const handleAdd = () => {
 // 编辑问卷
 const handleEdit = (row: Questionnaire) => {
     dialogType.value = 'edit'
-    form.value = { ...row }
+    form.value = { 
+        id: Number(row.id),
+        name: row.name,
+        type: row.type,
+        description: row.description,
+        updateTime: row.updateTime,
+        remark: row.remark,
+        status: row.status
+    }
     dialogVisible.value = true
 }
 
 // 删除问卷
 const handleDelete = (row: Questionnaire) => {
-    ElMessageBox.confirm('确认删除该问卷吗？', '提示', {
-        type: 'warning'
-    }).then(async () => {
+    ElMessageBox.confirm(
+        '确认删除该问卷吗？', 
+        '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }).then(async () => {
         // 调用后端API删除数据
         await deleteMsq(row.id)
         ElMessage.success('删除成功')
@@ -241,13 +246,10 @@ const handleSubmit = async () => {
     // 调用后端API保存数据
     if (dialogType.value === 'add') {
         await addMsq(form.value)
-    } else {
-        await updateMsq(form.value)
+        ElMessage.success('新增成功')
+        dialogVisible.value = false
+        getList()
     }
-    
-    ElMessage.success(dialogType.value === 'add' ? '新增成功' : '编辑成功')
-    dialogVisible.value = false
-    getList()
 }
 
 // 状态变更处理
@@ -255,6 +257,12 @@ const handleStatusChange = async (row: Questionnaire) => {
     // 调用后端API更新状态
     await updateStatus({id: row.id, status: row.status})
     ElMessage.success('状态更新成功: ' + row.status)
+}
+
+// 处理保存成功
+const handleSaveSuccess = () => {
+    dialogVisible.value = false
+    getList()
 }
 
 onMounted(() => {
@@ -367,5 +375,21 @@ h2 {
     .mobile-list {
         display: none;
     }
+}
+
+.edit-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.mobile-dialog :deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .edit-container {
+    padding: 10px;
+  }
 }
 </style> 

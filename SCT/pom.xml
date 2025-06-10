@@ -20,7 +20,8 @@
     <properties>
 <!--        <mybatis.spring>2.2.0</mybatis.spring>-->
         <jbcrypt>0.4</jbcrypt>
-        <mybatis.plus>3.5.2</mybatis.plus>
+        <mybatis.plus>3.5.3.1</mybatis.plus>
+        <jackson>2.14.2</jackson>
         <hutool-5.version>5.8.35</hutool-5.version>
         <lombok>1.18.20</lombok>
         <fastjson>1.2.76</fastjson>
@@ -46,6 +47,13 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis.plus}</version>
+            </dependency>
+
+            <!-- Jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson}</version>
             </dependency>
 
             <dependency>

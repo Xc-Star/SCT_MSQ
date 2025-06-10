@@ -1,7 +1,11 @@
 <template>
   <div class="msq-container">
     <div class="container">
-      <div v-if="error" class="error-message">
+      <div v-if="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
+      <div v-else-if="error" class="error-message">
         <h3>加载失败</h3>
         <p>{{ error }}</p>
         <button class="button2" @click="retryFetch">重试</button>
@@ -106,22 +110,31 @@ const submitData = ref<SubmitData>({})
 import { getMsqVO } from '@/api/MsqView.js'
 
 const error = ref<string | null>(null)
+const loading = ref(false)
 
 // 使用异步函数获取数据
 const fetchData = async () => {
+  loading.value = true
+  error.value = null
   try {
-    error.value = null
+    // TODO: 获取问卷id，根据问卷id获取问卷内容
     const response = await getMsqVO(1);
-    topic.value = response.data
-    // 在数据加载完成后初始化多选框数据
-    topic.value.topics.forEach(item => {
-      if (item.type === 'checkbox') {
-        submitData.value[item.id] = []
-      }
-    })
+    if (response && response.data) {
+      topic.value = response.data
+      // 在数据加载完成后初始化多选框数据
+      topic.value.topics.forEach(item => {
+        if (item.type === 'checkbox') {
+          submitData.value[item.id] = []
+        }
+      })
+    } else {
+      throw new Error('获取数据失败：返回数据格式不正确')
+    }
   } catch (err) {
-    console.error('获取数据失败:', err)
-    error.value = '获取问卷数据失败，请稍后重试'
+    console.error('获取数据失败：', err)
+    error.value = err.message || '获取数据失败，请稍后重试'
+  } finally {
+    loading.value = false
   }
 }
 
@@ -491,5 +504,33 @@ const handleCheckboxChange = (event, topicId) => {
 .error-message p {
   color: #666;
   margin-bottom: 24px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4c8bf5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
 }
 </style> 

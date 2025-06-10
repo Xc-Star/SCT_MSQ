@@ -4,6 +4,7 @@ import com.sct.dto.AdminLoginDTO;
 import com.sct.dto.UpdatePasswordDTO;
 import com.sct.result.Result;
 import com.sct.service.AuthService;
+import com.sct.vo.LoginVO;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +31,7 @@ public class AdminAuthController {
      * @return
      */
     @RequestMapping("/login")
-    public Result<String> login(@RequestBody AdminLoginDTO adminLoginDTO) {
+    public Result<LoginVO> login(@RequestBody AdminLoginDTO adminLoginDTO) {
         return Result.success(authService.login(adminLoginDTO));
     }
 

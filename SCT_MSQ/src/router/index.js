@@ -26,6 +26,10 @@ const router = createRouter({
       component: Login
     },
     {
+      path: '/admin',
+      redirect: '/admin/main'
+    },
+    {
       path: '/admin/main',
       name: 'adminMain',
       component: Main,

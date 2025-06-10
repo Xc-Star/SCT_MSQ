@@ -1,10 +1,14 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,7 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@TableName("topic")
+@TableName(value = "topic", autoResultMap = true)
 public class Topic extends BaseEntity {
 
     public static final String TYPE_INPUT = "input";
@@ -44,6 +48,11 @@ public class Topic extends BaseEntity {
     private String msqName;
 
     /**
+     * 题目排序编号
+     */
+    private Integer no;
+
+    /**
      * 问题类型
      */
     private String type;
@@ -56,5 +65,6 @@ public class Topic extends BaseEntity {
     /**
      * 选项
      */
+    @TableField(typeHandler = FastjsonTypeHandler.class)
     private List<String> options;
 }

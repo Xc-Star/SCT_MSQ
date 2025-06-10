@@ -12,6 +12,8 @@ import com.sct.properties.JwtProperties;
 import com.sct.service.AuthService;
 import com.sct.utils.JwtUtil;
 import com.sct.utils.PasswordUtil;
+import com.sct.vo.LoginVO;
+import com.sct.vo.UserInfoVO;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private JwtProperties jwtProperties;
 
     @Override
-    public String login(AdminLoginDTO adminLoginDTO) {
+    public LoginVO login(AdminLoginDTO adminLoginDTO) {
 
         AdminUser user = adminUserMapper.getUserByUsername(adminLoginDTO.getUsername());
         if (user == null) {
@@ -51,7 +53,15 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> map = new HashMap<>();
         map.put(JwtClaimsConstant.USER_ID, user.getId());
         map.put(JwtClaimsConstant.USERNAME, user.getUsername());
-        return JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), map);
+
+        return LoginVO.builder()
+                .token(JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), map))
+                .userInfo(UserInfoVO.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .avatar(user.getAvatar())
+                        .build())
+                .build();
     }
 
     @Override

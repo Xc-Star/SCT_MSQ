@@ -11,3 +11,5 @@ export const deleteMsq = (msqId) => request.delete("/admin/msq/delete/" + msqId)
 export const updateMsq = (msqData) => request.put("/admin/msq/update", msqData)
 
 export const updateStatus = (statusData) => request.put("/admin/msq/updateStatus", statusData)
+
+export const adminUpdateMsq = (MsqUpdateDTO) => request.put("/admin/topic/update", MsqUpdateDTO)

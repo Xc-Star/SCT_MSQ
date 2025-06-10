@@ -2,6 +2,7 @@ package com.sct.service;
 
 import com.sct.dto.AdminLoginDTO;
 import com.sct.dto.UpdatePasswordDTO;
+import com.sct.vo.LoginVO;
 
 /**
  * @Title: AuthService
@@ -16,7 +17,7 @@ public interface AuthService {
      * @param adminLoginDTO 管理员登录信息
      * @return token
      */
-    String login(AdminLoginDTO adminLoginDTO);
+    LoginVO login(AdminLoginDTO adminLoginDTO);
 
     /**
      * 修改密码

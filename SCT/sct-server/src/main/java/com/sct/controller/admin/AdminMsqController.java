@@ -25,7 +25,8 @@ public class AdminMsqController {
 
     @GetMapping("/list")
     public Result<List<Msq>> list() {
-        return Result.success(msqService.list());
+        List<Msq> list = msqService.list();
+        return Result.success(list);
     }
 
     @PostMapping("/save")

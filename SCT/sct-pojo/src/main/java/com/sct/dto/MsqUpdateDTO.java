@@ -1,24 +1,19 @@
-package com.sct.vo;
+package com.sct.dto;
 
 import com.sct.entity.Topic;
-import lombok.*;
+import lombok.Data;
 
 import java.util.List;
 
 /**
- * @Title: MsqInfoVO
+ * @Title: MsqUpdateDTO
  * @Author Xc_Star
- * @Package com.sct.vo
- * @Date 2025/6/6 23:27
+ * @Package com.sct.dto
+ * @Date 2025/6/11 02:59
  */
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@EqualsAndHashCode
-public class MsqInfoVO {
+public class MsqUpdateDTO {
 
     private Long id;
 
