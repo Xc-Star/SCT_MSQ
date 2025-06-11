@@ -2,6 +2,8 @@ package com.sct.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sct.entity.TopicResult;
+import com.sct.vo.MsqReviewInfoVO;
+import com.sct.vo.TopicResultVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,4 +19,6 @@ import java.util.List;
 public interface TopicResultMapper extends BaseMapper<TopicResult> {
 
     void saveBatch(List<TopicResult> topicResults);
+
+    List<TopicResultVO> getTopicResultsByMsqResultId(Long msqResultId);
 }

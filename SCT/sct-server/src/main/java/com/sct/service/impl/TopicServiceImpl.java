@@ -16,6 +16,8 @@ import com.sct.mapper.TopicResultMapper;
 import com.sct.service.TopicService;
 import com.sct.utils.BeanUtils;
 import com.sct.vo.MsqInfoVO;
+import com.sct.vo.MsqReviewInfoVO;
+import com.sct.vo.TopicResultVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +126,15 @@ public class TopicServiceImpl implements TopicService {
         msqResultMapper.insert(msqResult);
         topicResults.forEach(topicResult -> topicResult.setMsqResultId(msqResult.getId()));
         topicResultMapper.saveBatch(topicResults);
+    }
+
+    @Override
+    public MsqReviewInfoVO getReviewInfoById(Long msqResultId) {
+
+        MsqResult msqResult = msqResultMapper.selectById(msqResultId);
+        List<TopicResultVO> topicResults = topicResultMapper.getTopicResultsByMsqResultId(msqResultId);
+
+        return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).topicResults(topicResults).build();
     }
 
     private <T> List<Long> getIds(List<T> list) {

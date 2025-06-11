@@ -6,6 +6,7 @@ import com.sct.entity.Topic;
 import com.sct.result.Result;
 import com.sct.service.TopicService;
 import com.sct.vo.MsqInfoVO;
+import com.sct.vo.MsqReviewInfoVO;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -40,5 +41,10 @@ public class AdminTopicController {
     public Result<?> update(@RequestBody MsqUpdateDTO msqUpdateDTO) {
         topicService.updateById(msqUpdateDTO);
         return Result.success();
+    }
+
+    @GetMapping("/getReviewInfo/{msqResultId}")
+    public Result<MsqReviewInfoVO> getReviewInfo(@PathVariable Long msqResultId) {
+        return Result.success(topicService.getReviewInfoById(msqResultId));
     }
 }

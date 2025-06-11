@@ -1,6 +1,7 @@
 package com.sct.service;
 
 import com.sct.dto.MsqResultPageDTO;
+import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
 import com.sct.result.PageResult;
@@ -66,4 +67,10 @@ public interface MsqService {
      * @return 问卷结果列表
      */
     PageResult<MsqResult> getResultPage(MsqResultPageDTO msqResultPageDTO);
+
+    /**
+     * 修改问卷结果状态
+     * @param msqResultUpdateStatusDTO 修改参数
+     */
+    void updateMsqResultStatus(MsqResultUpdateStatusDTO msqResultUpdateStatusDTO);
 }

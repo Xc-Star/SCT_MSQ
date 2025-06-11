@@ -19,4 +19,24 @@
             )
         </foreach>
     </insert>
+    <select id="getTopicResultsByMsqResultId" resultType="com.sct.vo.TopicResultVO">
+        SELECT
+            t.msq_id,
+            t.msq_name,
+            t.no,
+            t.type,
+            t.topic,
+            t.options,
+            tr.topic_result,
+            tr.topic_results,
+            tr.create_time
+        FROM
+            topic t
+                JOIN
+            topic_result tr ON t.id = tr.topic_id
+        WHERE
+            tr.msq_result_id = #{msqResultId}
+        ORDER BY
+            t.no ASC;
+    </select>
 </mapper>

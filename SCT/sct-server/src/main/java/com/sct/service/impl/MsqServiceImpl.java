@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sct.dto.MsqResultPageDTO;
+import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
 import com.sct.mapper.MsqMapper;
@@ -120,5 +121,13 @@ public class MsqServiceImpl implements MsqService {
 
         // 返回包含实际数据的PageResult
         return new PageResult<>(pageInfo.getList(), pageInfo.getTotal());
+    }
+
+    @Override
+    public void updateMsqResultStatus(MsqResultUpdateStatusDTO msqResultUpdateStatusDTO) {
+        msqResultMapper.updateById(MsqResult.builder()
+                .id(msqResultUpdateStatusDTO.getId())
+                .status(msqResultUpdateStatusDTO.getStatus())
+                .build());
     }
 }

@@ -1,6 +1,7 @@
 package com.sct.controller.admin;
 
 import com.sct.dto.MsqResultPageDTO;
+import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.dto.MsqUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
@@ -64,5 +65,11 @@ public class AdminMsqController {
     @GetMapping("/pageResult")
     public Result<PageResult<MsqResult>> pageResult(MsqResultPageDTO msqResultPageDTO) {
         return Result.success(msqService.getResultPage(msqResultPageDTO));
+    }
+
+    @PutMapping("/updateResultStatus")
+    public Result<?> updateMsqResultStatus(@RequestBody MsqResultUpdateStatusDTO msqResultUpdateStatusDTO) {
+        msqService.updateMsqResultStatus(msqResultUpdateStatusDTO);
+        return Result.success();
     }
 }

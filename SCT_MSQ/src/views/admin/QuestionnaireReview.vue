@@ -105,9 +105,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { adminGetResultPage } from '@/api/AdminMsq'
+import { adminGetResultPage, getReviewInfo } from '@/api/AdminMsq'
 import { ElMessage } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import { useRouter } from 'vue-router'
 
 interface TableItem {
     id: number
@@ -149,6 +150,8 @@ const pageSize = ref(10)
 const total = ref(0)
 
 const isMobile = ref(window.innerWidth < 768)
+
+const router = useRouter()
 
 const handleResize = () => {
     isMobile.value = window.innerWidth < 768
@@ -212,15 +215,19 @@ const handleCurrentChange = (val: number) => {
     loadData()
 }
 
-const handleReview = (row: TableItem) => {
-    // TODO: 实现审核功能
-    console.log('审核问卷:', row)
+const handleReview = async (row: TableItem) => {
+    router.push({
+        name: 'msq-review',
+        params: {
+            id: row.id
+        }
+    })
 }
 
 const getStatusType = (status: number) => {
     switch (status) {
         case 1:
-            return 'warning'
+            return 'info'
         case 2:
             return 'success'
         case 3:

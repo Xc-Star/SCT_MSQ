@@ -17,3 +17,7 @@ export const adminUpdateMsq = (MsqUpdateDTO) => request.put("/admin/topic/update
 export const adminGetMsqVO = (msqId) => request.get("/admin/topic/get/" + msqId)
 
 export const adminGetResultPage = (params) => request.get("/admin/msq/pageResult", { params })
+
+export const getReviewInfo = (msqResultId) => request.get("/admin/topic/getReviewInfo/" + msqResultId)
+
+export const updateResultStatus = (updateResultStatusDTO) => request.put("/admin/msq/updateResultStatus", updateResultStatusDTO)
