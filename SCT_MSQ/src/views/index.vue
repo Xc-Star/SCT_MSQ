@@ -1,6 +1,6 @@
 <template>
   <div class="home-container">
-    <h1>欢迎来到问卷系统</h1>
+    <h1>欢迎来到SCT</h1>
     <el-button type="primary" @click="goToMsqView">进入问卷</el-button>
   </div>
 </template>
