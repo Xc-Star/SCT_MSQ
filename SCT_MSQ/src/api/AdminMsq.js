@@ -21,3 +21,5 @@ export const adminGetResultPage = (params) => request.get("/admin/msq/pageResult
 export const getReviewInfo = (msqResultId) => request.get("/admin/topic/getReviewInfo/" + msqResultId)
 
 export const updateResultStatus = (updateResultStatusDTO) => request.put("/admin/msq/updateResultStatus", updateResultStatusDTO)
+
+export const deleteMsqResult = (msqResultId) => request.delete("/admin/msq/deleteMsqResult/" + msqResultId)

@@ -21,5 +21,9 @@ public class MsqSubmitDTO {
 
     private Integer type;
 
+    private String avatar;
+
+    private String uuid;
+
     private List<TopicResult> topicResults;
 }

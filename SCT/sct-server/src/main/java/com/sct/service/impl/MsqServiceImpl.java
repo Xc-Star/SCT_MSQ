@@ -130,4 +130,9 @@ public class MsqServiceImpl implements MsqService {
                 .status(msqResultUpdateStatusDTO.getStatus())
                 .build());
     }
+
+    @Override
+    public void deleteMsqResult(Long msqResultId) {
+        msqResultMapper.deleteById(msqResultId);
+    }
 }

@@ -73,4 +73,10 @@ public interface MsqService {
      * @param msqResultUpdateStatusDTO 修改参数
      */
     void updateMsqResultStatus(MsqResultUpdateStatusDTO msqResultUpdateStatusDTO);
+
+    /**
+     * 删除问卷结果
+     * @param msqResultId 问卷结果id
+     */
+    void deleteMsqResult(Long msqResultId);
 }

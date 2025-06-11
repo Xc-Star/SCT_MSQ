@@ -7,6 +7,7 @@ import QuestionnaireReview from '../views/admin/QuestionnaireReview.vue'
 import QuestionnaireManage from '../views/admin/QuestionnaireManage.vue'
 import ImageManage from '../views/admin/ImageManage.vue'
 import MsqReviewView from '../views/admin/components/MsqReviewView.vue'
+import SubmitSuccess from '../views/SubmitSuccess.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/msq',
       name: 'msq',
       component: MsqView
+    },
+    {
+      path: '/msq/success',
+      name: 'submitSuccess',
+      component: SubmitSuccess
     },
     {
       path: '/admin/login',

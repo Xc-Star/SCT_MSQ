@@ -47,7 +47,18 @@
                         </el-table-column>
                         <el-table-column label="操作" width="150" align="center">
                             <template #default="scope">
-                                <el-button type="primary" size="small" @click="handleReview(scope.row)">审核</el-button>
+                                <el-button 
+                                    v-if="scope.row.status === 1"
+                                    type="primary" 
+                                    size="small" 
+                                    @click="handleReview(scope.row)"
+                                >审核</el-button>
+                                <el-button 
+                                    v-else
+                                    type="danger" 
+                                    size="small" 
+                                    @click="handleDelete(scope.row)"
+                                >删除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -81,7 +92,18 @@
                             </div>
                         </div>
                         <div class="item-footer">
-                            <el-button type="primary" size="small" @click="handleReview(item)">审核</el-button>
+                            <el-button 
+                                v-if="item.status === 1"
+                                type="primary" 
+                                size="small" 
+                                @click="handleReview(item)"
+                            >审核</el-button>
+                            <el-button 
+                                v-else
+                                type="danger" 
+                                size="small" 
+                                @click="handleDelete(item)"
+                            >删除</el-button>
                         </div>
                     </el-card>
                 </div>
@@ -105,8 +127,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { adminGetResultPage, getReviewInfo } from '@/api/AdminMsq'
-import { ElMessage } from 'element-plus'
+import { adminGetResultPage, deleteMsqResult } from '@/api/AdminMsq'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { useRouter } from 'vue-router'
 
@@ -130,6 +152,12 @@ interface ApiResponse {
         list: TableItem[]
         total: number
     }
+}
+
+interface DeleteResponse {
+    code: number
+    message: string | null
+    data: any
 }
 
 interface SearchForm {
@@ -222,6 +250,38 @@ const handleReview = async (row: TableItem) => {
             id: row.id
         }
     })
+}
+
+const handleDelete = async (row: TableItem) => {
+    try {
+        // 第一次确认
+        await ElMessageBox.confirm('删除仅用于恶意使用正版ID导致本人无法提交问卷时使用，你确定你要删除吗！', '警告', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'error'
+        })
+        
+        // 第二次确认
+        await ElMessageBox.confirm('你确定你已经阅读了删除警告信息吗！', '再次确认', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+        })
+        
+        // 调用删除API
+        const res = await deleteMsqResult(row.id) as unknown as DeleteResponse
+        if (res.code === 0) {
+            ElMessage.success('删除成功')
+            // 重新获取数据
+            await loadData()
+        } else {
+            ElMessage.error(res.message || '删除失败')
+        }
+    } catch (error) {
+        if (error !== 'cancel') {
+            ElMessage.error('删除失败')
+        }
+    }
 }
 
 const getStatusType = (status: number) => {

@@ -72,4 +72,10 @@ public class AdminMsqController {
         msqService.updateMsqResultStatus(msqResultUpdateStatusDTO);
         return Result.success();
     }
+
+    @DeleteMapping("/deleteMsqResult/{msqResultId}")
+    public Result<?> deleteMsqResult(@PathVariable Long msqResultId) {
+        msqService.deleteMsqResult(msqResultId);
+        return Result.success();
+    }
 }

@@ -30,11 +30,21 @@
         <div class="msq-topic" v-for="(topic, index) in topic.topics" :key="topic.id">
 
           <div v-if="topic.type === 'input'">
-            <!-- {{ topic.topic }} -->
             <div class="input-container">
-              <input required id="input" type="text" v-model="submitData[topic.id]" autocomplete="off" />
+              <input required id="input" type="text" v-model="submitData[topic.id]" autocomplete="off" @blur="handleInputBlur($event, topic.id)" />
               <label class="label" for="input">{{ index + 1 }}. {{ topic.topic }}</label>
               <div class="underline"></div>
+            </div>
+            <div v-if="topic.id === -2" class="player-info">
+              <template v-if="playerInfo">
+                <span class="player-tip">已查询到正版账号信息：</span>
+                <img :src="playerInfo.avatar" alt="玩家头像" class="player-avatar" />
+                <span class="player-username">{{ playerInfo.username }}</span>
+                <span class="player-uuid">{{ playerInfo.id }}</span>
+              </template>
+              <template v-else-if="errorMessage">
+                <span class="player-error">{{ errorMessage }}</span>
+              </template>
             </div>
             <div style="height: 50px;"></div>
           </div>
@@ -120,6 +130,8 @@ interface TopicResult {
   topic: string
   topicResult?: string
   topicResults?: string[]
+  avatar?: string
+  uuid?: string
 }
 
 interface SubmitRequest {
@@ -127,6 +139,8 @@ interface SubmitRequest {
   name: string
   type: number
   topicResults: TopicResult[]
+  avatar?: string
+  uuid?: string
 }
 
 interface ApiResponse<T> {
@@ -159,6 +173,14 @@ import { getMsqVO, getOneMsqVO, submitMsq } from '@/api/MsqView.js'
 const error = ref<string | null>(null)
 const loading = ref(false)
 const router = useRouter()
+
+const playerInfo = ref<{
+  avatar: string;
+  username: string;
+  id: string;
+} | null>(null);
+
+const errorMessage = ref<string | null>(null);
 
 // 使用异步函数获取数据
 const fetchData = async () => {
@@ -230,6 +252,51 @@ onMounted(() => {
 const submit = async (e: Event) => {
   e.preventDefault()
   
+  // 检查ID为负数的题目是否已填写
+  const negativeIdTopics = topic.value.topics.filter(item => item.id < 0)
+  for (const item of negativeIdTopics) {
+    if (item.type === 'checkbox') {
+      if (!submitData.value[item.id] || (submitData.value[item.id] as string[]).length === 0) {
+        ElMessage.error(`请填写"${item.topic}"`)
+        return
+      }
+    } else {
+      if (!submitData.value[item.id]) {
+        ElMessage.error(`请填写"${item.topic}"`)
+        return
+      }
+    }
+  }
+
+  // 检查正版账号验证状态
+  const genuineIdTopic = topic.value.topics.find(item => item.id === -2)
+  if (genuineIdTopic && submitData.value[-2]) {
+    try {
+      const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${submitData.value[-2]}`);
+      const data = await response.json();
+      
+      if (data.uuid) {
+        playerInfo.value = {
+          avatar: `https://mc-heads.net/avatar/${submitData.value[-2]}`,
+          username: data.username,
+          id: data.uuid
+        };
+        errorMessage.value = null;
+      } else {
+        playerInfo.value = null;
+        errorMessage.value = '未查询到正版账号信息';
+        ElMessage.error('请确保输入的是有效的正版账号ID')
+        return
+      }
+    } catch (error) {
+      console.error('验证玩家ID时出错：', error);
+      playerInfo.value = null;
+      errorMessage.value = '验证玩家ID时出错，请稍后重试';
+      ElMessage.error('验证玩家ID时出错，请稍后重试')
+      return
+    }
+  }
+  
   const topicResults: TopicResult[] = topic.value.topics.map(item => {
     const result: TopicResult = {
       topicId: item.id,
@@ -251,18 +318,58 @@ const submit = async (e: Event) => {
     type: topic.value.type,
     topicResults: topicResults
   }
+
+  // 如果有玩家信息，添加到提交数据中
+  if (playerInfo.value) {
+    submitRequest.avatar = playerInfo.value.avatar
+    submitRequest.uuid = playerInfo.value.id
+  }
   
   const response = await submitMsq(submitRequest)
   ElMessage.success('提交成功')
   // 延迟1秒后跳转，让用户看到成功提示
   setTimeout(() => {
-    router.push('/msq/list')  // 跳转到问卷列表页
+    router.push('/msq/success')  // 跳转到问卷列表页
   }, 1000)
 }
 
 const handleCheckboxChange = (event, topicId) => {
   if (!Array.isArray(submitData.value[topicId])) {
     submitData.value[topicId] = []
+  }
+}
+
+const handleInputBlur = async (event: Event, topicId: number) => {
+  // 只处理第一个输入框（通常是正版ID输入框）
+  if (topicId === -2) {
+    const input = event.target as HTMLInputElement;
+    const genuineId = input.value.trim();
+    
+    if (genuineId) {
+      try {
+        const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${genuineId}`);
+        const data = await response.json();
+        
+        if (data.uuid) {
+          playerInfo.value = {
+            avatar: `https://mc-heads.net/avatar/${genuineId}`,
+            username: data.username,
+            id: data.uuid
+          };
+          errorMessage.value = null;
+        } else {
+          playerInfo.value = null;
+          errorMessage.value = '未查询到正版账号信息';
+        }
+      } catch (error) {
+        console.error('验证玩家ID时出错：', error);
+        playerInfo.value = null;
+        errorMessage.value = '验证玩家ID时出错，请稍后重试';
+      }
+    } else {
+      playerInfo.value = null;
+      errorMessage.value = null;
+    }
   }
 }
 
@@ -665,5 +772,54 @@ const handleCheckboxChange = (event, topicId) => {
   margin: 0;
   color: #666;
   font-size: 14px;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.player-tip {
+  color: #666;
+}
+
+.player-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.player-username {
+  color: #333;
+  font-weight: 500;
+}
+
+.player-uuid {
+  color: #666;
+  font-family: monospace;
+}
+
+.player-error {
+  color: #ff4d4f;
+  font-size: 14px;
+}
+
+@media screen and (max-width: 768px) {
+  .player-tip {
+    display: none;
+  }
+  
+  .player-info {
+    flex-wrap: wrap;
+  }
+  
+  .player-uuid {
+    width: 100%;
+    margin-top: 4px;
+  }
 }
 </style> 
