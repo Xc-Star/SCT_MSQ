@@ -44,7 +44,7 @@ public class Msq extends BaseEntity {
     private String description;
 
     /**
-     * 问卷类型 1-红石 2-建筑 3-其他
+     * 问卷类型 1-红石 2-建筑 3-后勤 4-其他
      */
     private Integer type;
 

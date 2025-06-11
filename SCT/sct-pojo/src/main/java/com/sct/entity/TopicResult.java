@@ -1,7 +1,9 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
 
@@ -20,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@TableName("topic_result")
+@TableName(value = "topic_result", autoResultMap = true)
 public class TopicResult extends BaseEntity {
 
     /**
@@ -30,24 +32,14 @@ public class TopicResult extends BaseEntity {
     private Long id;
 
     /**
-     * 问卷id
+     * 问卷结果id
      */
-    private Long msqId;
-
-    /**
-     * 问卷名称
-     */
-    private String msqName;
+    private Long msqResultId;
 
     /**
      * 问题id
      */
     private Long topicId;
-
-    /**
-     * 问题
-     */
-    private String topicTopic;
 
     /**
      * 问题结果
@@ -57,15 +49,6 @@ public class TopicResult extends BaseEntity {
     /**
      * 多选结果
      */
+    @TableField(typeHandler = FastjsonTypeHandler.class)
     private List<String> topicResults;
-
-    /**
-     * 回答者
-     */
-    private String respondent;
-
-    /**
-     * 回答者联系方式
-     */
-    private String respondentContact;
 }

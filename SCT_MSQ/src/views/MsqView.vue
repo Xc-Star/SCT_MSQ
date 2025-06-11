@@ -10,6 +10,15 @@
         <p>{{ error }}</p>
         <button class="button2" @click="retryFetch">重试</button>
       </div>
+      <div v-else-if="showQuestionnaireList" class="questionnaire-list">
+        <h2>请选择问卷</h2>
+        <div class="questionnaire-items">
+          <div v-for="item in questionnaireList" :key="item.id" class="questionnaire-item" @click="selectQuestionnaire(item)">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description }}</p>
+          </div>
+        </div>
+      </div>
       <form v-else class="msq-form">
         <div class="title" style="margin-bottom: 64px;">
           <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: black;">{{ topic.name }}</h2>
@@ -65,6 +74,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 interface TopicOption {
   id: number
@@ -77,7 +88,20 @@ interface Topic {
   id: number
   name: string
   description: string
+  type: number
   topics: TopicOption[]
+}
+
+interface Questionnaire {
+  id: number
+  name: string
+  description: string
+  type: number
+  status: number
+  createTime: string
+  updateTime: string
+  remark: string
+  deleted: boolean
 }
 
 interface SubmitData {
@@ -91,10 +115,31 @@ interface FormattedData {
   values?: string[]
 }
 
+interface TopicResult {
+  topicId: number
+  topic: string
+  topicResult?: string
+  topicResults?: string[]
+}
+
+interface SubmitRequest {
+  msqId: number
+  name: string
+  type: number
+  topicResults: TopicResult[]
+}
+
+interface ApiResponse<T> {
+  code: number
+  message: string | null
+  data: T
+}
+
 const topic = ref<Topic>({
   id: 0,
   name: '',
   description: '',
+  type: 0,
   topics: [
     {
       id: 0,
@@ -106,21 +151,56 @@ const topic = ref<Topic>({
 })
 
 const submitData = ref<SubmitData>({})
+const questionnaireList = ref<Questionnaire[]>([])
+const showQuestionnaireList = ref(false)
 
-import { getMsqVO } from '@/api/MsqView.js'
+import { getMsqVO, getOneMsqVO, submitMsq } from '@/api/MsqView.js'
 
 const error = ref<string | null>(null)
 const loading = ref(false)
+const router = useRouter()
 
 // 使用异步函数获取数据
 const fetchData = async () => {
   loading.value = true
   error.value = null
   try {
-    // TODO: 获取问卷id，根据问卷id获取问卷内容
     const response = await getMsqVO(1);
     if (response && response.data) {
+      // 判断响应数据类型
+      if (Array.isArray(response.data)) {
+        // 第二种响应数据：问卷列表
+        questionnaireList.value = response.data
+        showQuestionnaireList.value = true
+      } else {
+        // 第一种响应数据：问卷内容
+        topic.value = response.data
+        showQuestionnaireList.value = false
+        // 在数据加载完成后初始化多选框数据
+        topic.value.topics.forEach(item => {
+          if (item.type === 'checkbox') {
+            submitData.value[item.id] = []
+          }
+        })
+      }
+    } else {
+      throw new Error('获取数据失败：返回数据格式不正确')
+    }
+  } catch (err) {
+    console.error('获取数据失败：', err)
+    error.value = err.message || '获取数据失败，请稍后重试'
+  } finally {
+    loading.value = false
+  }
+}
+
+const selectQuestionnaire = async (questionnaire: Questionnaire) => {
+  loading.value = true
+  try {
+    const response = await getOneMsqVO(questionnaire.id)
+    if (response && response.data) {
       topic.value = response.data
+      showQuestionnaireList.value = false
       // 在数据加载完成后初始化多选框数据
       topic.value.topics.forEach(item => {
         if (item.type === 'checkbox') {
@@ -128,11 +208,11 @@ const fetchData = async () => {
         }
       })
     } else {
-      throw new Error('获取数据失败：返回数据格式不正确')
+      throw new Error('获取问卷内容失败：返回数据格式不正确')
     }
   } catch (err) {
-    console.error('获取数据失败：', err)
-    error.value = err.message || '获取数据失败，请稍后重试'
+    console.error('获取问卷内容失败：', err)
+    error.value = err.message || '获取问卷内容失败，请稍后重试'
   } finally {
     loading.value = false
   }
@@ -147,25 +227,37 @@ onMounted(() => {
   fetchData();
 })
 
-const submit = (e: Event) => {
+const submit = async (e: Event) => {
   e.preventDefault()
   
-  const formattedData: FormattedData[] = topic.value.topics.map(item => {
-    const data: FormattedData = {
-      id: item.id,
-      topic: item.topic,
+  const topicResults: TopicResult[] = topic.value.topics.map(item => {
+    const result: TopicResult = {
+      topicId: item.id,
+      topic: item.topic
     }
     
     if (item.type === 'checkbox') {
-      data.values = submitData.value[item.id] as string[] || []
+      result.topicResults = submitData.value[item.id] as string[] || []
     } else {
-      data.value = submitData.value[item.id] as string || ''
+      result.topicResult = submitData.value[item.id] as string || ''
     }
     
-    return data
+    return result
   })
   
-  console.log('提交的数据：', formattedData)
+  const submitRequest: SubmitRequest = {
+    msqId: topic.value.id,
+    name: topic.value.name,
+    type: topic.value.type,
+    topicResults: topicResults
+  }
+  
+  const response = await submitMsq(submitRequest)
+  ElMessage.success('提交成功')
+  // 延迟1秒后跳转，让用户看到成功提示
+  setTimeout(() => {
+    router.push('/msq/list')  // 跳转到问卷列表页
+  }, 1000)
 }
 
 const handleCheckboxChange = (event, topicId) => {
@@ -532,5 +624,46 @@ const handleCheckboxChange = (event, topicId) => {
 .loading-container p {
   color: #666;
   font-size: 16px;
+}
+
+.questionnaire-list {
+  padding: 20px;
+}
+
+.questionnaire-list h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.questionnaire-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.questionnaire-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.questionnaire-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.questionnaire-item h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.questionnaire-item p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
 }
 </style> 

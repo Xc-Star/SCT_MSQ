@@ -1,6 +1,9 @@
 package com.sct.service;
 
+import com.sct.dto.MsqResultPageDTO;
 import com.sct.entity.Msq;
+import com.sct.entity.MsqResult;
+import com.sct.result.PageResult;
 
 import java.util.List;
 
@@ -49,4 +52,18 @@ public interface MsqService {
      * @param id 问卷id
      */
     void deleteById(Long id);
+
+    /**
+     * 根据类型获取问卷
+     * @param type 类型
+     * @return 问卷列表
+     */
+    List<Msq> getTypeMsq(Integer type);
+
+    /**
+     * 获取问卷结果列表
+     * @param msqResultPageDTO 分页参数
+     * @return 问卷结果列表
+     */
+    PageResult<MsqResult> getResultPage(MsqResultPageDTO msqResultPageDTO);
 }

@@ -13,3 +13,7 @@ export const updateMsq = (msqData) => request.put("/admin/msq/update", msqData)
 export const updateStatus = (statusData) => request.put("/admin/msq/updateStatus", statusData)
 
 export const adminUpdateMsq = (MsqUpdateDTO) => request.put("/admin/topic/update", MsqUpdateDTO)
+
+export const adminGetMsqVO = (msqId) => request.get("/admin/topic/get/" + msqId)
+
+export const adminGetResultPage = (params) => request.get("/admin/msq/pageResult", { params })

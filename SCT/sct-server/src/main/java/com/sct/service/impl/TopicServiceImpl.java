@@ -2,12 +2,17 @@ package com.sct.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sct.context.BaseContext;
+import com.sct.dto.MsqSubmitDTO;
 import com.sct.dto.MsqUpdateDTO;
 import com.sct.entity.Msq;
+import com.sct.entity.MsqResult;
 import com.sct.entity.Topic;
+import com.sct.entity.TopicResult;
 import com.sct.exception.BaseException;
 import com.sct.mapper.MsqMapper;
+import com.sct.mapper.MsqResultMapper;
 import com.sct.mapper.TopicMapper;
+import com.sct.mapper.TopicResultMapper;
 import com.sct.service.TopicService;
 import com.sct.utils.BeanUtils;
 import com.sct.vo.MsqInfoVO;
@@ -15,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +35,16 @@ import java.util.List;
 public class TopicServiceImpl implements TopicService {
 
     @Resource
-    private MsqMapper mapper;
-    @Resource
     private TopicMapper topicMapper;
     @Resource
+    private TopicResultMapper topicResultMapper;
+    @Resource
     private MsqMapper msqMapper;
+    @Resource
+    private MsqResultMapper msqResultMapper;
 
     @Override
-    public MsqInfoVO getMsqInfoVO(Long msqId) {
+    public MsqInfoVO getOneMsqInfoVO(Long msqId) {
         List<Topic> topics = getTopicParent();
         Msq msq = msqMapper.selectById(msqId);
         if (msq == null) {
@@ -52,6 +60,15 @@ public class TopicServiceImpl implements TopicService {
         if (topicList != null && !topicList.isEmpty()) topics.addAll(topicList);
         msqInfoVO.setTopics(topics);
         return msqInfoVO;
+    }
+
+    @Override
+    public List<Msq> getMsqInfoVO(String type) {
+        List<Msq> msqList = msqMapper.selectList(new QueryWrapper<Msq>().eq("type", type).eq("status", 1));
+        if (msqList == null || msqList.isEmpty()) {
+            throw new BaseException("暂未开放...");
+        }
+        return msqList;
     }
 
     @Transactional
@@ -75,10 +92,38 @@ public class TopicServiceImpl implements TopicService {
                 ids.remove(topic.getId());
                 continue;
             }
-            topicMapper.updateById(topic);
-            ids.remove(topic.getId());
+            topic.setId(null);
+            topicMapper.insert(topic);
         }
         if (!ids.isEmpty()) topicMapper.deleteBatchIds(ids);
+    }
+
+    @Transactional
+    @Override
+    public void submit(MsqSubmitDTO msqSubmitDTO) {
+        List<TopicResult> topicResults = msqSubmitDTO.getTopicResults();
+        String respondent = topicResults.get(0).getTopicResult();
+        String respondentContact = topicResults.get(1).getTopicResult();
+        LocalDateTime now = LocalDateTime.now();
+        List<MsqResult> msqResults = msqResultMapper.selectList(
+                new QueryWrapper<MsqResult>()
+                        .eq("respondent", respondent)
+                        .eq("respondent_contact", respondentContact)
+                        .between("create_time", now.minusDays(30), now));
+        if (msqResults != null && !msqResults.isEmpty()) {
+            throw new BaseException("您已提交过问卷，请联系管理员审核！");
+        }
+        MsqResult msqResult = MsqResult.builder()
+                .msqId(msqSubmitDTO.getMsqId())
+                .msqName(msqSubmitDTO.getName())
+                .respondent(respondent)
+                .respondentContact(respondentContact)
+                .type(msqSubmitDTO.getType())
+                .status(MsqResult.STATUS_WAITING)
+                .build();
+        msqResultMapper.insert(msqResult);
+        topicResults.forEach(topicResult -> topicResult.setMsqResultId(msqResult.getId()));
+        topicResultMapper.saveBatch(topicResults);
     }
 
     private <T> List<Long> getIds(List<T> list) {

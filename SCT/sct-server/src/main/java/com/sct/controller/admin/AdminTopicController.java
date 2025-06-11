@@ -33,7 +33,7 @@ public class AdminTopicController {
 
     @GetMapping("/get/{msqId}")
     public Result<?> getMsqInfo(@PathVariable Long msqId) {
-        return Result.success(topicService.getMsqInfoVO(msqId));
+        return Result.success(topicService.getOneMsqInfoVO(msqId));
     }
 
     @PutMapping("/update")

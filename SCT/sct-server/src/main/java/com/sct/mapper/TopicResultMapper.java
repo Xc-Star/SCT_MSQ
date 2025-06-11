@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sct.entity.TopicResult;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * @Title: TopicResultMapper
  * @Author Xc_Star
@@ -13,4 +15,6 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface TopicResultMapper extends BaseMapper<TopicResult> {
+
+    void saveBatch(List<TopicResult> topicResults);
 }

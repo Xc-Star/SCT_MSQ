@@ -20,15 +20,30 @@ import lombok.*;
 @TableName("msq_result")
 public class MsqResult extends BaseEntity {
 
-    public static final Integer STATUS_WAITING = 0; // 等待审核
-    public static final Integer STATUS_PASS = 1; // 通过
-    public static final Integer STATUS_FAIL = 2; // 未通过
+    public static final Integer STATUS_WAITING = 1; // 等待审核
+    public static final Integer STATUS_PASS = 2; // 通过
+    public static final Integer STATUS_FAIL = 3; // 未通过
 
     /**
      * id
      */
     @TableId
     private Long id;
+
+    /**
+     * 问卷id
+     */
+    private Long msqId;
+
+    /**
+     * 问卷名称
+     */
+    private String msqName;
+
+    /**
+     * 问卷类型 1-红石 2-建筑 3-后勤 4-其他
+     */
+    private Integer type;
 
     /**
      * 回答者

@@ -1,7 +1,10 @@
 package com.sct.controller.admin;
 
+import com.sct.dto.MsqResultPageDTO;
 import com.sct.dto.MsqUpdateStatusDTO;
 import com.sct.entity.Msq;
+import com.sct.entity.MsqResult;
+import com.sct.result.PageResult;
 import com.sct.result.Result;
 import com.sct.service.MsqService;
 import org.springframework.web.bind.annotation.*;
@@ -56,5 +59,10 @@ public class AdminMsqController {
     public Result<?> delete(@PathVariable Long id) {
         msqService.deleteById(id);
         return Result.success();
+    }
+
+    @GetMapping("/pageResult")
+    public Result<PageResult<MsqResult>> pageResult(MsqResultPageDTO msqResultPageDTO) {
+        return Result.success(msqService.getResultPage(msqResultPageDTO));
     }
 }

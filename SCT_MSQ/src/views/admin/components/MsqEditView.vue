@@ -102,9 +102,11 @@
         </el-table-column>
       </el-table>
 
-      <el-form-item>
-        <el-button type="primary" @click="submit">保存问卷</el-button>
-        <el-button @click="resetForm">重置</el-button>
+      <el-form-item class="form-buttons-container">
+        <div class="form-buttons">
+          <el-button @click="resetForm">重置</el-button>
+          <el-button type="primary" @click="submit">保存问卷</el-button>
+        </div>
       </el-form-item>
     </el-form>
 
@@ -160,7 +162,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { adminGetMsqVO } from '@/api/MsqView.js'
+import { adminGetMsqVO } from '@/api/AdminMsq.js'
 import { adminUpdateMsq } from '@/api/AdminMsq.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
@@ -591,6 +593,20 @@ const handleMoveDown = (index: number) => {
 
 :deep(.left-buttons .el-button) {
   padding: 0 8px;
+}
+
+.form-buttons-container {
+  margin-top: 20px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+:deep(.form-buttons-container .el-form-item__content) {
+  justify-content: flex-end;
 }
 
 @media screen and (max-width: 768px) {
