@@ -3,6 +3,7 @@ package com.sct.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sct.entity.MsqResult;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * @Title: MsqResultMapper
@@ -13,4 +14,10 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface MsqResultMapper extends BaseMapper<MsqResult> {
+
+    @Update("update msq_result set reviewer = #{username} where reviewer_id = #{reviewerId}")
+    void updateReviewer(Long reviewerId, String username);
+
+    @Update("update msq_result set remover = #{username} where remover_id = #{reviewerId}")
+    void updateRemover(Long reviewerId, String username);
 }

@@ -114,17 +114,15 @@ public class TopicServiceImpl implements TopicService {
         if (msqResults != null && !msqResults.isEmpty()) {
             throw new BaseException("您已提交过问卷，请联系管理员审核！");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(msqSubmitDTO.getAvatar()).append(",").append(msqSubmitDTO.getUuid());
         MsqResult msqResult = MsqResult.builder()
                 .msqId(msqSubmitDTO.getMsqId())
                 .msqName(msqSubmitDTO.getName())
                 .respondent(respondent)
                 .respondentContact(respondentContact)
+                .uuid(msqSubmitDTO.getUuid())
                 .type(msqSubmitDTO.getType())
                 .status(MsqResult.STATUS_WAITING)
                 .build();
-        msqResult.setRemark(sb.toString());
         msqResultMapper.insert(msqResult);
         topicResults.forEach(topicResult -> topicResult.setMsqResultId(msqResult.getId()));
         topicResultMapper.saveBatch(topicResults);

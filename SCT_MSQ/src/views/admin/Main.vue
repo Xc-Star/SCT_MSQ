@@ -28,6 +28,14 @@
                     <i class="el-icon-picture"></i>
                     <span v-show="!isCollapsed">图片管理</span>
                 </router-link>
+                <router-link v-if="userInfo.id === 0" to="/admin/main/admin-manage" class="nav-item" @click="handleMenuClick">
+                    <i class="el-icon-user"></i>
+                    <span v-show="!isCollapsed">账号管理</span>
+                </router-link>
+                <router-link to="/admin/main/server-member-manage" class="nav-item" @click="handleMenuClick">
+                    <i class="el-icon-user-filled"></i>
+                    <span v-show="!isCollapsed">成员管理</span>
+                </router-link>
             </nav>
         </div>
         <div class="main-content" :class="{ 'main-content-expanded': isCollapsed }" @click="handleMainContentClick">
@@ -51,20 +59,54 @@
             <router-view></router-view>
         </div>
         <div class="sidebar-mask" v-if="isMobile && !isCollapsed" @click="toggleSidebar"></div>
+
+        <!-- 修改密码弹窗 -->
+        <el-dialog
+            v-model="passwordDialogVisible"
+            title="修改密码"
+            width="400px"
+            destroy-on-close
+        >
+            <el-form :model="passwordForm" label-width="100px" :rules="passwordRules" ref="passwordFormRef">
+                <el-form-item label="原密码" prop="oldPassword">
+                    <el-input v-model="passwordForm.oldPassword" type="password" show-password />
+                </el-form-item>
+                <el-form-item label="新密码" prop="newPassword">
+                    <el-input v-model="passwordForm.newPassword" type="password" show-password />
+                </el-form-item>
+                <el-form-item label="确认新密码" prop="confirmPassword">
+                    <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="passwordDialogVisible = false">取消</el-button>
+                    <el-button type="primary" @click="handleChangePassword">确定</el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Expand, Fold, ArrowDown } from '@element-plus/icons-vue'
-import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElAvatar, ElIcon, ElMessageBox } from 'element-plus'
+import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElAvatar, ElIcon, ElMessageBox, ElMessage } from 'element-plus'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo'
 import { useRouter } from 'vue-router'
+import type { FormInstance } from 'element-plus'
 
 interface UserInfo {
     username?: string;
     avatar?: string;
+    id?: number;
+}
+
+interface PasswordForm {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
 }
 
 const store = useTokenStore()
@@ -76,6 +118,67 @@ const isCollapsed = ref(false)
 const isMobile = ref(false)
 const showButton = ref(true)
 let lastScrollTop = 0
+
+// 修改密码相关
+const passwordDialogVisible = ref(false)
+const passwordFormRef = ref<FormInstance>()
+const passwordForm = ref<PasswordForm>({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+})
+
+const validateConfirmPassword = (rule: any, value: string, callback: any) => {
+    if (value === '') {
+        callback(new Error('请再次输入新密码'))
+    } else if (value !== passwordForm.value.newPassword) {
+        callback(new Error('两次输入的密码不一致'))
+    } else {
+        callback()
+    }
+}
+
+const passwordRules = {
+    oldPassword: [
+        { required: true, message: '请输入原密码', trigger: 'blur' },
+        { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    ],
+    newPassword: [
+        { required: true, message: '请输入新密码', trigger: 'blur' },
+        { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    ],
+    confirmPassword: [
+        { required: true, message: '请再次输入新密码', trigger: 'blur' },
+        { validator: validateConfirmPassword, trigger: 'blur' }
+    ]
+}
+
+import { changePassword } from '@/api/Auth'
+const handleChangePassword = async () => {
+    if (!passwordFormRef.value) return
+    
+    await passwordFormRef.value.validate(async (valid) => {
+        if (valid) {
+            try {
+                const updatePasswordDTO = {
+                    oldPassword: passwordForm.value.oldPassword,
+                    newPassword: passwordForm.value.newPassword
+                }
+                await changePassword(updatePasswordDTO)
+                ElMessage.success('密码修改成功')
+                passwordDialogVisible.value = false
+                // 清空表单
+                passwordForm.value = {
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                }
+            } catch (error) {
+                // ElMessage.error('密码修改失败')
+            }
+        }
+    })
+}
 
 const checkMobile = () => {
     isMobile.value = window.innerWidth <= 768
@@ -115,7 +218,7 @@ const handleMenuClick = () => {
 const handleCommand = (command: string) => {
     switch (command) {
         case 'changePassword':
-            // TODO: 实现修改密码功能
+            passwordDialogVisible.value = true
             break
         case 'logout':
             ElMessageBox.confirm(

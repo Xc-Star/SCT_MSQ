@@ -23,5 +23,5 @@ public interface AuthService {
      * 修改密码
      * @param updatePasswordDTO 修改密码信息
      */
-    void updatePassword(UpdatePasswordDTO updatePasswordDTO);
+    void changePassword(UpdatePasswordDTO updatePasswordDTO);
 }

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { login } from '@/api/Login.js'
+import { login } from '@/api/Auth.js'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo.js'
 import { useRouter } from 'vue-router'

@@ -32,12 +32,12 @@
                         <el-table-column prop="msqName" label="问卷名称" align="center" />
                         <el-table-column prop="type" label="类型" align="center">
                             <template #default="scope">
-                                <el-tag>{{ getTypeText(scope.row.type) }}</el-tag>
+                                <el-tag :type="getTypeTagType(scope.row.type)">{{ getTypeText(scope.row.type) }}</el-tag>
                             </template>
                         </el-table-column>
                         <el-table-column prop="respondent" label="游戏ID" align="center" />
                         <el-table-column prop="respondentContact" label="联系方式" align="center" />
-                        <el-table-column prop="createTime" label="创建时间" align="center" />
+                        <el-table-column prop="createTime" label="提交时间" align="center" />
                         <el-table-column prop="status" label="状态" align="center">
                             <template #default="scope">
                                 <el-tag :type="getStatusType(scope.row.status)">
@@ -45,6 +45,8 @@
                                 </el-tag>
                             </template>
                         </el-table-column>
+                        <el-table-column prop="reviewer" label="审核人" align="center" />
+                        <el-table-column prop="reviewTime" label="审核时间" align="center" />
                         <el-table-column label="操作" width="150" align="center">
                             <template #default="scope">
                                 <el-button 
@@ -76,7 +78,7 @@
                         <div class="item-content">
                             <div class="info-row">
                                 <span class="label">类型：</span>
-                                <el-tag size="small">{{ getTypeText(item.type) }}</el-tag>
+                                <el-tag :type="getTypeTagType(item.type)" size="small">{{ getTypeText(item.type) }}</el-tag>
                             </div>
                             <div class="info-row">
                                 <span class="label">游戏ID：</span>
@@ -87,8 +89,16 @@
                                 <span>{{ item.respondentContact }}</span>
                             </div>
                             <div class="info-row">
-                                <span class="label">创建时间：</span>
+                                <span class="label">提交时间：</span>
                                 <span>{{ item.createTime }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">审核人：</span>
+                                <span>{{ item.reviewer }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">审核时间：</span>
+                                <span>{{ item.reviewTime }}</span>
                             </div>
                         </div>
                         <div class="item-footer">
@@ -137,6 +147,9 @@ interface TableItem {
     msqName: string
     respondent: string
     respondentContact: string
+    reviewerId: number | null
+    reviewer: string | null
+    reviewTime: string | null
     createTime: string
     status: number
     msqId: number
@@ -307,6 +320,21 @@ const getStatusText = (status: number) => {
             return '未通过'
         default:
             return '未知状态'
+    }
+}
+
+const getTypeTagType = (type: number) => {
+    switch (type) {
+        case 1:
+            return 'danger'  // 红色
+        case 2:
+            return 'primary'  // 蓝色
+        case 3:
+            return 'warning'  // 黄色
+        case 4:
+            return 'info'  // 灰色
+        default:
+            return 'info'  // 灰色
     }
 }
 

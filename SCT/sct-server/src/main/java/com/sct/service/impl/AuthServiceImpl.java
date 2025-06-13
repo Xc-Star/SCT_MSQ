@@ -65,14 +65,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
+    public void changePassword(UpdatePasswordDTO updatePasswordDTO) {
 
         Long currentId = BaseContext.getCurrentId();
         AdminUser user = adminUserMapper.selectById(currentId);
         if (!PasswordUtil.matches(updatePasswordDTO.getOldPassword(), user.getPassword())) {
-            throw new RuntimeException("旧密码错误");
+            throw new BaseException("旧密码错误");
         }
 
         user.setPassword(PasswordUtil.encode(updatePasswordDTO.getNewPassword()));
+        adminUserMapper.updateById(user);
     }
 }

@@ -156,8 +156,8 @@ const getTypeLabel = (type: number | string) => {
 // 获取类型标签样式
 const getTypeTagType = (type: number | string): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
     const typeMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
-        '1': 'primary',    // 红石问卷 - 蓝色
-        '2': 'success',    // 建筑问卷 - 绿色
+        '1': 'danger',    // 红石问卷 - 红色
+        '2': 'primary',    // 建筑问卷 - 蓝色
         '3': 'warning',    // 后勤问卷 - 黄色
         '4': 'info'        // 其他 - 灰色
     }

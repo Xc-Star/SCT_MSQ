@@ -298,7 +298,7 @@
     /* align-items: center; */
     /* justify-content: center; */
     min-height: 100vh;
-    background-color: skyblue;
+    background-color: #ddd;
   }
   
   .container {

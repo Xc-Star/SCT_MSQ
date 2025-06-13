@@ -3,6 +3,7 @@ package com.sct.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.sct.context.BaseContext;
 import com.sct.dto.MsqResultPageDTO;
 import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -96,38 +98,43 @@ public class MsqServiceImpl implements MsqService {
     public PageResult<MsqResult> getResultPage(MsqResultPageDTO msqResultPageDTO) {
         // 构建查询条件
         QueryWrapper<MsqResult> queryWrapper = new QueryWrapper<MsqResult>()
+                .ne("status", MsqResult.STATUS_REMOVED)
                 .orderByDesc("create_time");
 
         // 只有当respondent不为null时才添加查询条件
-        if (msqResultPageDTO.getRespondent() != null) {
-            queryWrapper.like("respondent", msqResultPageDTO.getRespondent());
-        }
+        if (msqResultPageDTO.getRespondent() != null) queryWrapper.like("respondent", msqResultPageDTO.getRespondent());
+
 
         // 只有当respondent_contact不为null时才添加查询条件
-        if (msqResultPageDTO.getRespondentContact() != null) {
-            queryWrapper.like("respondent_contact", msqResultPageDTO.getRespondentContact());
-        }
+        if (msqResultPageDTO.getRespondentContact() != null) queryWrapper.like("respondent_contact", msqResultPageDTO.getRespondentContact());
 
-        if (msqResultPageDTO.getType() != null) {
-            queryWrapper.eq("type", msqResultPageDTO.getType());
-        }
+
+        if (msqResultPageDTO.getType() != null) queryWrapper.eq("type", msqResultPageDTO.getType());
+
 
         // 执行分页查询
         PageHelper.startPage(msqResultPageDTO.getPageNo(), msqResultPageDTO.getPageSize());
-        List<MsqResult> msqResults = msqResultMapper.selectList(queryWrapper);
+        try {
+            List<MsqResult> msqResults = msqResultMapper.selectList(queryWrapper);
 
-        // 获取分页信息
-        PageInfo<MsqResult> pageInfo = new PageInfo<>(msqResults);
+            // 获取分页信息
+            PageInfo<MsqResult> pageInfo = new PageInfo<>(msqResults);
 
-        // 返回包含实际数据的PageResult
-        return new PageResult<>(pageInfo.getList(), pageInfo.getTotal());
+            // 返回包含实际数据的PageResult
+            return new PageResult<>(pageInfo.getList(), pageInfo.getTotal());
+        } finally {
+            PageHelper.clearPage();
+        }
     }
 
     @Override
     public void updateMsqResultStatus(MsqResultUpdateStatusDTO msqResultUpdateStatusDTO) {
         msqResultMapper.updateById(MsqResult.builder()
-                .id(msqResultUpdateStatusDTO.getId())
-                .status(msqResultUpdateStatusDTO.getStatus())
+                        .id(msqResultUpdateStatusDTO.getId())
+                        .status(msqResultUpdateStatusDTO.getStatus())
+                        .reviewerId(BaseContext.getCurrentId())
+                        .reviewer(BaseContext.getUsername())
+                        .reviewTime(LocalDateTime.now())
                 .build());
     }
 

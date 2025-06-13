@@ -1,6 +1,7 @@
 package com.sct.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
