@@ -4,20 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sct.context.BaseContext;
 import com.sct.dto.MsqSubmitDTO;
 import com.sct.dto.MsqUpdateDTO;
-import com.sct.entity.Msq;
-import com.sct.entity.MsqResult;
-import com.sct.entity.Topic;
-import com.sct.entity.TopicResult;
+import com.sct.dto.TopicDTO;
+import com.sct.entity.*;
 import com.sct.exception.BaseException;
-import com.sct.mapper.MsqMapper;
-import com.sct.mapper.MsqResultMapper;
-import com.sct.mapper.TopicMapper;
-import com.sct.mapper.TopicResultMapper;
+import com.sct.mapper.*;
 import com.sct.service.TopicService;
 import com.sct.utils.BeanUtils;
 import com.sct.vo.MsqInfoVO;
 import com.sct.vo.MsqReviewInfoVO;
 import com.sct.vo.TopicResultVO;
+import com.sct.vo.TopicVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +40,8 @@ public class TopicServiceImpl implements TopicService {
     private MsqMapper msqMapper;
     @Resource
     private MsqResultMapper msqResultMapper;
+    @Resource
+    private TopicImageMapper topicImageMapper;
 
     @Override
     public MsqInfoVO getOneMsqInfoVO(Long msqId) {
@@ -60,7 +58,19 @@ public class TopicServiceImpl implements TopicService {
                 .build();
         List<Topic> topicList = topicMapper.selectList(new QueryWrapper<Topic>().eq("msq_id", msqId).orderByAsc("no"));
         if (topicList != null && !topicList.isEmpty()) topics.addAll(topicList);
-        msqInfoVO.setTopics(topics);
+        List<TopicVO> topicVOS = new ArrayList<>();
+        for (Topic topic : topics) {
+            if (topic.getImageCount() == null || topic.getImageCount() == 0) {
+                topicVOS.add(BeanUtils.toBean(topic, TopicVO.class));
+                continue;
+            }
+            List<TopicImage> images = topicImageMapper.selectList(
+                    new QueryWrapper<TopicImage>().eq("topic_id", topic.getId()));
+            TopicVO topicVO = BeanUtils.toBean(topic, TopicVO.class);
+            topicVO.setImages(images);
+            topicVOS.add(topicVO);
+        }
+        msqInfoVO.setTopics(topicVOS);
         return msqInfoVO;
     }
 
@@ -80,14 +90,23 @@ public class TopicServiceImpl implements TopicService {
         msq.setRemark(BaseContext.getUsername());
         msqMapper.updateById(msq);
 
-        List<Topic> topics = msqUpdateDTO.getTopics();
+        List<TopicDTO> topics = msqUpdateDTO.getTopics();
         List<Long> ids = getIds(topics);
 
-        for (Topic topic : topics) {
+        for (TopicDTO topic : topics) {
             if (topic.getId() == null) {
                 topic.setMsqId(msq.getId());
                 topic.setMsqName(msq.getName());
-                topicMapper.insert(topic);
+                Topic bean = BeanUtils.toBean(topic, Topic.class);
+                if (topic.getImages() != null && !topic.getImages().isEmpty()) {
+                    bean.setImageCount(topic.getImages().size());
+                } else {
+                    bean.setImageCount(0);
+                }
+                topicMapper.insert(bean);
+                if (topic.getImages() != null && !topic.getImages().isEmpty()) {
+                    saveBatchImage(bean.getId(), topic.getImages());
+                }
                 continue;
             }
             if (topic.getId() < 0) {
@@ -95,9 +114,30 @@ public class TopicServiceImpl implements TopicService {
                 continue;
             }
             topic.setId(null);
-            topicMapper.insert(topic);
+            topic.setMsqId(msq.getId());
+            topic.setMsqName(msq.getName());
+            Topic bean = BeanUtils.toBean(topic, Topic.class);
+            if (topic.getImages() != null && !topic.getImages().isEmpty()) {
+                bean.setImageCount(topic.getImages().size());
+            } else {
+                bean.setImageCount(0);
+            }
+            topicMapper.insert(bean);
+            if (topic.getImages() != null && !topic.getImages().isEmpty()) {
+                saveBatchImage(bean.getId(), topic.getImages());
+            }
         }
         if (!ids.isEmpty()) topicMapper.deleteBatchIds(ids);
+    }
+
+    private void saveBatchImage(Long topicId, List<String> images) {
+        for (String image : images) {
+            TopicImage topicImage = new TopicImage();
+            topicImage.setTopicId(topicId);
+            topicImage.setImageUrl(image);
+            topicImage.setCreateTime(LocalDateTime.now());
+            topicImageMapper.insert(topicImage);
+        }
     }
 
     @Transactional
@@ -133,6 +173,14 @@ public class TopicServiceImpl implements TopicService {
 
         MsqResult msqResult = msqResultMapper.selectById(msqResultId);
         List<TopicResultVO> topicResults = topicResultMapper.getTopicResultsByMsqResultId(msqResultId);
+
+        for (TopicResultVO topicResult : topicResults) {
+            if (topicResult.getImageCount() != null && topicResult.getImageCount() != 0) {
+                List<TopicImage> images = topicImageMapper.selectList(
+                        new QueryWrapper<TopicImage>().eq("topic_id", topicResult.getTopicId()));
+                topicResult.setImages(images);
+            }
+        }
 
         return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).topicResults(topicResults).build();
     }

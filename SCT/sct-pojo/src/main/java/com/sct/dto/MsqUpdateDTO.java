@@ -23,5 +23,5 @@ public class MsqUpdateDTO {
 
     private Integer type;
 
-    private List<Topic> topics;
+    private List<TopicDTO> topics;
 }

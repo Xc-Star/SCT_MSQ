@@ -26,7 +26,9 @@
             t.no,
             t.type,
             t.topic,
+            t.image_count,
             t.options,
+            tr.topic_id,
             tr.topic_result,
             tr.topic_results,
             tr.create_time

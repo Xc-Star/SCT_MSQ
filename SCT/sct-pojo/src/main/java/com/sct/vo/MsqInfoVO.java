@@ -28,5 +28,5 @@ public class MsqInfoVO {
 
     private Integer type;
 
-    private List<Topic> topics;
+    private List<TopicVO> topics;
 }

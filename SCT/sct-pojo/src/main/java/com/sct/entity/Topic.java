@@ -63,6 +63,11 @@ public class Topic extends BaseEntity {
     private String topic;
 
     /**
+     * 图片数量
+     */
+    private Integer imageCount;
+
+    /**
      * 选项
      */
     @TableField(typeHandler = FastjsonTypeHandler.class)

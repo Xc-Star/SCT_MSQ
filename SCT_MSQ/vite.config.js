@@ -29,6 +29,10 @@ export default defineConfig({
         changeOrigin: true,
         // 重写路径
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/profile': {
+        target: 'http://localhost:48080',
+        changeOrigin: true
       }
     }
   },
@@ -40,11 +44,14 @@ export default defineConfig({
       '/api': {
         // 后台服务所在的源
         target: 'http://localhost:48080',
-        // target: 'http://127.0.0.1:4523/m1/6495443-6195651-default',
         // 是否修改源
         changeOrigin: true,
         // 重写路径
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/profile': {
+        target: 'http://localhost:48080',
+        changeOrigin: true
       }
     }
   },

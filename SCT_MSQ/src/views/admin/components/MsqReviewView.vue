@@ -23,6 +23,17 @@
                 <label class="label" for="input">{{ index + 1 }}. {{ topic.topic }}</label>
                 <div class="underline"></div>
               </div>
+              <div v-if="topic.images && topic.images.length" class="topic-images">
+                <img
+                  v-for="img in topic.images"
+                  :key="img.id"
+                  :src="getImageUrl(img.imageUrl)"
+                  class="topic-image"
+                  alt="题目图片"
+                  @click="openImageViewer(getImageUrl(img.imageUrl))"
+                  style="cursor: pointer;"
+                />
+              </div>
               <div style="height: 50px;"></div>
             </div>
   
@@ -37,6 +48,17 @@
                   </label>
                 </div>
               </div>
+              <div v-if="topic.images && topic.images.length" class="topic-images">
+                <img
+                  v-for="img in topic.images"
+                  :key="img.id"
+                  :src="getImageUrl(img.imageUrl)"
+                  class="topic-image"
+                  alt="题目图片"
+                  @click="openImageViewer(getImageUrl(img.imageUrl))"
+                  style="cursor: pointer;"
+                />
+              </div>
               <div style="height: 32px;"></div>
             </div>
   
@@ -47,6 +69,17 @@
                   <input type="checkbox" class="cyberpunk-checkbox" :id="'checkbox-' + topic.topic + '-' + optionIndex" :name="'checkbox-group-' + topic.topic" :value="option" v-model="submitData[topic.topic]" disabled>
                   {{ option }}
                 </label>
+              </div>
+              <div v-if="topic.images && topic.images.length" class="topic-images">
+                <img
+                  v-for="img in topic.images"
+                  :key="img.id"
+                  :src="getImageUrl(img.imageUrl)"
+                  class="topic-image"
+                  alt="题目图片"
+                  @click="openImageViewer(getImageUrl(img.imageUrl))"
+                  style="cursor: pointer;"
+                />
               </div>
               <div style="height: 32px;"></div>
             </div>
@@ -59,6 +92,9 @@
           </div>
         </form>
       </div>
+    </div>
+    <div v-if="showImageViewer" class="image-viewer-overlay" @click="closeImageViewer">
+      <img :src="currentImageUrl" class="image-viewer-img" @click.stop />
     </div>
   </template>
   
@@ -77,6 +113,7 @@
   
   interface ParsedTopicOption extends Omit<TopicOption, 'options'> {
     options: string[]
+    images?: { id: number; imageUrl: string }[]
   }
   
   interface Topic {
@@ -146,10 +183,17 @@
   const route = useRoute()
   
   const parsedTopics = computed(() => {
-    return topic.value.topicResults.map(item => ({
-      ...item,
-      options: JSON.parse(item.options || '[]')
-    }))
+    return topic.value.topicResults.map(item => {
+      let images: { id: number; imageUrl: string }[] = []
+      if (Array.isArray((item as any).images)) {
+        images = (item as any).images
+      }
+      return {
+        ...item,
+        options: JSON.parse(item.options || '[]'),
+        images
+      }
+    })
   })
   
   // 使用异步函数获取数据
@@ -265,6 +309,24 @@
     }
   }
   
+  const showImageViewer = ref(false)
+  const currentImageUrl = ref('')
+
+  function getImageUrl(url: string) {
+    if (!url) return ''
+    if (url.startsWith('http')) return url
+    return url
+  }
+
+  function openImageViewer(url: string) {
+    currentImageUrl.value = url
+    showImageViewer.value = true
+  }
+  function closeImageViewer() {
+    showImageViewer.value = false
+    currentImageUrl.value = ''
+  }
+  
   // topic.value = {
   //   id: 1,
   //   name: 'SCT问卷',
@@ -298,7 +360,7 @@
     /* align-items: center; */
     /* justify-content: center; */
     min-height: 100vh;
-    background-color: #ddd;
+    background-color: #fff;
   }
   
   .container {
@@ -307,7 +369,7 @@
     margin: 50px auto;
     padding: 60px 5%;
     background-color: rgba(255, 255, 255, .3);
-    box-shadow: 5px 5px 5px rgba(0, 0, 0, .3);
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, .3);
     border-radius: 5px;
     box-sizing: border-box;
   }
@@ -753,5 +815,35 @@
   .review-buttons .button2:hover:before,
   .review-buttons .button2:hover:after {
     background-color: transparent;
+  }
+  
+  .topic-images {
+    margin: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .topic-image {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    object-fit: contain;
+  }
+  .image-viewer-overlay {
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-viewer-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    background: #fff;
   }
   </style> 

@@ -1,5 +1,6 @@
 package com.sct.config;
 
+import com.sct.constant.Constants;
 import com.sct.interceptor.JwtTokenAdminInterceptor;
 import com.sct.interceptor.JwtTokenUserInterceptor;
 import com.sct.json.JacksonObjectMapper;
@@ -97,6 +98,10 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         log.info("开始设置静态资源映射...");
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        /** 本地文件上传路径 */
+        registry.addResourceHandler(Constants.RESOURCE_PREFIX + "/**")
+                .addResourceLocations("file:" + SctConfig.getProfile() + "/");
+//        System.out.println("映射路径：" + "file:" + SctConfig.getProfile() + "/");
     }
 
     /**

@@ -11,13 +11,15 @@
                                 <span>服务器成员</span>
                             </div>
                         </template>
-                        <el-table :data="memberList" v-loading="loading">
+                        <!-- PC端表格 -->
+                        <el-table :data="memberList" v-loading="loading" class="pc-table">
                             <el-table-column prop="avatar" label="头像" align="center">
                                 <template #default="scope">
                                     <img :src="scope.row.avatar" style="width:32px;height:32px;border-radius:50%;" />
                                 </template>
                             </el-table-column>
                             <el-table-column prop="respondent" label="ID" align="center" />
+                            <el-table-column prop="uuid" label="UUID" align="center" />
                             <el-table-column prop="respondentContact" label="联系方式" align="center" />
                             <el-table-column prop="type" label="类型" align="center">
                                 <template #default="scope">
@@ -27,7 +29,7 @@
                                 </template>
                             </el-table-column>
                             <el-table-column prop="reviewer" label="审核人" align="center" />
-                            <el-table-column prop="reviewTime" label="审核时间" align="center" />
+                            <el-table-column prop="reviewTime" label="加入时间" align="center" />
                             <el-table-column label="操作" width="120" align="center">
                                 <template #default="scope">
                                     <el-button 
@@ -40,15 +42,45 @@
                                 </template>
                             </el-table-column>
                         </el-table>
+
+                        <!-- 移动端列表 -->
+                        <div class="mobile-list" v-loading="loading">
+                            <div v-for="item in memberList" :key="item.id" class="mobile-item">
+                                <div class="item-header">
+                                    <div class="user-info">
+                                        <img :src="item.avatar" class="avatar" />
+                                        <span class="user-id">{{ item.respondent }}</span>
+                                        <!-- <span class="user-uuid">{{ item.uuid }}</span> -->
+                                    </div>
+                                    <el-tag :type="getTypeTagType(item.type)" size="small">
+                                        {{ typeMap[item.type] || '未知' }}
+                                    </el-tag>
+                                </div>
+                                <div class="item-content">
+                                    <div class="info-row">
+                                        <span class="label">加入时间：</span>
+                                        <span class="time">{{ item.reviewTime }}</span>
+                                        <el-button 
+                                            type="danger" 
+                                            size="small" 
+                                            @click="handleRemoveMember(item)"
+                                        >
+                                            移出服务器
+                                        </el-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="pagination-container" v-if="memberTotal > pageSize">
                             <el-pagination
                                 v-model:current-page="memberPage"
                                 v-model:page-size="pageSize"
                                 :page-sizes="[10, 20, 50, 100]"
                                 :total="memberTotal"
+                                :layout="isMobile ? 'total, prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
                                 @size-change="handleSizeChange"
                                 @current-change="getMemberList"
-                                layout="total, sizes, prev, pager, next, jumper"
                             />
                         </div>
                     </el-card>
@@ -61,13 +93,15 @@
                                 <span>被移除成员</span>
                             </div>
                         </template>
-                        <el-table :data="removedList" v-loading="loading">
+                        <!-- PC端表格 -->
+                        <el-table :data="removedList" v-loading="loading" class="pc-table">
                             <el-table-column prop="avatar" label="头像" align="center">
                                 <template #default="scope">
                                     <img :src="scope.row.avatar" style="width:32px;height:32px;border-radius:50%;" />
                                 </template>
                             </el-table-column>
                             <el-table-column prop="respondent" label="ID" align="center" />
+                            <el-table-column prop="uuid" label="UUID" align="center" />
                             <el-table-column prop="respondentContact" label="联系方式" align="center" />
                             <el-table-column prop="type" label="类型" align="center">
                                 <template #default="scope">
@@ -80,15 +114,38 @@
                             <el-table-column prop="removeTime" label="移除时间" align="center" />
                             <el-table-column prop="remark" label="移除原因" align="center" />
                         </el-table>
+
+                        <!-- 移动端列表 -->
+                        <div class="mobile-list" v-loading="loading">
+                            <div v-for="item in removedList" :key="item.id" class="mobile-item">
+                                <div class="item-header">
+                                    <div class="user-info">
+                                        <img :src="item.avatar" class="avatar" />
+                                        <span class="user-id">{{ item.respondent }}</span>
+                                        <!-- <span class="user-uuid">{{ item.uuid }}</span> -->
+                                    </div>
+                                    <el-tag :type="getTypeTagType(item.type)" size="small">
+                                        {{ typeMap[item.type] || '未知' }}
+                                    </el-tag>
+                                </div>
+                                <div class="item-content">
+                                    <div class="info-row">
+                                        <span class="label">移除时间：</span>
+                                        <span>{{ item.removeTime }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="pagination-container" v-if="removedTotal > pageSize">
                             <el-pagination
                                 v-model:current-page="removedPage"
                                 v-model:page-size="pageSize"
                                 :page-sizes="[10, 20, 50, 100]"
                                 :total="removedTotal"
+                                :layout="isMobile ? 'total, prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
                                 @size-change="handleSizeChange"
                                 @current-change="getRemovedList"
-                                layout="total, sizes, prev, pager, next, jumper"
                             />
                         </div>
                     </el-card>
@@ -100,7 +157,7 @@
         <el-dialog
             v-model="removeDialogVisible"
             title="移出服务器"
-            width="500px"
+            :width="isMobile ? '90%' : '500px'"
             destroy-on-close
         >
             <el-form :model="removeForm" label-width="80px" :rules="removeRules" ref="removeFormRef">
@@ -212,6 +269,14 @@ const removedTotal = ref(0)
 const memberPage = ref(1)
 const removedPage = ref(1)
 const pageSize = ref(20)
+
+// 添加移动端检测
+const isMobile = ref(window.innerWidth <= 768)
+
+// 监听窗口大小变化
+window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth <= 768
+})
 
 // 处理每页显示数量变化
 const handleSizeChange = (val: number) => {
@@ -339,11 +404,16 @@ h2 {
 /* 移动端适配样式 */
 @media screen and (max-width: 768px) {
     .server-member-manage {
-        padding: 10px;
+        padding: 0;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin: 8px;
     }
 
     .content {
-        padding: 10px;
+        padding: 0;
     }
 
     .pc-table {
@@ -352,50 +422,105 @@ h2 {
 
     .mobile-list {
         display: block;
+        background: #fff;
     }
 
     .mobile-item {
-        background: #fff;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        padding: 6px 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .mobile-item:last-child {
+        border-bottom: none;
     }
 
     .item-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 4px;
     }
 
-    .item-name {
-        font-size: 16px;
-        font-weight: bold;
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+    }
+
+    .user-id {
+        font-size: 0.8rem;
+        color: #333;
+    }
+
+    .user-uuid {
+        font-size: 0.7rem;
+        color: #666;
+        margin-left: 4px;
     }
 
     .item-content {
-        margin: 10px 0;
+        margin: 4px 0;
     }
 
-    .join-time, .last-login-time {
-        font-size: 12px;
-        color: #999;
-        margin: 5px 0;
-    }
-
-    .item-footer {
+    .info-row {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #eee;
+        margin-bottom: 2px;
+        font-size: 0.75rem;
+        line-height: 1.2;
     }
 
-    .operations {
-        display: flex;
-        gap: 8px;
+    .label {
+        color: #666;
+        width: 60px;
+        flex-shrink: 0;
+    }
+
+    .time {
+        flex: 1;
+        margin-right: 8px;
+    }
+
+    .el-button--small {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        height: 20px;
+        line-height: 1;
+    }
+
+    .el-tag--small {
+        padding: 0 4px;
+        height: 18px;
+        line-height: 16px;
+        font-size: 0.7rem;
+    }
+
+    .pagination-container {
+        margin: 8px;
+    }
+
+    .member-tabs :deep(.el-tabs__nav) {
+        padding: 0 8px;
+    }
+
+    .member-tabs :deep(.el-tabs__content) {
+        padding: 0;
+    }
+
+    .card-header {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    .member-tabs :deep(.el-tabs__item) {
+        font-size: 0.85rem;
+        padding: 0 8px;
     }
 }
 
@@ -413,11 +538,6 @@ h2 {
     gap: 20px;
 }
 
-.member-card,
-.removed-card {
-    width: 100%;
-}
-
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -430,24 +550,11 @@ h2 {
     justify-content: center;
 }
 
-@media screen and (max-width: 768px) {
-    .card-container {
-        margin-top: 15px;
-        gap: 15px;
-    }
-}
-
 .member-tabs {
     width: 100%;
 }
 
 .member-tabs :deep(.el-tabs__content) {
     padding: 20px 0;
-}
-
-@media screen and (max-width: 768px) {
-    .member-tabs :deep(.el-tabs__content) {
-        padding: 15px 0;
-    }
 }
 </style> 

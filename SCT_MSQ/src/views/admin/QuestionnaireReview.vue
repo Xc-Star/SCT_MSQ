@@ -66,9 +66,9 @@
                     </el-table>
                 </div>
 
-                <!-- 移动端卡片列表 -->
+                <!-- 移动端列表 -->
                 <div class="mobile-list" v-loading="loading">
-                    <el-card v-for="(item, index) in tableData" :key="item.id" class="list-item">
+                    <div v-for="(item, index) in tableData" :key="item.id" class="list-item">
                         <div class="item-header">
                             <span class="item-title">{{ item.msqName }}</span>
                             <el-tag :type="getStatusType(item.status)" size="small">
@@ -91,31 +91,31 @@
                             <div class="info-row">
                                 <span class="label">提交时间：</span>
                                 <span>{{ item.createTime }}</span>
+                                <div class="action-buttons" v-if="item.status === 1">
+                                    <el-button 
+                                        type="primary" 
+                                        size="small" 
+                                        @click="handleReview(item)"
+                                    >审核</el-button>
+                                </div>
                             </div>
-                            <div class="info-row">
+                            <div class="info-row" v-if="item.status !== 1">
                                 <span class="label">审核人：</span>
                                 <span>{{ item.reviewer }}</span>
                             </div>
-                            <div class="info-row">
+                            <div class="info-row" v-if="item.status !== 1">
                                 <span class="label">审核时间：</span>
                                 <span>{{ item.reviewTime }}</span>
+                                <div class="action-buttons">
+                                    <el-button 
+                                        type="danger" 
+                                        size="small" 
+                                        @click="handleDelete(item)"
+                                    >删除</el-button>
+                                </div>
                             </div>
                         </div>
-                        <div class="item-footer">
-                            <el-button 
-                                v-if="item.status === 1"
-                                type="primary" 
-                                size="small" 
-                                @click="handleReview(item)"
-                            >审核</el-button>
-                            <el-button 
-                                v-else
-                                type="danger" 
-                                size="small" 
-                                @click="handleDelete(item)"
-                            >删除</el-button>
-                        </div>
-                    </el-card>
+                    </div>
                 </div>
 
                 <!-- 分页 -->
@@ -365,18 +365,17 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .questionnaire-review {
-    padding: 10px;
+    padding: 20px;
 }
 
 h2 {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     color: #333;
-    font-size: 1.2rem;
 }
 
 .content {
     background-color: #fff;
-    padding: 15px;
+    padding: 20px;
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 }
@@ -405,107 +404,175 @@ h2 {
     margin-top: 20px;
 }
 
-.mobile-list {
-    margin-top: 15px;
-}
-
-.list-item {
-    margin-bottom: 15px;
-}
-
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.item-title {
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-.item-content {
-    margin: 10px 0;
-}
-
-.info-row {
-    display: flex;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-.label {
-    color: #666;
-    width: 80px;
-    flex-shrink: 0;
-}
-
-.item-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
-}
-
 .pagination-container {
     margin-top: 15px;
     display: flex;
     justify-content: center;
 }
 
-.pc-table {
-    display: none;
-}
-
-@media screen and (min-width: 768px) {
+/* 移动端适配样式 */
+@media screen and (max-width: 768px) {
     .questionnaire-review {
-        padding: 20px;
+        padding: 0;
     }
 
     h2 {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
+        font-size: 1.1rem;
+        margin: 8px;
     }
 
     .content {
-        padding: 20px;
+        padding: 0;
+    }
+
+    .pc-table {
+        display: none;
+    }
+
+    .mobile-list {
+        display: block;
+        background: #fff;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+    }
+
+    .list-item {
+        padding: 12px 8px;
+        position: relative;
+    }
+
+    .list-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 0;
+        height: 1px;
+        background-color: #eee;
+    }
+
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .item-title {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .item-content {
+        padding: 0;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+
+    .label {
+        color: #666;
+        width: 60px;
+        flex-shrink: 0;
+    }
+
+    .action-buttons {
+        margin-left: auto;
+        display: flex;
+        gap: 4px;
+    }
+
+    .el-button--small {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        height: 20px;
+        line-height: 1;
+    }
+
+    .el-tag--small {
+        padding: 0 4px;
+        height: 18px;
+        line-height: 16px;
+        font-size: 0.7rem;
+    }
+
+    .pagination-container {
+        margin: 8px;
+    }
+
+    .search-form {
+        padding: 8px;
+    }
+
+    .search-form :deep(.el-form-item) {
+        margin-bottom: 8px;
+    }
+
+    .search-form :deep(.el-form-item__label) {
+        width: 80px;
+        font-size: 0.8rem;
+    }
+
+    .search-form :deep(.el-input__inner) {
+        font-size: 0.8rem;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .search-form :deep(.el-input) {
+        width: 100%;
+    }
+
+    .search-form :deep(.el-select) {
+        width: 100%;
+    }
+
+    .button-group {
+        margin-top: 8px;
+    }
+
+    .button-group .el-button {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+}
+
+/* PC端样式 */
+@media screen and (min-width: 769px) {
+    .mobile-list {
+        display: none;
     }
 
     .search-form {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 16px;
+        align-items: flex-start;
     }
 
     .search-form :deep(.el-form-item) {
         margin-bottom: 0;
+        width: 240px;
     }
 
     .search-form :deep(.el-input) {
-        width: 200px;
+        width: 100%;
     }
 
     .search-form :deep(.el-select) {
-        width: 200px !important;
+        width: 100%;
     }
 
-    .button-group {
+    .search-form :deep(.button-group) {
         margin-top: 0;
-    }
-
-    .mobile-list {
-        display: none;
-    }
-
-    .pc-table {
-        display: block;
-    }
-
-    .pagination-container {
-        justify-content: flex-end;
+        display: flex;
+        gap: 8px;
     }
 }
 </style> 

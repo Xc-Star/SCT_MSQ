@@ -65,6 +65,22 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column label="图片" min-width="120">
+          <template #default="scope">
+            <div v-if="scope.row.images && scope.row.images.length">
+              <el-image
+                v-for="(img, idx) in scope.row.images"
+                :key="img"
+                :src="img"
+                :preview-src-list="scope.row.images"
+                :initial-index="idx"
+                style="width: 40px; height: 40px; margin-right: 4px; border-radius: 4px"
+                fit="cover"
+              />
+            </div>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="200" align="center">
           <template #default="scope">
             <div class="operation-buttons">
@@ -149,6 +165,25 @@
             </el-text>
           </div>
         </el-form-item>
+        <el-form-item label="图片上传">
+          <el-upload
+            class="upload-demo"
+            action="/api/upload/image"
+            list-type="picture-card"
+            :limit="3"
+            :on-success="handleImageSuccess"
+            :on-remove="handleImageRemove"
+            :file-list="imageFileList"
+            :on-exceed="() => ElMessage.warning('最多上传三张图片')"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+          <div class="option-tips">
+            <el-text type="info" size="small">
+              最多上传3张图片，支持拖拽排序
+            </el-text>
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -161,11 +196,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { adminGetMsqVO } from '@/api/AdminMsq.js'
 import { adminUpdateMsq } from '@/api/AdminMsq.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { ArrowUp, ArrowDown, Plus } from '@element-plus/icons-vue'
 
 // 定义props接收id
 const props = defineProps<{
@@ -182,6 +217,7 @@ interface TopicOption {
   type: 'input' | 'radio' | 'checkbox'
   topic: string
   options?: string[]
+  images?: string[]
 }
 
 interface Topic {
@@ -214,7 +250,8 @@ const questionForm = ref({
   id: 0,
   type: 'input' as 'input' | 'radio' | 'checkbox',
   topic: '',
-  options: []
+  options: [],
+  images: [] as string[]
 })
 
 // 获取问题类型标签
@@ -250,10 +287,30 @@ const fetchData = async () => {
     const response = await adminGetMsqVO(props.id);
     if (response && response.data) {
       topic.value = response.data
-      // 在数据加载完成后初始化多选框数据
+      // 确保每个题目的 images 字段为图片地址数组，options为数组
       topic.value.topics.forEach(item => {
+        // 1. 兼容 images 为对象数组的情况
+        if (Array.isArray(item.images)) {
+          if (item.images.length > 0 && typeof item.images[0] === 'object' && item.images[0] !== null) {
+            // 转成图片地址数组
+            item.images = item.images.map((imgObj: any) => imgObj && typeof imgObj === 'object' && 'imageUrl' in imgObj ? imgObj.imageUrl : '').filter(Boolean)
+          } else if (item.images.length > 0 && typeof item.images[0] === 'string') {
+            // 已经是字符串数组，直接用
+            item.images = item.images.filter(Boolean)
+          }
+        } else {
+          item.images = []
+        }
+        // 2. 其它字段兼容
+        if (!Array.isArray(item.images)) {
+          item.images = []
+        }
         if (item.type === 'checkbox') {
           submitData.value[item.id] = []
+        }
+        // 3. 兼容 options 字段为 null
+        if (!Array.isArray(item.options)) {
+          item.options = []
         }
       })
     } else {
@@ -326,7 +383,8 @@ const submit = async () => {
       no: index + 1,
       type: item.type,
       topic: item.topic,
-      options: item.type === 'input' ? [] : item.options
+      options: item.type === 'input' ? [] : item.options,
+      images: item.images
     }))
   }
 
@@ -361,7 +419,8 @@ const handleAddQuestion = () => {
     id: undefined, // 使用负数作为临时ID
     type: 'input' as 'input' | 'radio' | 'checkbox',
     topic: '',
-    options: []
+    options: [],
+    images: []
   }
   questionDialogVisible.value = true
 }
@@ -373,7 +432,8 @@ const handleEditQuestion = (row: TopicOption) => {
     id: row.id,
     type: row.type,
     topic: row.topic,
-    options: row.options ? [...row.options] : []
+    options: row.options ? [...row.options] : [],
+    images: Array.isArray(row.images) ? [...row.images] : []
   }
   questionDialogVisible.value = true
 }
@@ -420,7 +480,8 @@ const handleQuestionSubmit = () => {
       id: questionForm.value.id,
       type: questionForm.value.type,
       topic: questionForm.value.topic,
-      options: questionForm.value.type === 'input' ? undefined : questionForm.value.options
+      options: questionForm.value.type === 'input' ? undefined : questionForm.value.options,
+      images: Array.isArray(questionForm.value.images) ? questionForm.value.images : []
     })
   } else {
     const index = topic.value.topics.findIndex(item => item.id === questionForm.value.id)
@@ -429,7 +490,8 @@ const handleQuestionSubmit = () => {
         id: questionForm.value.id,
         type: questionForm.value.type,
         topic: questionForm.value.topic,
-        options: questionForm.value.type === 'input' ? undefined : questionForm.value.options
+        options: questionForm.value.type === 'input' ? undefined : questionForm.value.options,
+        images: Array.isArray(questionForm.value.images) ? questionForm.value.images : []
       }
     }
   }
@@ -459,6 +521,23 @@ const handleMoveDown = (index: number) => {
     topic.value.topics[index] = topic.value.topics[index + 1]
     topic.value.topics[index + 1] = temp
   }
+}
+
+// 图片上传 file-list 适配
+const imageFileList = computed(() =>
+  questionForm.value.images.map((url, idx) => ({ name: `图片${idx + 1}`, url }))
+)
+
+// 图片上传成功
+const handleImageSuccess = (response, file, fileList) => {
+  // 上传成功后，手动把 file.url 设置为后端返回的地址
+  file.url = response.data
+  questionForm.value.images = fileList.map(f => f.url || (f.response && f.response.data)).filter(Boolean)
+}
+
+// 删除图片
+const handleImageRemove = (file, fileList) => {
+  questionForm.value.images = fileList.map(f => f.url || (f.response && f.response.data)).filter(Boolean)
 }
 </script>
 
