@@ -10,6 +10,7 @@ import MsqReviewView from '../views/admin/components/MsqReviewView.vue'
 import SubmitSuccess from '../views/SubmitSuccess.vue'
 import AdminManage from '../views/admin/AdminManage.vue'
 import ServerMemberManage from '../views/admin/ServerMemberManage.vue'
+import BuildTool from '../views/build-tool.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -75,6 +76,11 @@ const router = createRouter({
           component: MsqReviewView
         }
       ]
+    },
+    {
+      path: '/build-tool',
+      name: 'buildTool',
+      component: BuildTool
     }
   ]
 })
