@@ -57,6 +57,11 @@
                                 >审核</el-button>
                                 <el-button 
                                     v-else
+                                    type="warning" 
+                                    size="small" 
+                                    @click="handleView(scope.row)"
+                                >查看</el-button>
+                                <el-button 
                                     type="danger" 
                                     size="small" 
                                     @click="handleDelete(scope.row)"
@@ -97,6 +102,11 @@
                                         size="small" 
                                         @click="handleReview(item)"
                                     >审核</el-button>
+                                    <el-button 
+                                        type="danger" 
+                                        size="small" 
+                                        @click="handleDelete(item)"
+                                    >删除</el-button>
                                 </div>
                             </div>
                             <div class="info-row" v-if="item.status !== 1">
@@ -107,6 +117,11 @@
                                 <span class="label">审核时间：</span>
                                 <span>{{ item.reviewTime }}</span>
                                 <div class="action-buttons">
+                                    <el-button 
+                                        type="warning" 
+                                        size="small" 
+                                        @click="handleView(item)"
+                                    >查看</el-button>
                                     <el-button 
                                         type="danger" 
                                         size="small" 
@@ -141,6 +156,7 @@ import { adminGetResultPage, deleteMsqResult } from '@/api/AdminMsq'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { useRouter } from 'vue-router'
+import { c } from 'vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf'
 
 interface TableItem {
     id: number
@@ -265,6 +281,14 @@ const handleReview = async (row: TableItem) => {
     })
 }
 
+const handleView = (row: TableItem) => {
+    router.push({
+        name: 'msq-review',
+        params: { id: row.id },
+        query: { mode: 'view' }
+    })
+}
+
 const handleDelete = async (row: TableItem) => {
     try {
         // 第一次确认
@@ -304,6 +328,8 @@ const getStatusType = (status: number) => {
         case 2:
             return 'success'
         case 3:
+            return 'warning'
+        case 4:
             return 'danger'
         default:
             return 'info'
@@ -318,6 +344,8 @@ const getStatusText = (status: number) => {
             return '已通过'
         case 3:
             return '未通过'
+        case 4:
+            return '已移出'
         default:
             return '未知状态'
     }

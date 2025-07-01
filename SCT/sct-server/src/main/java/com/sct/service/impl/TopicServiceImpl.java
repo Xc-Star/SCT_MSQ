@@ -147,9 +147,14 @@ public class TopicServiceImpl implements TopicService {
         String respondent = topicResults.get(0).getTopicResult();
         String respondentContact = topicResults.get(1).getTopicResult();
         LocalDateTime now = LocalDateTime.now();
+        MsqResult one = msqResultMapper.selectOne(new QueryWrapper<MsqResult>().eq("respondent", respondent).eq("status", MsqResult.STATUS_REMOVED));
+        if (one != null) {
+            throw new BaseException("您已被移除服务器");
+        }
         List<MsqResult> msqResults = msqResultMapper.selectList(
                 new QueryWrapper<MsqResult>()
                         .eq("respondent", respondent)
+                        .eq("type", msqSubmitDTO.getType())
                         .between("create_time", now.minusDays(30), now));
         if (msqResults != null && !msqResults.isEmpty()) {
             throw new BaseException("您已提交过问卷，请联系管理员审核！");
@@ -182,7 +187,7 @@ public class TopicServiceImpl implements TopicService {
             }
         }
 
-        return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).topicResults(topicResults).build();
+        return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).status(msqResult.getStatus()).topicResults(topicResults).build();
     }
 
     private <T> List<Long> getIds(List<T> list) {

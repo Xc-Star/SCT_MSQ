@@ -2,6 +2,9 @@ package com.sct.service.impl;
 
 import com.sct.controller.user.convert.ConvertEntity;
 import com.sct.service.ConvertService;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -99,12 +102,23 @@ public class ConvertServiceImpl implements ConvertService {
                 row.createCell(9).setCellValue("");                  // 物品所在位置
             }
 
+            // 在最后添加一行"生成工具由Xc_Star编写"
+            int lastRowNum = sheet.getLastRowNum();
+            XSSFRow footerRow = sheet.createRow(lastRowNum + 2); // +2是为了空一行
+            CellRangeAddress mergedRegion = new CellRangeAddress(lastRowNum + 2, lastRowNum + 2, 0, 9);
+            sheet.addMergedRegion(mergedRegion);
+            footerRow.createCell(0).setCellValue("生成工具由Xc_Star编写");
+
+            // 设置合并单元格的样式（可选）
+            CellStyle footerStyle = workbook.createCellStyle();
+            footerStyle.setAlignment(HorizontalAlignment.CENTER);
+            footerRow.getCell(0).setCellStyle(footerStyle);
+
             for (int i = 0; i < 10; i++) {
                 sheet.autoSizeColumn(i);
             }
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//            ServletOutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
             return outputStream.toByteArray();
         }

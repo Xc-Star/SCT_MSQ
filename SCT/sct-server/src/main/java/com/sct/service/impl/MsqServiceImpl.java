@@ -8,10 +8,16 @@ import com.sct.dto.MsqResultPageDTO;
 import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
+import com.sct.entity.TopicImage;
+import com.sct.exception.BaseException;
 import com.sct.mapper.MsqMapper;
 import com.sct.mapper.MsqResultMapper;
+import com.sct.mapper.TopicImageMapper;
+import com.sct.mapper.TopicResultMapper;
 import com.sct.result.PageResult;
 import com.sct.service.MsqService;
+import com.sct.vo.MsqReviewInfoVO;
+import com.sct.vo.TopicResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +37,12 @@ public class MsqServiceImpl implements MsqService {
 
     @Resource
     private MsqMapper msqMapper;
-    @Autowired
+    @Resource
     private MsqResultMapper msqResultMapper;
+    @Resource
+    private TopicResultMapper topicResultMapper;
+    @Resource
+    private TopicImageMapper topicImageMapper;
 
     /**
      * 获取所有问卷
@@ -98,7 +108,7 @@ public class MsqServiceImpl implements MsqService {
     public PageResult<MsqResult> getResultPage(MsqResultPageDTO msqResultPageDTO) {
         // 构建查询条件
         QueryWrapper<MsqResult> queryWrapper = new QueryWrapper<MsqResult>()
-                .ne("status", MsqResult.STATUS_REMOVED)
+//                .ne("status", MsqResult.STATUS_REMOVED)
                 .orderByDesc("create_time");
 
         // 只有当respondent不为null时才添加查询条件
@@ -141,5 +151,27 @@ public class MsqServiceImpl implements MsqService {
     @Override
     public void deleteMsqResult(Long msqResultId) {
         msqResultMapper.deleteById(msqResultId);
+    }
+
+    @Override
+    public MsqReviewInfoVO getReviewInfoByRespondent(String username) {
+        List<MsqResult> msqResults = msqResultMapper.selectList(new QueryWrapper<MsqResult>().eq("respondent", username));
+        if (msqResults == null || msqResults.isEmpty()) {
+            throw new BaseException("您没有提交问卷");
+        }
+        MsqResult msqResult = msqResults.get(0);
+
+
+        List<TopicResultVO> topicResults = topicResultMapper.getTopicResultsByMsqResultId(msqResult.getId());
+
+        for (TopicResultVO topicResult : topicResults) {
+            if (topicResult.getImageCount() != null && topicResult.getImageCount() != 0) {
+                List<TopicImage> images = topicImageMapper.selectList(
+                        new QueryWrapper<TopicImage>().eq("topic_id", topicResult.getTopicId()));
+                topicResult.setImages(images);
+            }
+        }
+
+        return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).status(msqResult.getStatus()).topicResults(topicResults).build();
     }
 }

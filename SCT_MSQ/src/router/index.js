@@ -5,12 +5,14 @@ import Login from '../views/admin/Login.vue'
 import Main from '../views/admin/Main.vue'
 import QuestionnaireReview from '../views/admin/QuestionnaireReview.vue'
 import QuestionnaireManage from '../views/admin/QuestionnaireManage.vue'
-import ImageManage from '../views/admin/ImageManage.vue'
+import SystemManage from '../views/admin/SystemManage.vue'
 import MsqReviewView from '../views/admin/components/MsqReviewView.vue'
 import SubmitSuccess from '../views/SubmitSuccess.vue'
 import AdminManage from '../views/admin/AdminManage.vue'
 import ServerMemberManage from '../views/admin/ServerMemberManage.vue'
 import BuildTool from '../views/build-tool.vue'
+import Overview from '../views/overview.vue'
+import MsqResultView from '../views/MsqResultView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,9 +58,9 @@ const router = createRouter({
           component: QuestionnaireManage
         },
         {
-          path: 'image-manage',
-          name: 'imageManage',
-          component: ImageManage
+          path: 'system-manage',
+          name: 'systemManage',
+          component: SystemManage
         },
         {
           path: 'admin-manage',
@@ -81,6 +83,16 @@ const router = createRouter({
       path: '/build-tool',
       name: 'buildTool',
       component: BuildTool
+    },
+    {
+      path: '/overview',
+      name: 'overview',
+      component: Overview
+    },
+    {
+      path: '/msq/result',
+      name: 'msq-result',
+      component: MsqResultView
     }
   ]
 })

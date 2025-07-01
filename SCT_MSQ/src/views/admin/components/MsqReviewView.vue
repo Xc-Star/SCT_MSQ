@@ -11,8 +11,13 @@
           <button class="button2" @click="retryFetch">重试</button>
         </div>
         <form v-else class="msq-form">
-          <div class="title" style="margin-bottom: 64px;">
+          <div class="title" style="margin-bottom: 64px; position: relative;">
             <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: black;">{{ topic.msqName }}</h2>
+            <template v-if="[2,3,4].includes(topic.status)">
+              <div class="stamp" :class="getStampClass(topic.status)">
+                {{ getStampText(topic.status) }}
+              </div>
+            </template>
           </div>
   
           <div class="msq-topic" v-for="(topic, index) in parsedTopics" :key="topic.topic">
@@ -86,7 +91,7 @@
   
           </div>
 
-          <div class="review-buttons">
+          <div class="review-buttons" v-if="!isViewMode">
               <button type="button" class="button2 reject" @click="handleReview(false)">不通过</button>
               <button type="button" class="button2 approve" @click="handleReview(true)">通过</button>
           </div>
@@ -120,6 +125,7 @@
     id: number
     msqName: string
     topicResults: TopicOption[]
+    status: number
   }
   
   interface Questionnaire {
@@ -168,7 +174,8 @@
   const topic = ref<Topic>({
     id: 0,
     msqName: '',
-    topicResults: []
+    topicResults: [],
+    status: 1
   })
   
   const submitData = ref<SubmitData>({})
@@ -195,6 +202,9 @@
       }
     })
   })
+  
+  // 新增：判断是否为查看模式
+  const isViewMode = computed(() => route.query.mode === 'view')
   
   // 使用异步函数获取数据
   const fetchData = async () => {
@@ -325,6 +335,33 @@
   function closeImageViewer() {
     showImageViewer.value = false
     currentImageUrl.value = ''
+  }
+  
+  // 盖章文字
+  function getStampText(status: number) {
+    switch (status) {
+      case 2:
+        return '已通过'
+      case 3:
+        return '未通过'
+      case 4:
+        return '已移出'
+      default:
+        return ''
+    }
+  }
+  // 盖章样式
+  function getStampClass(status: number) {
+    switch (status) {
+      case 2:
+        return 'stamp-success'
+      case 3:
+        return 'stamp-danger'
+      case 4:
+        return 'stamp-removed'
+      default:
+        return ''
+    }
   }
   
   // topic.value = {
@@ -845,5 +882,30 @@
     border-radius: 8px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     background: #fff;
+  }
+  .stamp {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 12px 28px;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 8px;
+    transform: rotate(12deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0.92;
+    z-index: 10;
+    letter-spacing: 6px;
+    user-select: none;
+  }
+  .stamp-success {
+    background: #67c23a;
+  }
+  .stamp-danger {
+    background: #f56c6c;
+  }
+  .stamp-removed {
+    background: #909399;
   }
   </style> 

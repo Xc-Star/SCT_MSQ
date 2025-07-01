@@ -24,9 +24,9 @@
                     <i class="el-icon-document"></i>
                     <span v-show="!isCollapsed">问卷管理</span>
                 </router-link>
-                <router-link to="/admin/main/image-manage" class="nav-item" @click="handleMenuClick">
+                <router-link v-if="userInfo.id === 0" to="/admin/main/system-manage" class="nav-item" @click="handleMenuClick">
                     <i class="el-icon-picture"></i>
-                    <span v-show="!isCollapsed">图片管理</span>
+                    <span v-show="!isCollapsed">网站管理</span>
                 </router-link>
                 <router-link v-if="userInfo.id === 0" to="/admin/main/admin-manage" class="nav-item" @click="handleMenuClick">
                     <i class="el-icon-user"></i>

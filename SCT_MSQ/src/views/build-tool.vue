@@ -1,44 +1,53 @@
 <template>
   <div class="build-tool-container">
-    <h2>备货列表生成工具</h2>
-    <div class="desp">
-        <p>请上传txt文件</p>
-        <p>找到你的原理图，点击下面的材料列表，最上面的菜单有一个写入文件</p>
-        <p>直接点击保存就行，默认会保存在你的".../Minecraft版本文件夹/config/litematica"下</p>
-        <p>如果不知道是哪个可以按时间排序找到最新的</p>
-        <p>如果上传之后没有预览窗口出现说明格式不对，需要txt用|---+做成的"表"才能够解析</p>
+    <!-- 导航栏 -->
+    <Navbar />
+    
+    <div class="content">
+      <h2>备货列表生成工具</h2>
+      <div class="desp">
+          <p>请上传txt文件</p>
+          <p>找到你的原理图，点击下面的材料列表，最上面的菜单有一个写入文件</p>
+          <p>直接点击保存就行，默认会保存在你的".../Minecraft版本文件夹/config/litematica"下</p>
+          <p>如果不知道是哪个可以按时间排序找到最新的</p>
+          <p>如果上传之后没有预览窗口出现说明格式不对，需要txt用|---+做成的"表"才能够解析</p>
+      </div>
+      <el-upload
+        class="upload-demo"
+        drag
+        action=""
+        :auto-upload="false"
+        :before-upload="handleBeforeUpload"
+        :on-change="handleFileChange"
+        :file-list="fileList"
+        accept=".txt"
+        :disabled="loading"
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将txt文件拖到此处，或<em>点击上传</em></div>
+      </el-upload>
+      <el-button type="primary" :disabled="!file || loading" @click="handleGenerateExcel" :loading="loading" style="margin-top: 20px;">生成Excel</el-button>
+      <div v-if="previewTableData.length" class="preview-window">
+        <h3>文件预览：</h3>
+        <el-table :data="previewTableData" style="width: 100%">
+          <el-table-column v-for="col in previewTableColumns" :key="col.prop" :prop="col.prop" :label="col.label" align="center" />
+        </el-table>
+      </div>
+      <el-loading :loading="loading" text="正在生成Excel，请稍候...">
+      </el-loading>
     </div>
-    <el-upload
-      class="upload-demo"
-      drag
-      action=""
-      :auto-upload="false"
-      :before-upload="handleBeforeUpload"
-      :on-change="handleFileChange"
-      :file-list="fileList"
-      accept=".txt"
-      :disabled="loading"
-    >
-      <i class="el-icon-upload"></i>
-      <div class="el-upload__text">将txt文件拖到此处，或<em>点击上传</em></div>
-    </el-upload>
-    <el-button type="primary" :disabled="!file || loading" @click="handleGenerateExcel" :loading="loading" style="margin-top: 20px;">生成Excel</el-button>
-    <div v-if="previewTableData.length" class="preview-window">
-      <h3>文件预览：</h3>
-      <el-table :data="previewTableData" style="width: 100%">
-        <el-table-column v-for="col in previewTableColumns" :key="col.prop" :prop="col.prop" :label="col.label" align="center" />
-      </el-table>
-    </div>
-    <el-loading :loading="loading" text="正在生成Excel，请稍候...">
-    </el-loading>
   </div>
 </template>
 
 <script>
 import { convertTxtToExcel } from '@/api/buildTool'
+import Navbar from '@/components/Navbar.vue'
 
 export default {
   name: 'BuildTool',
+  components: {
+    Navbar
+  },
   data() {
     return {
       file: null,
@@ -172,15 +181,22 @@ export default {
 body {
   background: #f3f6f9;
 }
+
 .build-tool-container {
+  min-height: 100vh;
+  background: #f3f6f9;
+}
+
+.content {
   max-width: 600px;
-  margin: 40px auto;
+  margin: 80px auto 40px;
   padding: 30px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   text-align: center;
 }
+
 .preview-window {
   margin-top: 30px;
   text-align: left;
@@ -190,6 +206,7 @@ body {
   max-height: 300px;
   overflow: auto;
 }
+
 .desp p {
     color: red;
 }

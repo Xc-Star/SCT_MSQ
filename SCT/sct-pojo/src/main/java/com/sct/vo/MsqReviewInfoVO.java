@@ -23,5 +23,7 @@ public class MsqReviewInfoVO {
 
     private String msqName;
 
+    private Integer status;
+
     List<TopicResultVO> topicResults;
 }

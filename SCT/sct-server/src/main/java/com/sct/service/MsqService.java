@@ -5,6 +5,7 @@ import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
 import com.sct.result.PageResult;
+import com.sct.vo.MsqReviewInfoVO;
 
 import java.util.List;
 
@@ -79,4 +80,11 @@ public interface MsqService {
      * @param msqResultId 问卷结果id
      */
     void deleteMsqResult(Long msqResultId);
+
+    /**
+     * 根据respondent获取问卷结果
+     * @param username respondent
+     * @return 问卷结果
+     */
+    MsqReviewInfoVO getReviewInfoByRespondent(String username);
 }

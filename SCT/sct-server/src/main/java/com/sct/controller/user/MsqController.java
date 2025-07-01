@@ -3,6 +3,7 @@ package com.sct.controller.user;
 import com.sct.entity.Msq;
 import com.sct.result.Result;
 import com.sct.service.MsqService;
+import com.sct.vo.MsqReviewInfoVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,5 +30,10 @@ public class MsqController {
     @GetMapping("/selectMsq/{type}")
     public Result<List<Msq>> getTypeList(@PathVariable Integer type) {
         return Result.success(msqService.getTypeMsq(type));
+    }
+
+    @GetMapping("/getMsqResult/{username}")
+    public Result<MsqReviewInfoVO> getMsqResult(@PathVariable String username) {
+        return Result.success(msqService.getReviewInfoByRespondent(username));
     }
 }

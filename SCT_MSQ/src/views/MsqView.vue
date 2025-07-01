@@ -1,5 +1,8 @@
 <template>
-  <div class="msq-container">
+  <div class="msq-container" ref="msqContainer">
+    <!-- 导航栏 -->
+    <Navbar />
+
     <div class="container">
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
@@ -120,8 +123,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import Navbar from '@/components/Navbar.vue'
+import { getConfig } from '@/api/System'
 
 interface TopicOption {
   id: number
@@ -210,6 +215,7 @@ import { getMsqVO, getOneMsqVO, submitMsq } from '@/api/MsqView.js'
 const error = ref<string | null>(null)
 const loading = ref(false)
 const router = useRouter()
+const route = useRoute()
 
 const playerInfo = ref<{
   avatar: string;
@@ -222,6 +228,35 @@ const errorMessage = ref<string | null>(null);
 const showImageViewer = ref(false)
 const currentImageUrl = ref('')
 
+// 背景图片自适应逻辑
+const msqContainer = ref<HTMLElement | null>(null)
+const backgroundImageUrl = ref('')
+const isMobile = ref(false)
+const configMap = ref({})
+
+function checkDeviceType() {
+  isMobile.value = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
+
+function setBackgroundImage() {
+  if (msqContainer.value) {
+    msqContainer.value.style.backgroundImage = `url('${backgroundImageUrl.value}')`
+    msqContainer.value.style.backgroundSize = 'cover'
+    msqContainer.value.style.backgroundPosition = 'center'
+    msqContainer.value.style.backgroundRepeat = 'no-repeat'
+    msqContainer.value.style.backgroundAttachment = 'fixed'
+  }
+}
+
+function getBackgroundImage() {
+  if (isMobile.value) {
+    backgroundImageUrl.value = configMap.value['phone_msq_background'] || ''
+  } else {
+    backgroundImageUrl.value = configMap.value['msq_background'] || ''
+  }
+  setBackgroundImage()
+}
+
 function getImageUrl(url: string) {
   if (!url) return ''
   if (url.startsWith('http')) return url
@@ -233,7 +268,20 @@ const fetchData = async () => {
   loading.value = true
   error.value = null
   try {
-    const response = await getMsqVO(1);
+    // 从路由查询参数中获取问卷类型
+    const questionnaireTypeParam = (route.query.type as string) || 'redstone'
+    
+    // 将英文参数转换为对应的数字
+    const typeMapping: { [key: string]: number } = {
+      'redstone': 1,
+      'architectural': 2,
+      'logistics': 3,
+      'other': 4
+    }
+    
+    const questionnaireType = typeMapping[questionnaireTypeParam] || 1
+    
+    const response = await getMsqVO(questionnaireType);
     if (response && response.data) {
       // 判断响应数据类型
       if (Array.isArray(response.data)) {
@@ -291,7 +339,29 @@ const retryFetch = () => {
 }
 
 // 在组件挂载时获取数据
-onMounted(() => {
+onMounted(async () => {
+  checkDeviceType()
+  // 获取配置
+  try {
+    const res = await getConfig()
+    if (res && res.data) {
+      const map = {}
+      res.data.forEach(item => {
+        map[item.configKey] = item.configValue
+      })
+      configMap.value = map
+    }
+  } catch (e) {
+    // 可选：错误处理
+  }
+  getBackgroundImage()
+  window.addEventListener('resize', () => {
+    const wasMobile = isMobile.value
+    checkDeviceType()
+    if (wasMobile !== isMobile.value) {
+      getBackgroundImage()
+    }
+  })
   fetchData();
 })
 
@@ -423,6 +493,7 @@ function openImageViewer(url: string) {
   currentImageUrl.value = url
   showImageViewer.value = true
 }
+
 function closeImageViewer() {
   showImageViewer.value = false
   currentImageUrl.value = ''
@@ -433,21 +504,23 @@ function closeImageViewer() {
 .msq-container {
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
-  /* justify-content: center; */
   min-height: 100vh;
-  background-color: skyblue;
+  /* 背景图片由js动态设置 */
 }
 
 .container {
   width: 100%;
   max-width: 1200px;
-  margin: 50px auto;
-  padding: 60px 5%;
-  background-color: rgba(255, 255, 255, .3);
+  margin: 60px auto 0;
+  padding: 20px 5%;
+  background-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 2px 2px 8px rgba(0, 0, 0, .3);
   border-radius: 5px;
   box-sizing: border-box;
+  margin-bottom: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .msq-form {
