@@ -1,0 +1,96 @@
+server:
+  port: 48080
+
+spring:
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 20MB
+      # 设置总上传的文件大小
+      max-request-size: 100MB
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${sct.datasource.driver-class-name}
+      url: jdbc:mysql://${sct.datasource.host}:${sct.datasource.port}/${sct.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${sct.datasource.username}
+      password: ${sct.datasource.password}
+  redis:
+    host: ${sct.redis.host}
+    port: ${sct.redis.port}
+    password: ${sct.redis.password}
+    database: ${sct.redis.database}
+
+#mybatis:
+#  #mapper配置文件
+#  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.sct.entity
+#  configuration:
+#    #开启驼峰命名
+#    map-underscore-to-camel-case: true
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.sct.entity
+  global-config:
+    db-config:
+      id-type: AUTO
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      logic-delete-field: deleted
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开启SQL日志
+
+logging:
+  level:
+    com:
+      sct:
+        mapper: debug
+        service: info
+        controller: info
+
+# 项目相关配置
+sct:
+  # 名称
+  name: SCT_MSQ
+  # 版本
+  version: 1.0.0
+  # 版权年份
+  copyrightYear: 2025
+  # 文件路径 示例（ Windows配置 D:/sct/uploadPath，Linux配置 /home/sct/uploadPath）
+  profile: D:/sct_msq_upload/sct/upload
+  # 获取ip地址开关
+  addressEnabled: false
+  # 验证码类型 math 数字计算 char 字符验证
+  captchaType: math
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: sctserveradminsecretkey
+    # 设置jwt过期时间
+    admin-ttl: 600000
+#    admin-ttl: 60000000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: Authorization
+    # 设置jwt签名加密时使用的秘钥
+    user-secret-key: sctserverusersecretkey
+    # 设置jwt过期时间
+    user-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    user-token-name: User-Authentication
+  alioss:
+    endpoint: ${sct.alioss.endpoint}
+    access-key-id: ${sct.alioss.access-key-id}
+    access-key-secret: ${sct.alioss.access-key-secret}
+    bucket-name: ${sct.alioss.bucket-name}
+
+# Oss配置
+oss:
+  type: 0 # 0：是本地存储，1：阿里云存储

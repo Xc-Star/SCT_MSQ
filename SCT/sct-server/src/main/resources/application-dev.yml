@@ -1,0 +1,17 @@
+sct:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: sct
+    username: root
+    password: 123456
+  alioss:
+    endpoint:
+    bucketName:
+    accessKeyId:
+    accessKeySecret:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 1

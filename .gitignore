@@ -61,12 +61,12 @@ out/
 .cursor/
 
 # Spring Boot
-application.properties
-application-*.properties
-!application-example.properties
-application.yml
-application-*.yml
-!application-example.yml
+# application.properties
+# application-*.properties
+# !application-example.properties
+# application.yml
+# application-*.yml
+# !application-example.yml
 
 # Logs
 logs/
