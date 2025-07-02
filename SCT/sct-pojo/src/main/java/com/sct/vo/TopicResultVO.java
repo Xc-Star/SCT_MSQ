@@ -23,6 +23,8 @@ import java.util.List;
 @EqualsAndHashCode
 public class TopicResultVO {
 
+    private Long id;
+
     private Long topicId;
 
     private String topic;
@@ -38,4 +40,6 @@ public class TopicResultVO {
     private String topicResults;
 
     private List<TopicImage> images;
+
+    private List<String> files;
 }

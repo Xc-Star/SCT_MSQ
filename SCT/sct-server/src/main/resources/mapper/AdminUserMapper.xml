@@ -8,14 +8,16 @@
         msq_result_id,
         topic_id,
         topic_result,
-        topic_results
+        topic_results,
+        files
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
             #{item.msqResultId},
             #{item.topicId},
             #{item.topicResult},
-            #{item.topicResults, typeHandler=com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler}
+            #{item.topicResults, typeHandler=com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler},
+            #{item.files, typeHandler=com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler}
             )
         </foreach>
     </insert>
@@ -28,6 +30,7 @@
             t.topic,
             t.image_count,
             t.options,
+            tr.id,
             tr.topic_id,
             tr.topic_result,
             tr.topic_results,

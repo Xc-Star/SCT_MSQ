@@ -185,6 +185,10 @@ public class TopicServiceImpl implements TopicService {
                         new QueryWrapper<TopicImage>().eq("topic_id", topicResult.getTopicId()));
                 topicResult.setImages(images);
             }
+            if ("file".equals(topicResult.getType())) {
+                TopicResult topicResult1 = topicResultMapper.selectById(topicResult.getId());
+                topicResult.setFiles(topicResult1.getFiles());
+            }
         }
 
         return MsqReviewInfoVO.builder().id(msqResult.getId()).msqName(msqResult.getMsqName()).status(msqResult.getStatus()).topicResults(topicResults).build();

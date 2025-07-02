@@ -63,6 +63,40 @@
             <div style="height: 50px;"></div>
           </div>
 
+          <div v-if="topic.type === 'file'">
+            <div class="input-container">
+              <label>{{ index + 1 }}. {{ topic.topic }}</label>
+            </div>
+            <div v-if="topic.images && topic.images.length" class="topic-images">
+              <img
+                v-for="img in topic.images"
+                :key="img.id"
+                :src="getImageUrl(img.imageUrl)"
+                class="topic-image"
+                alt="题目图片"
+                @click="openImageViewer(getImageUrl(img.imageUrl))"
+                style="cursor: pointer;"
+              />
+            </div>
+            <el-upload
+              class="upload-demo"
+              action="/api/upload/file"
+              :limit="3"
+              :on-success="(res, file, fileList) => handleFileSuccess(res, file, fileList, topic.id)"
+              :on-remove="(file, fileList) => handleFileRemove(file, fileList, topic.id)"
+              :file-list="fileUploadList[topic.id]"
+              :before-upload="(file) => beforeFileUpload(file)"
+              :on-exceed="() => ElMessage.warning('最多上传3个文件')"
+              :accept="acceptFileTypes"
+              multiple>
+              <el-button type="primary">点击上传</el-button>
+              <template #tip>
+                <div class="el-upload__tip">支持bmp, gif, jpg, jpeg, png, rar, zip, gz, bz2, litematic, schematic格式，最多3个文件，单文件不超过20MB</div>
+              </template>
+            </el-upload>
+            <div style="height: 50px;"></div>
+          </div>
+
           <div v-if="topic.type === 'radio'">
             {{ index + 1 }}. {{ topic.topic }}
             <div class="radio-button-container">
@@ -130,7 +164,7 @@ import { getConfig } from '@/api/System'
 
 interface TopicOption {
   id: number
-  type: 'input' | 'radio' | 'checkbox'
+  type: 'input' | 'radio' | 'checkbox' | 'file'
   topic: string
   options?: string[]
   images?: { id: number; imageUrl: string }[]
@@ -234,6 +268,9 @@ const backgroundImageUrl = ref('')
 const isMobile = ref(false)
 const configMap = ref({})
 
+const fileUploadList = ref<{ [key: number]: any[] }>({})
+const acceptFileTypes = '.bmp,.gif,.jpg,.jpeg,.png,.rar,.zip,.gz,.bz2,.litematic,.schematic'
+
 function checkDeviceType() {
   isMobile.value = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
@@ -293,8 +330,13 @@ const fetchData = async () => {
         topic.value = response.data
         showQuestionnaireList.value = false
         // 在数据加载完成后初始化多选框数据
-        topic.value.topics.forEach(item => {
+        if (!Array.isArray(response.data.topics)) return
+        response.data.topics.forEach(item => {
           if (item.type === 'checkbox') {
+            submitData.value[item.id] = []
+          }
+          if (item.type === 'file') {
+            fileUploadList.value[item.id] = []
             submitData.value[item.id] = []
           }
         })
@@ -318,8 +360,13 @@ const selectQuestionnaire = async (questionnaire: Questionnaire) => {
       topic.value = response.data
       showQuestionnaireList.value = false
       // 在数据加载完成后初始化多选框数据
-      topic.value.topics.forEach(item => {
+      if (!Array.isArray(response.data.topics)) return
+      response.data.topics.forEach(item => {
         if (item.type === 'checkbox') {
+          submitData.value[item.id] = []
+        }
+        if (item.type === 'file') {
+          fileUploadList.value[item.id] = []
           submitData.value[item.id] = []
         }
       })
@@ -339,11 +386,10 @@ const retryFetch = () => {
 }
 
 // 在组件挂载时获取数据
-onMounted(async () => {
+onMounted(() => {
   checkDeviceType()
   // 获取配置
-  try {
-    const res = await getConfig()
+  getConfig().then(res => {
     if (res && res.data) {
       const map = {}
       res.data.forEach(item => {
@@ -351,10 +397,9 @@ onMounted(async () => {
       })
       configMap.value = map
     }
-  } catch (e) {
-    // 可选：错误处理
-  }
-  getBackgroundImage()
+  }).finally(() => {
+    getBackgroundImage()
+  })
   window.addEventListener('resize', () => {
     const wasMobile = isMobile.value
     checkDeviceType()
@@ -414,17 +459,23 @@ const submit = async (e: Event) => {
   }
   
   const topicResults: TopicResult[] = topic.value.topics.map(item => {
-    const result: TopicResult = {
+    const result: any = {
       topicId: item.id,
-      topic: item.topic
     }
-    
     if (item.type === 'checkbox') {
       result.topicResults = submitData.value[item.id] as string[] || []
+      result.topicResult = ''
+      result.files = []
+    } else if (item.type === 'file') {
+      const files = submitData.value[item.id]
+      result.files = Array.isArray(files) ? files : []
+      result.topicResult = ''
+      result.topicResults = []
     } else {
       result.topicResult = submitData.value[item.id] as string || ''
+      result.topicResults = []
+      result.files = []
     }
-    
     return result
   })
   
@@ -498,6 +549,44 @@ function closeImageViewer() {
   showImageViewer.value = false
   currentImageUrl.value = ''
 }
+
+function beforeFileUpload(file: File) {
+  const isAllowed = [
+    'image/bmp', 'image/gif', 'image/jpeg', 'image/png',
+    'application/x-rar-compressed', 'application/zip', 'application/gzip', 'application/x-bzip2',
+    '', // litematic, schematic等特殊格式可能无MIME
+  ]
+  const extAllowed = [
+    'bmp', 'gif', 'jpg', 'jpeg', 'png', 'rar', 'zip', 'gz', 'bz2', '7z', 'litematic', 'schematic'
+  ]
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  const isExtAllowed = ext && extAllowed.includes(ext)
+  const isLt20M = file.size / 1024 / 1024 < 20
+  if (!isExtAllowed) {
+    ElMessage.error('不支持的文件格式')
+    return false
+  }
+  if (!isLt20M) {
+    ElMessage.error('单文件不能超过20MB')
+    return false
+  }
+  return true
+}
+
+function handleFileSuccess(res, file, fileList, topicId) {
+  if (!fileUploadList.value[topicId]) fileUploadList.value[topicId] = []
+  fileUploadList.value[topicId] = fileList
+  submitData.value[topicId] = fileList
+    .map(f => f.response?.data || f.url)
+    .filter(url => !!url)
+}
+
+function handleFileRemove(file, fileList, topicId) {
+  fileUploadList.value[topicId] = fileList
+  submitData.value[topicId] = fileList
+    .map(f => f.response?.data || f.url)
+    .filter(url => !!url)
+}
 </script>
 
 <style scoped>
@@ -506,6 +595,11 @@ function closeImageViewer() {
   flex-direction: column;
   min-height: 100vh;
   /* 背景图片由js动态设置 */
+}
+
+/* 全局文字阴影 */
+* {
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.10);
 }
 
 .container {

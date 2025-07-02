@@ -51,4 +51,10 @@ public class TopicResult extends BaseEntity {
      */
     @TableField(typeHandler = FastjsonTypeHandler.class)
     private List<String> topicResults;
+
+    /**
+     * 文件
+     */
+    @TableField(typeHandler = FastjsonTypeHandler.class)
+    private List<String> files;
 }

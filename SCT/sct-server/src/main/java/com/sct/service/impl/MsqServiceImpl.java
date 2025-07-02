@@ -1,5 +1,6 @@
 package com.sct.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -9,6 +10,7 @@ import com.sct.dto.MsqResultUpdateStatusDTO;
 import com.sct.entity.Msq;
 import com.sct.entity.MsqResult;
 import com.sct.entity.TopicImage;
+import com.sct.entity.TopicResult;
 import com.sct.exception.BaseException;
 import com.sct.mapper.MsqMapper;
 import com.sct.mapper.MsqResultMapper;
@@ -155,7 +157,7 @@ public class MsqServiceImpl implements MsqService {
 
     @Override
     public MsqReviewInfoVO getReviewInfoByRespondent(String username) {
-        List<MsqResult> msqResults = msqResultMapper.selectList(new QueryWrapper<MsqResult>().eq("respondent", username));
+        List<MsqResult> msqResults = msqResultMapper.selectList(new QueryWrapper<MsqResult>().eq("respondent", username).orderByDesc("create_time"));
         if (msqResults == null || msqResults.isEmpty()) {
             throw new BaseException("您没有提交问卷");
         }
@@ -169,6 +171,10 @@ public class MsqServiceImpl implements MsqService {
                 List<TopicImage> images = topicImageMapper.selectList(
                         new QueryWrapper<TopicImage>().eq("topic_id", topicResult.getTopicId()));
                 topicResult.setImages(images);
+            }
+            if ("file".equals(topicResult.getType())) {
+                TopicResult topicResult1 = topicResultMapper.selectById(topicResult.getId());
+                topicResult.setFiles(topicResult1.getFiles());
             }
         }
 

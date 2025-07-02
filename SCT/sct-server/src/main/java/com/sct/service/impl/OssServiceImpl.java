@@ -26,16 +26,21 @@ public class OssServiceImpl implements OssService {
 
     @Override
     public String saveOneImage(MultipartFile file) {
-        return saveOne(file, MimeTypeUtils.IMAGE_EXTENSION);
+        return saveOne(file, MimeTypeUtils.IMAGE_EXTENSION, SctConfig.getTopicImagePath());
+    }
+
+    @Override
+    public String saveOneFile(MultipartFile file) {
+        return saveOne(file, MimeTypeUtils.MSQ_REQUEST_FILE_TYPE, SctConfig.getRequestPath());
     }
 
     @SneakyThrows
-    public String saveOne(MultipartFile file, String[] fileType) {
+    public String saveOne(MultipartFile file, String[] fileType, String path) {
         Integer type = ossConfig.getType();
         switch (type) {
             case 0:
                 // 本地存储
-                return FileUploadUtils.upload(SctConfig.getUploadPath(), file, fileType);
+                return FileUploadUtils.upload(path, file, fileType);
             default:
                 throw new IllegalArgumentException("不支持的存储类型: " + type);
         }

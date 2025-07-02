@@ -38,6 +38,14 @@ public class MimeTypeUtils {
             // pdf
             "pdf"};
 
+    public static final String[] MSQ_REQUEST_FILE_TYPE = {
+            // 图片
+            "bmp", "gif", "jpg", "jpeg", "png",
+            // 压缩文件
+            "rar", "zip", "gz", "bz2", "7z",
+            // 投影
+            "litematic", "schematic"};
+
     public static String getExtension(String prefix) {
         switch (prefix) {
             case IMAGE_PNG:

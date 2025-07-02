@@ -10,5 +10,17 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface OssService {
 
+    /**
+     * 上传图片
+     * @param file 图片
+     * @return 图片URL
+     */
     String saveOneImage(MultipartFile file);
+
+    /**
+     * 上传文件
+     * @param file 文件
+     * @return 文件URL
+     */
+    String saveOneFile(MultipartFile file);
 }

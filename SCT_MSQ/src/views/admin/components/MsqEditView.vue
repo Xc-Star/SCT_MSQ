@@ -72,10 +72,9 @@
                 v-for="(img, idx) in scope.row.images"
                 :key="img"
                 :src="img"
-                :preview-src-list="scope.row.images"
-                :initial-index="idx"
-                style="width: 40px; height: 40px; margin-right: 4px; border-radius: 4px"
+                style="width: 40px; height: 40px; margin-right: 4px; border-radius: 4px; cursor: pointer"
                 fit="cover"
+                @click="openImagePreview(scope.row.images, idx)"
               />
             </div>
             <span v-else>-</span>
@@ -139,6 +138,7 @@
             <el-option label="填空题" value="input" />
             <el-option label="单选题" value="radio" />
             <el-option label="多选题" value="checkbox" />
+            <el-option label="文件上传" value="file" />
           </el-select>
         </el-form-item>
         <el-form-item label="问题内容" required>
@@ -192,6 +192,29 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="previewVisible" :width="previewDialogWidth" :show-close="true" center class="image-preview-dialog">
+      <div style="text-align:center">
+        <el-image
+          :src="previewImages[previewIndex]"
+          style="max-width: 100%; max-height: 70vh"
+          fit="contain"
+        />
+        <div style="margin-top: 10px;">
+          <el-button
+            v-if="previewIndex > 0"
+            @click="previewIndex--"
+            size="small"
+            style="margin-right: 10px"
+          >上一张</el-button>
+          <el-button
+            v-if="previewIndex < previewImages.length - 1"
+            @click="previewIndex++"
+            size="small"
+          >下一张</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -201,6 +224,7 @@ import { adminGetMsqVO } from '@/api/AdminMsq.js'
 import { adminUpdateMsq } from '@/api/AdminMsq.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowUp, ArrowDown, Plus } from '@element-plus/icons-vue'
+import { useWindowSize } from '@vueuse/core'
 
 // 定义props接收id
 const props = defineProps<{
@@ -214,7 +238,7 @@ const emit = defineEmits<{
 
 interface TopicOption {
   id: number
-  type: 'input' | 'radio' | 'checkbox'
+  type: 'input' | 'radio' | 'checkbox' | 'file'
   topic: string
   options?: string[]
   images?: string[]
@@ -248,18 +272,29 @@ const questionDialogVisible = ref(false)
 const questionDialogType = ref<'add' | 'edit'>('add')
 const questionForm = ref({
   id: 0,
-  type: 'input' as 'input' | 'radio' | 'checkbox',
+  type: 'input' as 'input' | 'radio' | 'checkbox' | 'file',
   topic: '',
   options: [],
   images: [] as string[]
 })
+
+// 图片预览相关
+const previewVisible = ref(false)
+const previewImages = ref<string[]>([])
+const previewIndex = ref(0)
+const openImagePreview = (images: string[], index: number) => {
+  previewImages.value = images
+  previewIndex.value = index
+  previewVisible.value = true
+}
 
 // 获取问题类型标签
 const getQuestionTypeLabel = (type: string) => {
   const typeMap: Record<string, string> = {
     'input': '填空题',
     'radio': '单选题',
-    'checkbox': '多选题'
+    'checkbox': '多选题',
+    'file': '文件上传'
   }
   return typeMap[type] || '未知类型'
 }
@@ -269,7 +304,8 @@ const getQuestionTypeTag = (type: string): 'primary' | 'success' | 'warning' | '
   const typeMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     'input': 'primary',
     'radio': 'success',
-    'checkbox': 'warning'
+    'checkbox': 'warning',
+    'file': 'danger'
   }
   return typeMap[type] || 'info'
 }
@@ -417,7 +453,7 @@ const handleAddQuestion = () => {
   questionDialogType.value = 'add'
   questionForm.value = {
     id: undefined, // 使用负数作为临时ID
-    type: 'input' as 'input' | 'radio' | 'checkbox',
+    type: 'input' as 'input' | 'radio' | 'checkbox' | 'file',
     topic: '',
     options: [],
     images: []
@@ -480,7 +516,7 @@ const handleQuestionSubmit = () => {
       id: questionForm.value.id,
       type: questionForm.value.type,
       topic: questionForm.value.topic,
-      options: questionForm.value.type === 'input' ? undefined : questionForm.value.options,
+      options: (questionForm.value.type === 'input') ? undefined : (questionForm.value.type === 'file' ? [] : questionForm.value.options),
       images: Array.isArray(questionForm.value.images) ? questionForm.value.images : []
     })
   } else {
@@ -490,7 +526,7 @@ const handleQuestionSubmit = () => {
         id: questionForm.value.id,
         type: questionForm.value.type,
         topic: questionForm.value.topic,
-        options: questionForm.value.type === 'input' ? undefined : questionForm.value.options,
+        options: (questionForm.value.type === 'input') ? undefined : (questionForm.value.type === 'file' ? [] : questionForm.value.options),
         images: Array.isArray(questionForm.value.images) ? questionForm.value.images : []
       }
     }
@@ -539,6 +575,13 @@ const handleImageSuccess = (response, file, fileList) => {
 const handleImageRemove = (file, fileList) => {
   questionForm.value.images = fileList.map(f => f.url || (f.response && f.response.data)).filter(Boolean)
 }
+
+const { width: windowWidth } = useWindowSize()
+const previewDialogWidth = computed(() => {
+  // 90vw, 最小 300px，最大 900px
+  const w = Math.min(windowWidth.value * 0.9, 900)
+  return w < 300 ? '300px' : w + 'px'
+})
 </script>
 
 <style scoped>
@@ -692,5 +735,10 @@ const handleImageRemove = (file, fileList) => {
   .msq-container {
     padding: 10px;
   }
+}
+
+.image-preview-dialog >>> .el-dialog {
+  max-width: 90vw;
+  min-width: 300px;
 }
 </style> 

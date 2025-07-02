@@ -117,4 +117,15 @@ public class SctConfig {
     public static String getUploadPath() {
         return getProfile() + "/upload";
     }
+
+    public static String getTopicImagePath() {
+        return getProfile() + "/topic_image";
+    }
+
+    /**
+     * 获取请求上传路径
+     */
+    public static String getRequestPath() {
+        return getProfile() + "/request";
+    }
 }

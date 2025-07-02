@@ -29,4 +29,9 @@ public class FIleUploadController {
     public Result<?> upload(@RequestParam("file") MultipartFile file) {
         return Result.success(ossService.saveOneImage(file));
     }
+
+    @PostMapping("/file")
+    public Result<?> uploadFile(@RequestParam("file") MultipartFile file) {
+        return Result.success(ossService.saveOneFile(file));
+    }
 }

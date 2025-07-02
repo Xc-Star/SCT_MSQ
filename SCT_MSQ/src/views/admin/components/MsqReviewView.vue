@@ -42,6 +42,31 @@
               <div style="height: 50px;"></div>
             </div>
   
+            <div v-if="topic.type === 'file'">
+              <div class="input-container">
+                <label>{{ index + 1 }}. {{ topic.topic }}</label>
+              </div>
+              <div v-if="topic.images && topic.images.length" class="topic-images">
+                <img
+                  v-for="img in topic.images"
+                  :key="img.id"
+                  :src="getImageUrl(img.imageUrl)"
+                  class="topic-image"
+                  alt="题目图片"
+                  @click="openImageViewer(getImageUrl(img.imageUrl))"
+                  style="cursor: pointer;"
+                />
+              </div>
+              <div v-if="topic.files && topic.files.length" class="topic-files" style="margin-top: 12px;">
+                <div v-for="(file, fileIndex) in topic.files" :key="fileIndex" style="margin-bottom: 8px;">
+                  <a :href="getImageUrl(file)" target="_blank" style="color: #4c8bf5; text-decoration: underline;">
+                    {{ getFileName(file) }}
+                  </a>
+                </div>
+              </div>
+              <div style="height: 50px;"></div>
+            </div>
+  
             <div v-if="topic.type === 'radio'">
               {{ index + 1 }}. {{ topic.topic }}
               <div class="radio-button-container">
@@ -110,7 +135,7 @@
   
   interface TopicOption {
     topic: string
-    type: 'input' | 'radio' | 'checkbox'
+    type: 'input' | 'radio' | 'checkbox' | 'file'
     options: string
     topicResult: string | null
     topicResults: string | null
@@ -119,6 +144,7 @@
   interface ParsedTopicOption extends Omit<TopicOption, 'options'> {
     options: string[]
     images?: { id: number; imageUrl: string }[]
+    files?: string[]
   }
   
   interface Topic {
@@ -195,10 +221,15 @@
       if (Array.isArray((item as any).images)) {
         images = (item as any).images
       }
+      let files: string[] = []
+      if (Array.isArray((item as any).files)) {
+        files = (item as any).files
+      }
       return {
         ...item,
         options: JSON.parse(item.options || '[]'),
-        images
+        images,
+        files
       }
     })
   })
@@ -362,6 +393,11 @@
       default:
         return ''
     }
+  }
+  
+  function getFileName(filePath: string) {
+    if (!filePath) return ''
+    return filePath.split('/').pop() || filePath
   }
   
   // topic.value = {

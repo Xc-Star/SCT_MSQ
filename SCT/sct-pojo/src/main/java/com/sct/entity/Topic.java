@@ -30,6 +30,7 @@ public class Topic extends BaseEntity {
     public static final String TYPE_INPUT = "input";
     public static final String TYPE_RADIO = "radio";
     public static final String TYPE_CHECKBOX = "checkbox";
+    public static final String TYPE_FILE = "file";
 
     /**
      * id
