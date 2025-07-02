@@ -387,6 +387,7 @@ const retryFetch = () => {
 
 // 在组件挂载时获取数据
 onMounted(() => {
+  document.title = '问卷填写'
   checkDeviceType()
   // 获取配置
   getConfig().then(res => {

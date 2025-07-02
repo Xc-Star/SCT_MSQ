@@ -13,7 +13,7 @@
         </div>
         <div class="sidebar" :class="{ 'sidebar-collapsed': isCollapsed }">
             <div class="logo">
-                <h1>SCT问卷后台</h1>
+                <h1>SCT网站后台</h1>
             </div>
             <nav class="nav-menu">
                 <router-link to="/admin/main/questionnaire-review" class="nav-item" @click="handleMenuClick">
@@ -238,7 +238,23 @@ const handleCommand = (command: string) => {
     }
 }
 
+function getServerShortName() {
+    const CACHE_KEY = 'navbar_config_cache'
+    const cacheStr = localStorage.getItem(CACHE_KEY)
+    if (cacheStr) {
+        try {
+            const cache = JSON.parse(cacheStr)
+            if (cache.data) {
+                const item = cache.data.find(item => item.configKey === 'server_short_name')
+                if (item && item.configValue) return item.configValue
+            }
+        } catch (e) {}
+    }
+    return 'SCT'
+}
+
 onMounted(() => {
+    document.title = getServerShortName() + '后台'
     checkMobile()
     window.addEventListener('resize', checkMobile)
     window.addEventListener('scroll', handleScroll)
@@ -262,7 +278,12 @@ onUnmounted(() => {
     color: #fff;
     padding: 20px 0;
     transition: all 0.3s;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: 2px 0 8px rgba(0,0,0,.08);
 }
 
 .sidebar-collapsed {
@@ -328,10 +349,11 @@ onUnmounted(() => {
     padding: 20px;
     background-color: #f0f2f5;
     transition: all 0.3s;
+    margin-left: 240px;
 }
 
 .main-content-expanded {
-    margin-left: -176px;
+    margin-left: 64px;
 }
 
 .mobile-menu-btn {
@@ -415,29 +437,13 @@ onUnmounted(() => {
         z-index: 1000;
         transform: translateX(0);
         box-shadow: 2px 0 8px rgba(0,0,0,.15);
-        /* padding-top: 60px; */
     }
-
     .sidebar-collapsed {
         transform: translateX(-100%);
     }
-
     .main-content {
         margin-left: 0 !important;
         padding-top: 60px;
-    }
-
-    .logo {
-        padding-top: 0;
-    }
-
-    .collapse-btn {
-        display: block;
-    }
-
-    .user-info {
-        top: 10px;
-        right: 10px;
     }
 }
 </style>

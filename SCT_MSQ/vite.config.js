@@ -19,6 +19,11 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     open: true,
+    allowedHosts: [
+      's0.sea000.com', // 您的cpolar域名
+      'localhost',
+      '127.0.0.1'
+    ],
     proxy: {
       // 获取路径中含'/api'的请求
       '/api': {
@@ -36,23 +41,23 @@ export default defineConfig({
       }
     }
   },
-  devServer: {
-    host: '0.0.0.0',
-    disableHostCheck: true,
-    proxy: {
-      // 获取路径中含'/api'的请求
-      '/api': {
-        // 后台服务所在的源
-        target: 'http://localhost:48080',
-        // 是否修改源
-        changeOrigin: true,
-        // 重写路径
-        rewrite: (path) => path.replace(/^\/api/, '')
-      },
-      '/profile': {
-        target: 'http://localhost:48080',
-        changeOrigin: true
-      }
-    }
-  },
+  // devServer: {
+  //   host: '0.0.0.0',
+  //   disableHostCheck: true,
+  //   proxy: {
+  //     // 获取路径中含'/api'的请求
+  //     '/api': {
+  //       // 后台服务所在的源
+  //       target: 'http://localhost:48080',
+  //       // 是否修改源
+  //       changeOrigin: true,
+  //       // 重写路径
+  //       rewrite: (path) => path.replace(/^\/api/, '')
+  //     },
+  //     '/profile': {
+  //       target: 'http://localhost:48080',
+  //       changeOrigin: true
+  //     }
+  //   }
+  // },
 })

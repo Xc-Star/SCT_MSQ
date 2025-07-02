@@ -7,15 +7,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import Navbar from '@/components/Navbar.vue'
 
-export default {
-  name: 'Overview',
-  components: {
-    Navbar
+function getServerShortName() {
+  const CACHE_KEY = 'navbar_config_cache'
+  const cacheStr = localStorage.getItem(CACHE_KEY)
+  if (cacheStr) {
+    try {
+      const cache = JSON.parse(cacheStr)
+      if (cache.data) {
+        const item = cache.data.find(item => item.configKey === 'server_short_name')
+        if (item && item.configValue) return item.configValue
+      }
+    } catch (e) {}
   }
+  return 'SCT官网'
 }
+
+onMounted(async () => {
+  document.title = getServerShortName() + '官网'
+})
 </script>
 
 <style scoped>

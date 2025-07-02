@@ -307,6 +307,7 @@ function getBackgroundImage() {
 }
 
 onMounted(async () => {
+  document.title = '结果查询'
   checkDeviceType()
   // 获取配置
   try {

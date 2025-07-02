@@ -39,142 +39,127 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import { convertTxtToExcel } from '@/api/buildTool'
 import Navbar from '@/components/Navbar.vue'
 
-export default {
-  name: 'BuildTool',
-  components: {
-    Navbar
-  },
-  data() {
+const file = ref(null)
+const fileList = ref([])
+const previewContent = ref('')
+const previewTableData = ref([])
+const previewTableColumns = [
+  { prop: 'name', label: '材料' },
+  { prop: 'finished', label: '是否完成' },
+  { prop: 'total', label: '总量/个' },
+  { prop: 'carton', label: '所需/箱盒' },
+  { prop: 'box', label: '所需/盒' },
+  { prop: 'group', label: '所需/组' },
+  { prop: 'piece', label: '所需/个' },
+  { prop: 'owner', label: '负责人' },
+  { prop: 'progress', label: '完成进度' },
+  { prop: 'location', label: '物品所在位置' }
+]
+const loading = ref(false)
+
+function handleBeforeUpload(f) {
+  file.value = f
+  return false
+}
+function handleFileChange(fileObj) {
+  const f = fileObj.raw
+  file.value = f
+  fileList.value = [fileObj]
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    previewContent.value = e.target.result
+    previewTableData.value = parseTxtToTable(previewContent.value)
+  }
+  reader.readAsText(f, 'utf-8')
+}
+function parseTxtToTable(txt) {
+  const pattern = /^\|.*\|.*\|.*\|.*\|$/
+  const lines = txt.split(/\r?\n/).map(line => line.trim())
+  return lines.filter(line =>
+    pattern.test(line) &&
+    !line.startsWith('| 材料') &&
+    !line.startsWith('| Item')
+  ).map(line => {
+    const content = line.substring(1, line.length - 1)
+    const parts = content.split('|').map(s => s.trim())
+    const total = parseInt(parts[1]) || 0
+    const [carton, box, group, piece] = calculateUnits(total)
     return {
-      file: null,
-      fileList: [],
-      previewContent: '',
-      previewTableData: [],
-      previewTableColumns: [
-        { prop: 'name', label: '材料' },
-        { prop: 'finished', label: '是否完成' },
-        { prop: 'total', label: '总量/个' },
-        { prop: 'carton', label: '所需/箱盒' },
-        { prop: 'box', label: '所需/盒' },
-        { prop: 'group', label: '所需/组' },
-        { prop: 'piece', label: '所需/个' },
-        { prop: 'owner', label: '负责人' },
-        { prop: 'progress', label: '完成进度' },
-        { prop: 'location', label: '物品所在位置' }
-      ],
-      loading: false
+      name: parts[0] || '',
+      finished: '',
+      total: total,
+      carton,
+      box,
+      group,
+      piece,
+      owner: '',
+      progress: '',
+      location: ''
     }
-  },
-  methods: {
-    handleBeforeUpload(file) {
-      this.file = file;
-      return false; // 阻止自动上传
-    },
-    handleFileChange(fileObj) {
-      const file = fileObj.raw;
-      this.file = file;
-      this.fileList = [fileObj];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.previewContent = e.target.result;
-        this.previewTableData = this.parseTxtToTable(this.previewContent);
-      };
-      reader.readAsText(file, 'utf-8');
-    },
-    parseTxtToTable(txt) {
-      const pattern = /^\|.*\|.*\|.*\|.*\|$/;
-      const lines = txt.split(/\r?\n/).map(line => line.trim());
-      return lines.filter(line =>
-        pattern.test(line) &&
-        !line.startsWith('| 材料') &&
-        !line.startsWith('| Item')
-      ).map(line => {
-        const content = line.substring(1, line.length - 1);
-        const parts = content.split('|').map(s => s.trim());
-        const total = parseInt(parts[1]) || 0;
-        const [carton, box, group, piece] = this.calculateUnits(total);
-        return {
-          name: parts[0] || '',
-          finished: '',
-          total: total,
-          carton,
-          box,
-          group,
-          piece,
-          owner: '',
-          progress: '',
-          location: ''
-        }
-      });
-    },
-    calculateUnits(total) {
-      const CARTON_TO_BOX = 54;
-      const BOX_TO_PIECES = 1728;
-      const HALF_BOX = 864;
-      const GROUP_TO_PIECES = 64;
-      const HALF_GROUP = 32;
-
-      if (total <= 10) {
-        return [0, 0, 0, 10];
-      }
-
-      const totalBoxesNeeded = Math.ceil(total / BOX_TO_PIECES);
-
-      let cartons = Math.floor(totalBoxesNeeded / CARTON_TO_BOX);
-      let remainingBoxes = totalBoxesNeeded % CARTON_TO_BOX;
-
-      let remainingPieces = total % BOX_TO_PIECES;
-      let groups = 0;
-      let pieces = 0;
-
-      if (remainingPieces > 0) {
-        groups = Math.floor(remainingPieces / GROUP_TO_PIECES);
-        pieces = remainingPieces % GROUP_TO_PIECES;
-
-        if (pieces >= HALF_GROUP) {
-          groups++;
-          pieces = 0;
-        }
-
-        if (groups * GROUP_TO_PIECES >= HALF_BOX) {
-          remainingBoxes++;
-          groups = 0;
-          pieces = 0;
-        }
-      }
-
-      return [cartons, remainingBoxes, groups, pieces];
-    },
-    async handleGenerateExcel() {
-      if (!this.file) return;
-      this.loading = true;
-      try {
-        const res = await convertTxtToExcel(this.file);
-        const blob = res instanceof Blob ? res : res.data || res;
-        // 获取原文件名（去除扩展名）
-        let originName = this.file.name || '文件';
-        originName = originName.replace(/\.[^.]+$/, '');
-        const downloadName = originName + '备货列表.xlsx';
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = downloadName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (e) {
-        this.$message.error('生成Excel失败');
-      } finally {
-        this.loading = false;
-      }
+  })
+}
+function calculateUnits(total) {
+  const CARTON_TO_BOX = 54
+  const BOX_TO_PIECES = 1728
+  const HALF_BOX = 864
+  const GROUP_TO_PIECES = 64
+  const HALF_GROUP = 32
+  if (total <= 10) {
+    return [0, 0, 0, 10]
+  }
+  const totalBoxesNeeded = Math.ceil(total / BOX_TO_PIECES)
+  let cartons = Math.floor(totalBoxesNeeded / CARTON_TO_BOX)
+  let remainingBoxes = totalBoxesNeeded % CARTON_TO_BOX
+  let remainingPieces = total % BOX_TO_PIECES
+  let groups = 0
+  let pieces = 0
+  if (remainingPieces > 0) {
+    groups = Math.floor(remainingPieces / GROUP_TO_PIECES)
+    pieces = remainingPieces % GROUP_TO_PIECES
+    if (pieces >= HALF_GROUP) {
+      groups++
+      pieces = 0
+    }
+    if (groups * GROUP_TO_PIECES >= HALF_BOX) {
+      remainingBoxes++
+      groups = 0
+      pieces = 0
     }
   }
+  return [cartons, remainingBoxes, groups, pieces]
 }
+async function handleGenerateExcel() {
+  if (!file.value) return
+  loading.value = true
+  try {
+    const res = await convertTxtToExcel(file.value)
+    const blob = res instanceof Blob ? res : res.data || res
+    let originName = file.value.name || '文件'
+    originName = originName.replace(/\.[^.]+$/, '')
+    const downloadName = originName + '备货列表.xlsx'
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = downloadName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    window.$message ? window.$message.error('生成Excel失败') : alert('生成Excel失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  document.title = '备货列表生成工具'
+})
 </script>
 
 <style scoped>

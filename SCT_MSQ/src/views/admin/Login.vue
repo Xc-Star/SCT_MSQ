@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { login } from '@/api/Auth.js'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo.js'
@@ -68,6 +68,25 @@ const submit = async (e: Event) =>  {
         router.push('/admin/main')
     }
 }
+
+function getServerShortName() {
+  const CACHE_KEY = 'navbar_config_cache'
+  const cacheStr = localStorage.getItem(CACHE_KEY)
+  if (cacheStr) {
+    try {
+      const cache = JSON.parse(cacheStr)
+      if (cache.data) {
+        const item = cache.data.find(item => item.configKey === 'server_short_name')
+        if (item && item.configValue) return item.configValue
+      }
+    } catch (e) {}
+  }
+  return 'SCT'
+}
+
+onMounted(() => {
+    document.title = getServerShortName() + '后台登录'
+})
 </script>
 
 <style>
