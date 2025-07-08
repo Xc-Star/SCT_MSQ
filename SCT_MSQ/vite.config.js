@@ -20,7 +20,6 @@ export default defineConfig({
     port: 5173,
     open: true,
     allowedHosts: [
-      's0.sea000.com', // 您的cpolar域名
       'localhost',
       '127.0.0.1'
     ],

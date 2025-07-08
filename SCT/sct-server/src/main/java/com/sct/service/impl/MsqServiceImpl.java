@@ -103,7 +103,7 @@ public class MsqServiceImpl implements MsqService {
 
     @Override
     public List<Msq> getTypeMsq(Integer type) {
-        return msqMapper.selectList(new QueryWrapper<Msq>().eq("type", type));
+        return msqMapper.selectList(new QueryWrapper<Msq>().eq("type", type).eq("status", 1));
     }
 
     @Override
