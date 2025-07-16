@@ -21,7 +21,8 @@ export default defineConfig({
     open: true,
     allowedHosts: [
       'localhost',
-      '127.0.0.1'
+      '127.0.0.1',
+      '192.168.1.163'
     ],
     proxy: {
       // 获取路径中含'/api'的请求

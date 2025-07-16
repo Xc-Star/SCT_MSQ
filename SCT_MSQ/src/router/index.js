@@ -14,6 +14,9 @@ import ServerMemberManage from '../views/admin/ServerMemberManage.vue'
 import BuildTool from '../views/build-tool.vue'
 import Overview from '../views/overview.vue'
 import MsqResultView from '../views/MsqResultView.vue'
+import OverviewMember from '../views/overview-member.vue'
+import OverviewMachine from '../views/overview-machine.vue'
+import OverviewBuilding from '../views/overview-building.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -94,6 +97,21 @@ const router = createRouter({
       path: '/overview',
       name: 'overview',
       component: Overview
+    },
+    {
+      path: '/overview/member',
+      name: 'overview-member',
+      component: OverviewMember
+    },
+    {
+      path: '/overview/machine',
+      name: 'overview-machine',
+      component: OverviewMachine
+    },
+    {
+      path: '/overview/building',
+      name: 'overview-building',
+      component: OverviewBuilding
     },
     {
       path: '/msq/result',
