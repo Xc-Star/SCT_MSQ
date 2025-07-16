@@ -60,6 +60,7 @@ public class AuthServiceImpl implements AuthService {
                         .id(user.getId())
                         .username(user.getUsername())
                         .avatar(user.getAvatar())
+                        .isSuperAdmin(user.getIsSuperAdmin())
                         .build())
                 .build();
     }

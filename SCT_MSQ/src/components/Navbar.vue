@@ -125,7 +125,8 @@ function applyConfig(data) {
 }
 
 function goToHome() {
-  router.push('/')
+  // window.location.href = 'http://v4.sctserver.top:81/sctserver'
+  window.location.href = 'http://localhost:5173/sctserver'
 }
 function goToOverview() {
   router.push('/overview')

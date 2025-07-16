@@ -1,5 +1,6 @@
 package com.sct.controller.admin;
 
+import com.sct.annotation.SuperPermission;
 import com.sct.context.BaseContext;
 import com.sct.entity.Config;
 import com.sct.exception.BaseException;
@@ -24,19 +25,15 @@ public class AdminConfigController {
     @Resource
     private ConfigService configService;
 
+    @SuperPermission
     @GetMapping
     public Result<List<Config>> list() {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
         return Result.success(configService.list());
     }
 
+    @SuperPermission
     @PutMapping
     public Result<?> update(@RequestBody Config config) {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
         configService.update(config);
         return Result.success();
     }

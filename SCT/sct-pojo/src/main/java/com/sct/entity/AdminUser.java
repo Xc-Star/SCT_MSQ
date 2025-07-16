@@ -1,7 +1,7 @@
 package com.sct.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sct.entity.common.BaseEntity;
 import lombok.*;
@@ -44,6 +44,12 @@ public class AdminUser extends BaseEntity {
      * 头像
      */
     private String avatar;
+
+    /**
+     * 是否是超级管理员
+     */
+    @TableField
+    private Boolean isSuperAdmin;
 
     /**
      * 最后登录时间

@@ -1,5 +1,6 @@
 package com.sct.controller.admin;
 
+import com.sct.annotation.SuperPermission;
 import com.sct.context.BaseContext;
 import com.sct.entity.AdminUser;
 import com.sct.entity.common.PageParam;
@@ -25,41 +26,33 @@ public class AdminUserController {
     @Resource
     private AdminUserService adminUserService;
 
+    @SuperPermission
     @GetMapping("/page")
     public Result<PageResult<AdminUser>> page(PageParam pageParam) {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
         return Result.success(adminUserService.pageQuery(pageParam));
     }
 
+    @SuperPermission
     @PutMapping("/update")
     public Result<?> update(@RequestBody AdminUser adminUser) {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
-        if (adminUser.getId() == 0) {
+        if (adminUserService.isSuperAdmin(adminUser.getId())) {
             throw new BaseException("超级管理员账号不可修改");
         }
         adminUserService.update(adminUser);
         return Result.success();
     }
 
+    @SuperPermission
     @PostMapping("/save")
     public Result<?> save(@RequestBody AdminUser adminUser) {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
         adminUserService.save(adminUser);
         return Result.success();
     }
 
+    @SuperPermission
     @DeleteMapping("/delete/{id}")
     public Result<?> delete(@PathVariable Long id) {
-        if (BaseContext.getCurrentId() != 0) {
-            throw new BaseException("权限不足");
-        }
-        if (id == 0) {
+        if (adminUserService.isSuperAdmin(id)) {
             throw new BaseException("超级管理员账号不可删除");
         }
         adminUserService.delete(id);

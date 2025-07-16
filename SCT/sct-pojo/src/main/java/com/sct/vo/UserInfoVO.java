@@ -22,4 +22,6 @@ public class UserInfoVO {
     private String username;
 
     private String avatar;
+
+    private Boolean isSuperAdmin;
 }

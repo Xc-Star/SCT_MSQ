@@ -33,13 +33,13 @@
                                 type="primary" 
                                 link 
                                 @click="handleEdit(scope.row)"
-                                :disabled="scope.row.id === 0"
+                                :disabled="scope.row.isSuperAdmin"
                             >编辑</el-button>
                             <el-button 
                                 type="danger" 
                                 link 
                                 @click="handleDelete(scope.row)"
-                                :disabled="scope.row.id === 0"
+                                :disabled="scope.row.isSuperAdmin"
                             >删除</el-button>
                         </template>
                     </el-table-column>
@@ -58,13 +58,13 @@
                                     type="primary" 
                                     link 
                                     @click="handleEdit(item)"
-                                    :disabled="item.id === 0"
+                                    :disabled="item.isSuperAdmin"
                                 >编辑</el-button>
                                 <el-button 
                                     type="danger" 
                                     link 
                                     @click="handleDelete(item)"
-                                    :disabled="item.id === 0"
+                                    :disabled="item.isSuperAdmin"
                                 >删除</el-button>
                             </div>
                         </div>
@@ -127,6 +127,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getAdminList, addAdmin, updateAdmin, deleteAdmin } from '@/api/AdminUser'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import useUserInfoStore from '@/stores/userInfo'
 
 interface Admin {
     id: number
@@ -138,6 +139,7 @@ interface Admin {
     updateTime: string
     deleted: boolean
     remark?: string
+    isSuperAdmin: boolean // Added isSuperAdmin to the interface
 }
 
 const loading = ref(false)
@@ -159,7 +161,8 @@ const form = ref<Admin>({
     createTime: '',
     lastLoginTime: '',
     updateTime: '',
-    deleted: false
+    deleted: false,
+    isSuperAdmin: false // Added isSuperAdmin to the form
 })
 
 const rules = ref({
@@ -171,6 +174,9 @@ const rules = ref({
         { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
     ]
 })
+
+const userInfoStore = useUserInfoStore()
+const userInfo = userInfoStore.info
 
 // 获取管理员列表
 const fetchAdminList = async () => {
@@ -209,7 +215,8 @@ const handleAdd = () => {
         createTime: '',
         lastLoginTime: '',
         updateTime: '',
-        deleted: false
+        deleted: false,
+        isSuperAdmin: false // Added isSuperAdmin to the form
     }
     dialogVisible.value = true
 }

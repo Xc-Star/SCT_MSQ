@@ -24,11 +24,11 @@
                     <i class="el-icon-document"></i>
                     <span v-show="!isCollapsed">问卷管理</span>
                 </router-link>
-                <router-link v-if="userInfo.id === 0" to="/admin/main/system-manage" class="nav-item" @click="handleMenuClick">
+                <router-link v-if="userInfo.isSuperAdmin" to="/admin/main/system-manage" class="nav-item" @click="handleMenuClick">
                     <i class="el-icon-picture"></i>
                     <span v-show="!isCollapsed">网站管理</span>
                 </router-link>
-                <router-link v-if="userInfo.id === 0" to="/admin/main/admin-manage" class="nav-item" @click="handleMenuClick">
+                <router-link v-if="userInfo.isSuperAdmin" to="/admin/main/admin-manage" class="nav-item" @click="handleMenuClick">
                     <i class="el-icon-user"></i>
                     <span v-show="!isCollapsed">账号管理</span>
                 </router-link>
@@ -101,6 +101,7 @@ interface UserInfo {
     username?: string;
     avatar?: string;
     id?: number;
+    isSuperAdmin?: boolean; // 新增超级管理员标识
 }
 
 interface PasswordForm {

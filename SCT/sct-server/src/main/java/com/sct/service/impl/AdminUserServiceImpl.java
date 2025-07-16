@@ -69,4 +69,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void delete(Long id) {
         adminUserMapper.deleteById(id);
     }
+
+    @Override
+    public Boolean isSuperAdmin(Long id) {
+        Boolean isSuperAdmin = adminUserMapper.selectById(id).getIsSuperAdmin();
+        return isSuperAdmin;
+    }
 }

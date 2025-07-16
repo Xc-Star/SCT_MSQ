@@ -36,4 +36,11 @@ public interface AdminUserService {
      * @param id 管理员账号ID
      */
     void delete(Long id);
+
+    /**
+     * 判断当前用户是否是超级管理员
+     * @param id 用户ID
+     * @return 是否是超级管理员
+     */
+    Boolean isSuperAdmin(Long id);
 }

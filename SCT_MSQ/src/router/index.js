@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MsqView from '../views/MsqView.vue'
 import IndexView from '../views/index.vue';
+import SctServer from '../views/SctServer.vue'
 import Login from '../views/admin/Login.vue'
 import Main from '../views/admin/Main.vue'
 import QuestionnaireReview from '../views/admin/QuestionnaireReview.vue'
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/',
       name: 'index',
       component: IndexView
+    },
+    {
+      path: '/sctserver',
+      name: 'sctserver',
+      component: SctServer
     },
     {
       path: '/msq',
