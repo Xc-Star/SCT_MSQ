@@ -5,7 +5,7 @@ import com.sct.exception.BaseException;
 /**
  * 文件信息异常类
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class FileException extends BaseException {
 

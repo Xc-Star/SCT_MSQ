@@ -72,7 +72,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public Boolean isSuperAdmin(Long id) {
-        Boolean isSuperAdmin = adminUserMapper.selectById(id).getIsSuperAdmin();
-        return isSuperAdmin;
+        return adminUserMapper.selectById(id).getIsSuperAdmin();
     }
 }

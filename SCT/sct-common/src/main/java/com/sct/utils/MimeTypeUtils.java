@@ -3,7 +3,7 @@ package com.sct.utils;
 /**
  * 媒体类型工具类
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class MimeTypeUtils {
 

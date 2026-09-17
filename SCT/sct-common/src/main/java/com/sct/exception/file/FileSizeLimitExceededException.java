@@ -3,7 +3,7 @@ package com.sct.exception.file;
 /**
  * 文件名大小限制异常类
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class FileSizeLimitExceededException extends FileException {
 

@@ -3,7 +3,7 @@ package com.sct.exception;
 /**
  * 工具类异常
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class UtilException extends RuntimeException {
 

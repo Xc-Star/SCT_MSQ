@@ -3,7 +3,7 @@ package com.sct.utils.uuid;
 /**
  * ID生成器工具类
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class IdUtils {
 

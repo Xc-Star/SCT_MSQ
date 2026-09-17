@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 /**
  * 读取项目相关配置
  *
- * @Author hongshu
+ * @Author SCT
  */
 @Component
 @ConfigurationProperties(prefix = "sct")

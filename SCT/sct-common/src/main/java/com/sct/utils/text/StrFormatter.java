@@ -5,7 +5,7 @@ import com.sct.utils.StringUtils;
 /**
  * 字符串格式化
  *
- * @Author hongshu
+ * @Author SCT
  */
 public class StrFormatter {
 
