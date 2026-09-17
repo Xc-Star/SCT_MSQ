@@ -6,12 +6,21 @@ sct:
     database: sct
     username: root
     password: 123456
-  alioss:
+  # 文件路径 示例（ Windows配置 D:/sct/uploadPath，Linux配置 /home/sct/uploadPath）
+  profile: D:/sct_msq_upload/sct/upload
+  s3:
     endpoint:
-    bucketName:
-    accessKeyId:
-    accessKeySecret:
+    region: auto
+    access-key-id:
+    secret-access-key:
+    bucket-name:
+    public-url:
+    object-prefix:
+    path-style-access: true
   redis:
     host: 127.0.0.1
     port: 6379
-    database: 1
+    database: 0
+# 文件存储配置
+oss:
+  type: 0 # 0：本地存储，1：S3存储

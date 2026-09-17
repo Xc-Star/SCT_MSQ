@@ -1,12 +1,5 @@
 package com.sct.enumeration;
 
-import cn.hutool.core.util.ArrayUtil;
-import com.sct.utils.ArrayValuable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-import java.util.Arrays;
-
 /**
  * @Title: ConfigKeyEnum
  * @Author Xc_Star
@@ -14,8 +7,6 @@ import java.util.Arrays;
  * @Date 2025/6/30 03:35
  */
 
-@Getter
-@AllArgsConstructor
 public enum ConfigKeyEnum {
 
     LOGO("logo", "服务器Logo"),
@@ -33,4 +24,17 @@ public enum ConfigKeyEnum {
     private final String keyName;
 
     private final String description;
+
+    ConfigKeyEnum(String keyName, String description) {
+        this.keyName = keyName;
+        this.description = description;
+    }
+
+    public String getKeyName() {
+        return keyName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

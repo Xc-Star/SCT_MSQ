@@ -67,10 +67,10 @@ import Navbar from '@/components/Navbar.vue'
 const router = useRouter()
 
 const memberMessages = [
-  { id: 1, user: 'Chengzi_er_', message: '大家好，这里是SCT！', avatar: 'https://mc-heads.net/avatar/Chengzi_er_', top: true },
-  { id: 2, user: 'CNJ233', message: '欢迎来到留言区。', avatar: 'https://mc-heads.net/avatar/CNJ233', top: false },
-  { id: 3, user: 'Xc_Star', message: '祝大家天天开心！', avatar: 'https://mc-heads.net/avatar/Xc_Star', top: false },
-  { id: 4, user: 'late_maple', message: '新成员报到~', avatar: 'https://mc-heads.net/avatar/late_maple', top: true }
+  { id: 1, user: 'Chengzi_er_', message: '大家好，这里是SCT！', avatar: 'https://crafthead.net/avatar/Chengzi_er_', top: true },
+  { id: 2, user: 'CNJ233', message: '欢迎来到留言区。', avatar: 'https://crafthead.net/avatar/CNJ233', top: false },
+  { id: 3, user: 'Xc_Star', message: '祝大家天天开心！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
+  { id: 4, user: 'late_maple', message: '新成员报到~', avatar: 'https://crafthead.net/avatar/late_maple', top: true }
 ]
 
 const machines = [

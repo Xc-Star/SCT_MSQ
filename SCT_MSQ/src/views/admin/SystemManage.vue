@@ -153,10 +153,10 @@ function handleImageRemove(file, fileList) {
   // 不自动保存，只做本地回显
 }
 function beforeImageUpload(file: File) {
-    const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
+    const isJPG = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/webp'
     const isLt2M = file.size / 1024 / 1024 < 20
     if (!isJPG) {
-        ElMessage.error('只能上传 JPG/PNG 格式图片!')
+        ElMessage.error('只能上传 JPG/JPEG/PNG/WEBP 格式图片!')
     }
     if (!isLt2M) {
         ElMessage.error('图片大小不能超过 20MB!')

@@ -14,10 +14,10 @@
 
 <script setup>
 const memberMessages = [
-  { id: 1, user: '小明', message: '大家好，这里是SCT！', avatar: 'https://mc-heads.net/avatar/Xc_Star', top: true },
-  { id: 2, user: '小红', message: '欢迎来到留言区。', avatar: 'https://mc-heads.net/avatar/Xc_Star', top: false },
-  { id: 3, user: '小刚', message: '祝大家天天开心！', avatar: 'https://mc-heads.net/avatar/Xc_Star', top: false },
-  { id: 4, user: '小李', message: '新成员报到~', avatar: 'https://mc-heads.net/avatar/Xc_Star', top: true }
+  { id: 1, user: '小明', message: '大家好，这里是SCT！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: true },
+  { id: 2, user: '小红', message: '欢迎来到留言区。', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
+  { id: 3, user: '小刚', message: '祝大家天天开心！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
+  { id: 4, user: '小李', message: '新成员报到~', avatar: 'https://crafthead.net/avatar/Xc_Star', top: true }
 ]
 </script>
 

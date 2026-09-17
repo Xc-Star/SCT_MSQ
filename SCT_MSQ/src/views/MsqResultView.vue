@@ -2,9 +2,10 @@
   <div class="msq-container" ref="msqContainer">
     <Navbar />
     
-    <el-dialog v-model="showDialog" title="请输入你的ID" :width="dialogWidth" :close-on-click-modal="false" :show-close="false" :class="{'mobile-dialog': isMobile}">
+    <el-dialog v-model="showDialog" title="请输入你的ID" :width="dialogWidth" :close-on-click-modal="false" :show-close="true" @close="handleCancel" :class="{'mobile-dialog': isMobile}">
         <el-input v-model="inputId" placeholder="请输入你的ID" @keyup.enter.native="handleConfirm" spellcheck="false" autocapitalize="off" />
         <template #footer>
+          <el-button @click="handleCancel">返回</el-button>
           <el-button @click="handleConfirm" type="primary">确定</el-button>
         </template>
       </el-dialog>
@@ -161,6 +162,8 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const showDialog = ref(true)
 const inputId = ref('')
+const isConfirming = ref(false)
+const isCancelling = ref(false)
 const router = useRouter()
 const route = useRoute()
 const showImageViewer = ref(false)
@@ -218,9 +221,17 @@ const handleConfirm = () => {
     ElMessage.error('请输入ID')
     return
   }
+  isConfirming.value = true
   showDialog.value = false
   router.replace({ query: { id: inputId.value } })
   fetchData(inputId.value)
+}
+
+const handleCancel = () => {
+  if (isConfirming.value || isCancelling.value) return
+  isCancelling.value = true
+  showDialog.value = false
+  router.back()
 }
 
 const retryFetch = () => {

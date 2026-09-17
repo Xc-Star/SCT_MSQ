@@ -66,7 +66,7 @@ sct:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置 D:/sct/uploadPath，Linux配置 /home/sct/uploadPath）
-  profile: D:/sct_msq_upload/sct/upload
+  profile: ${sct.profile}
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -85,12 +85,20 @@ sct:
     user-ttl: 7200000
     # 设置前端传递过来的令牌名称
     user-token-name: User-Authentication
-  alioss:
-    endpoint: ${sct.alioss.endpoint}
-    access-key-id: ${sct.alioss.access-key-id}
-    access-key-secret: ${sct.alioss.access-key-secret}
-    bucket-name: ${sct.alioss.bucket-name}
+# S3配置。启用S3时将oss.type设置为1。
+  s3:
+    # S3 API地址。AWS官方S3可留空，S3兼容服务填写完整地址。
+    endpoint: ${sct.s3.endpoint:}
+    region: ${sct.s3.region:auto}
+    access-key-id: ${sct.s3.access-key-id:}
+    secret-access-key: ${sct.s3.secret-access-key:}
+    bucket-name: ${sct.s3.bucket-name:}
+    # 最终返回并保存的完整URL，建议配置CDN或公开域名；为空时根据endpoint自动生成。
+    public-url: ${sct.s3.public-url:}
+    object-prefix: ${sct.s3.object-prefix:}
+    # MinIO、R2等S3兼容服务通常需要开启。
+    path-style-access: ${sct.s3.path-style-access:true}
 
-# Oss配置
+# 文件存储配置
 oss:
-  type: 0 # 0：本地存储，1：s3存储
+  type: ${oss.type} # 0：本地存储，1：S3存储
