@@ -1,60 +1,86 @@
 <template>
-  <div>
+  <div class="overview-page">
     <Navbar />
+
     <div class="overview-container">
+      <header class="page-hero">
+        <h1 class="hero-title">浏览 {{ serverShortName }}</h1>
+      </header>
+
       <!-- 成员留言区 -->
-      <section class="overview-section" style="margin-top: 100px;">
+      <section class="overview-section">
         <div class="section-header">
           <h2>成员留言区</h2>
-          <span class="more-link" @click="goToDetail('member')">查看更多 ></span>
+          <el-button type="text" class="more-link" @click="goToDetail('member')">查看更多</el-button>
         </div>
+
         <div class="section-content">
           <ul v-if="memberMessages.length" class="message-list">
-            <li v-for="item in memberMessages.slice(0, 3)" :key="item.id" class="message-item" style="position:relative;">
-              <img :src="item.avatar" class="avatar" alt="头像" @error="handleAvatarError" />
-              <span class="user-name">{{ item.playerId }} ：</span>
-              <span class="user-message">{{ item.content }}</span>
-              <span v-if="item.top" class="top-tag">置顶</span>
+            <li v-for="item in memberMessages.slice(0, 3)" :key="item.id" class="message-item">
+              <img :src="item.avatar" class="avatar" alt="头像" loading="lazy" @error="handleAvatarError" />
+              <div class="message-body">
+                <div class="message-meta">
+                  <span class="user-name">{{ item.playerId }}</span>
+                  <span v-if="item.top" class="top-tag">置顶</span>
+                </div>
+                <p class="user-message">{{ item.content }}</p>
+              </div>
             </li>
           </ul>
           <div v-else-if="messageLoadFailed" class="empty-tip">留言加载失败，请稍后再试</div>
-          <div v-else class="empty-tip">还没有留言，快去留言吧~</div>
+          <div v-else class="empty-tip">还没有留言，快去留言吧</div>
         </div>
       </section>
+
       <!-- 机器展览区 -->
       <section class="overview-section">
         <div class="section-header">
           <h2>机器展览区</h2>
-          <span
+          <el-button
             v-if="machines.length > machinePreviewCountFinal"
+            type="text"
             class="more-link"
             @click="goToDetail('machine')"
-          >查看更多 ></span>
+          >查看更多</el-button>
         </div>
-        <div class="section-content preview-list" ref="machineContainer">
-          <div v-for="item in machines.slice(0, machinePreviewCountFinal)" :key="item.id" class="preview-item" style="position:relative;">
-            <img :src="item.img" :alt="item.title" class="preview-img" />
-            <div class="preview-title">{{ item.title }}</div>
-            <span v-if="item.top" class="top-tag">置顶</span>
-          </div>
+        <div class="gallery-grid" ref="machineContainer">
+          <article
+            v-for="item in machines.slice(0, machinePreviewCountFinal)"
+            :key="item.id"
+            class="gallery-card"
+          >
+            <div class="card-media">
+              <img :src="item.img" :alt="item.title" class="card-img" loading="lazy" />
+              <span v-if="item.top" class="top-tag floating">置顶</span>
+            </div>
+            <div class="card-title">{{ item.title }}</div>
+          </article>
         </div>
       </section>
+
       <!-- 建筑展览区 -->
       <section class="overview-section">
         <div class="section-header">
           <h2>建筑展览区</h2>
-          <span
+          <el-button
             v-if="buildings.length > buildingPreviewCountFinal"
+            type="text"
             class="more-link"
             @click="goToDetail('building')"
-          >查看更多 ></span>
+          >查看更多</el-button>
         </div>
-        <div class="section-content preview-list" ref="buildingContainer">
-          <div v-for="item in buildings.slice(0, buildingPreviewCountFinal)" :key="item.id" class="preview-item" style="position:relative;">
-            <img :src="item.img" :alt="item.title" class="preview-img" />
-            <div class="preview-title">{{ item.title }}</div>
-            <span v-if="item.top" class="top-tag">置顶</span>
-          </div>
+        <div class="gallery-grid" ref="buildingContainer">
+          <article
+            v-for="item in buildings.slice(0, buildingPreviewCountFinal)"
+            :key="item.id"
+            class="gallery-card"
+          >
+            <div class="card-media">
+              <img :src="item.img" :alt="item.title" class="card-img" loading="lazy" />
+              <span v-if="item.top" class="top-tag floating">置顶</span>
+            </div>
+            <div class="card-title">{{ item.title }}</div>
+          </article>
         </div>
       </section>
     </div>
@@ -71,6 +97,7 @@ const router = useRouter()
 
 const memberMessages = ref([])
 const messageLoadFailed = ref(false)
+const serverShortName = ref('SCT')
 
 async function fetchMemberMessages() {
   try {
@@ -105,7 +132,9 @@ const buildings = [
 
 const machinePreviewCount = ref(3)
 const buildingPreviewCount = ref(3)
-const cardWidth = 150 + 32 // 卡片宽度+gap，和样式保持一致
+// 与 .gallery-grid 的 minmax 最小宽度、gap 保持一致
+const cardMinWidth = 200
+const cardGap = 20
 
 const machineContainer = ref(null)
 const buildingContainer = ref(null)
@@ -119,7 +148,7 @@ function checkIsMobile() {
 function calcPreviewCount(containerRef, countRef) {
   if (!containerRef.value) return
   const width = containerRef.value.offsetWidth
-  countRef.value = Math.max(1, Math.floor(width / cardWidth))
+  countRef.value = Math.max(1, Math.floor((width + cardGap) / (cardMinWidth + cardGap)))
 }
 
 function handleResize() {
@@ -140,8 +169,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', checkIsMobile)
 })
 
-const machinePreviewCountFinal = computed(() => isMobile.value ? 3 : machinePreviewCount.value)
-const buildingPreviewCountFinal = computed(() => isMobile.value ? 3 : buildingPreviewCount.value)
+const machinePreviewCountFinal = computed(() => isMobile.value ? 4 : machinePreviewCount.value)
+const buildingPreviewCountFinal = computed(() => isMobile.value ? 4 : buildingPreviewCount.value)
 
 function goToDetail(type) {
   router.push(`/overview/${type}`)
@@ -159,238 +188,240 @@ function getServerShortName() {
       }
     } catch (e) {}
   }
-  return 'SCT官网'
+  return 'SCT'
 }
 
 onMounted(async () => {
-  document.title = getServerShortName() + '官网'
+  serverShortName.value = getServerShortName()
+  document.title = serverShortName.value + '官网'
   await fetchMemberMessages()
 })
 </script>
 
 <style scoped>
-.overview-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 0 16px;
+.overview-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #303133;
 }
+
+.overview-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 92px 20px 60px;
+}
+
+.page-hero {
+  margin-bottom: 20px;
+}
+.hero-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #409EFF 30%, #66b1ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- 区块 ---------- */
 .overview-section {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  margin-bottom: 32px;
-  padding: 32px 24px;
-}
-.overview-section h2 {
-  margin-top: 0;
-  margin-bottom: 22px;
-  font-size: 1.7rem;
-  color: #2d3a4b;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-align: left;
-}
-.section-content {
-  min-height: 60px;
-  color: #666;
-  font-size: 1.1rem;
-}
-.preview-list {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-.preview-item {
-  width: 160px;
-  text-align: center;
-}
-.preview-img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
   border-radius: 8px;
-  background: #f2f2f2;
-  margin-bottom: 8px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-.preview-title {
-  font-size: 1.08rem;
-  color: #222;
-  font-weight: 500;
-}
-.more-btn {
-  margin-top: 16px;
-  padding: 6px 18px;
-  background: #409eff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-.more-btn:hover {
-  background: #3076c9;
-}
-.message-list {
-  padding-left: 0;
-  margin-bottom: 0;
-}
-.message-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  list-style: none;
-}
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 12px;
-  background: #f2f2f2;
-}
-.user-name {
-  font-weight: 500;
-  color: #222;
-  margin-right: 8px;
-}
-.user-message {
-  color: #555;
-}
-.empty-tip {
-  color: #999;
-  font-size: 1rem;
-  padding: 8px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  padding-bottom: 20px;
 }
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #ebeef5;
 }
 .section-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
-  font-size: 1.7rem;
-  color: #2d3a4b;
-  font-weight: bold;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #303133;
   letter-spacing: 1px;
-  text-align: left;
 }
-.more-btn {
-  padding: 6px 18px;
-  background: linear-gradient(90deg,#409eff 0%,#66b1ff 100%);
-  color: #fff;
-  border: none;
-  border-radius: 18px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(64,158,255,0.10);
-  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-  letter-spacing: 1px;
-  margin-left: 18px;
-}
-.more-btn:hover {
-  background: linear-gradient(90deg,#3076c9 0%,#409eff 100%);
-  box-shadow: 0 6px 18px rgba(64,158,255,0.18);
-  transform: translateY(-2px) scale(1.03);
+.section-header h2::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: #409EFF;
 }
 .more-link {
-  /* color: #409eff; */
-  font-size: 1rem;
-  font-weight: 500;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: #409EFF;
+  padding: 0;
+}
+
+.section-content {
+  padding: 8px 20px 0;
+}
+
+/* ---------- 留言 ---------- */
+.message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+.message-item:last-child {
+  border-bottom: none;
+}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f5f7fa;
+  flex-shrink: 0;
+}
+.message-body {
+  min-width: 0;
+  flex: 1;
+}
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.user-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #303133;
+}
+.user-message {
+  margin: 0;
+  color: #606266;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.empty-tip {
+  padding: 32px 0;
+  text-align: center;
+  color: #909399;
+  font-size: 0.92rem;
+}
+
+/* ---------- 图集 ---------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px 20px 0;
+}
+.gallery-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  overflow: hidden;
   cursor: pointer;
-  margin-left: 18px;
-  transition: text-decoration 0.2s;
 }
-.more-link:hover {
-  text-decoration: underline;
+.gallery-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
+.card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #f5f7fa;
+  overflow: hidden;
+}
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.card-title {
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #303133;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .top-tag {
+  display: inline-block;
+  padding: 0 7px;
+  line-height: 20px;
+  border-radius: 4px;
+  background: #fdf6ec;
+  border: 1px solid #f5dab1;
+  color: #e6a23c;
+  font-size: 0.72rem;
+}
+.top-tag.floating {
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 8px;
-  background: #ff9800;
-  color: #fff;
-  font-size: 0.85rem;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-weight: bold;
-  z-index: 2;
+  background: rgba(253, 246, 236, 0.95);
 }
 
 @media (max-width: 800px) {
   .overview-container {
-    padding: 0 4px;
+    padding: 78px 12px 36px;
+  }
+  .hero-title {
+    font-size: 1.3rem;
   }
   .overview-section {
-    padding: 18px 6px 16px 6px;
-    border-radius: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
   }
   .section-header {
-    margin-bottom: 10px;
+    padding: 12px 14px;
   }
   .section-header h2 {
-    font-size: 1.13rem;
+    font-size: 0.98rem;
   }
   .more-link {
-    font-size: 0.98rem;
-    margin-left: 8px;
+    font-size: 0.85rem;
   }
-  .preview-list {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 2px;
+  .section-content {
+    padding: 4px 14px 0;
   }
-  .preview-item {
-    flex: 1 1 0;
-    min-width: 0;
-    max-width: none;
-    width: 33.33vw;
-    box-sizing: border-box;
-    padding: 8px 2px 8px 2px;
-    border-radius: 8px;
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px 14px 0;
   }
-  .preview-img {
-    width: 80%;
-    height: 80px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-  .preview-title {
-    font-size: 0.98rem;
-    padding-top: 4px;
-  }
-  .message-list {
-    gap: 10px;
+  .card-title {
+    padding: 8px 10px;
+    font-size: 0.88rem;
   }
   .message-item {
-    padding: 8px 6px;
-    border-radius: 7px;
+    padding: 12px 0;
+    gap: 10px;
   }
   .avatar {
-    width: 28px;
-    height: 28px;
-    margin-right: 7px;
-  }
-  .user-name {
-    font-size: 0.98rem;
-    margin-right: 4px;
+    width: 34px;
+    height: 34px;
   }
   .user-message {
-    font-size: 0.95rem;
-    padding: 4px 8px;
+    font-size: 0.88rem;
   }
 }
 </style> 

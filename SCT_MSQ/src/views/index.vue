@@ -4,6 +4,7 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import { getConfig } from '@/api/System'
@@ -77,7 +78,9 @@ function getServerShortName() {
 onMounted(async () => {
   // 强制跳转到指定URL
   // window.location.href = 'http://v4.sctserver.top:81/sctserver'
-  window.location.href = 'http://localhost:5173/sctserver'
+  // window.location.href = 'http://localhost:5173/sctserver'
+  const router = useRouter()
+  router.push('/sctserver')
   
   // 以下代码将不会执行，因为页面已经跳转
   document.title = getServerShortName() + '官网'

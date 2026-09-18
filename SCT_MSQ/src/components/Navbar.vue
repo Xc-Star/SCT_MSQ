@@ -12,6 +12,7 @@
     </div>
     <!-- PC端按钮 -->
     <div class="nav-right nav-pc">
+      <el-button type="text" class="nav-btn" @click="goToHome">首页</el-button>
       <el-button type="text" class="nav-btn" @click="goToResult">查询问卷结果</el-button>
       <el-button type="text" class="nav-btn" @click="goToOverview">浏览{{ serverShortName }}</el-button>
       <el-button v-if="showStockListTool" type="text" class="nav-btn" @click="goBuildTool">备货列表生成工具</el-button>
@@ -27,6 +28,7 @@
         <div class="mobile-full-menu auto-height" :class="{ show: menuOpen }">
           <div class="mobile-full-menu-content">
             <ul class="mobile-menu">
+              <li @click="handleMenuClick(goToHome)">首页</li>
               <li @click="handleMenuClick(goToResult)">查询问卷结果</li>
               <li @click="handleMenuClick(goToOverview)">浏览{{ serverShortName }}</li>
               <li v-if="showStockListTool" @click="handleMenuClick(goBuildTool)">备货列表生成工具</li>
@@ -126,7 +128,8 @@ function applyConfig(data) {
 
 function goToHome() {
   // window.location.href = 'http://v4.sctserver.top:81/sctserver'
-  window.location.href = 'http://localhost:5173/sctserver'
+  // window.location.href = 'http://localhost:5173/sctserver'
+  router.push('/sctserver')
 }
 function goToOverview() {
   router.push('/overview')

@@ -1,23 +1,44 @@
 <template>
-  <div class="detail-container">
-    <h2>成员留言区</h2>
-    <ul v-if="memberMessages.length" class="message-list">
-      <li v-for="item in memberMessages" :key="item.id" class="message-item" style="position:relative;">
-        <img :src="item.avatar" class="avatar" alt="头像" @error="handleAvatarError" />
-        <span class="user-name">{{ item.playerId }}</span>
-        <span class="user-message">{{ item.content }}</span>
-        <span v-if="item.top" class="top-tag">置顶</span>
-      </li>
-    </ul>
-    <div v-else-if="loadFailed" class="empty-tip">留言加载失败，请稍后再试</div>
-    <div v-else-if="!loading" class="empty-tip">还没有留言，快去留言吧~</div>
+  <div class="detail-page">
+    <Navbar />
+
+    <div class="detail-container">
+      <header class="detail-hero">
+        <el-button type="text" class="back-btn" @click="goBack">‹ 返回</el-button>
+        <h1>成员留言区</h1>
+        <span class="count">共 {{ memberMessages.length }} 条</span>
+      </header>
+
+      <div class="detail-card">
+        <div v-if="loading" class="skeleton-list">
+          <div v-for="n in 4" :key="n" class="skeleton-item"></div>
+        </div>
+        <ul v-else-if="memberMessages.length" class="message-list">
+          <li v-for="item in memberMessages" :key="item.id" class="message-item">
+            <img :src="item.avatar" class="avatar" alt="头像" loading="lazy" @error="handleAvatarError" />
+            <div class="message-body">
+              <div class="message-meta">
+                <span class="user-name">{{ item.playerId }}</span>
+                <span v-if="item.top" class="top-tag">置顶</span>
+              </div>
+              <p class="user-message">{{ item.content }}</p>
+            </div>
+          </li>
+        </ul>
+        <div v-else-if="loadFailed" class="empty-tip">留言加载失败，请稍后再试</div>
+        <div v-else class="empty-tip">还没有留言，快去留言吧</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import Navbar from '@/components/Navbar.vue'
 import { getMemberMessageList } from '@/api/MemberMessage'
 
+const router = useRouter()
 const memberMessages = ref([])
 const loading = ref(true)
 const loadFailed = ref(false)
@@ -39,74 +60,147 @@ function handleAvatarError(e) {
   e.target.style.visibility = 'hidden'
 }
 
+function goBack() {
+  router.push('/overview')
+}
+
 onMounted(fetchMemberMessages)
 </script>
 
 <style scoped>
+.detail-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #303133;
+}
+
 .detail-container {
-  max-width: 700px;
-  margin: 40px auto;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 92px 20px 60px;
+}
+.detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.back-btn {
+  padding: 0;
+  font-size: 0.92rem;
+  color: #409EFF;
+}
+.detail-hero h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.count {
+  font-size: 0.85rem;
+  color: #909399;
+}
+
+.detail-card {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  padding: 32px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 4px 20px;
 }
-.detail-container h2 {
-  margin-bottom: 18px;
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: bold;
-}
-.detail-container ul {
-  padding-left: 0;
-}
-.detail-container li {
-  list-style: none;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-  font-size: 1.1rem;
-}
+
 .message-list {
-  padding-left: 0;
-  margin-bottom: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .message-item {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  list-style: none;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+.message-item:last-child {
+  border-bottom: none;
 }
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 12px;
-  background: #f2f2f2;
+  background: #f5f7fa;
+  flex-shrink: 0;
+}
+.message-body {
+  min-width: 0;
+  flex: 1;
+}
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 .user-name {
-  font-weight: 500;
-  color: #222;
-  margin-right: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #303133;
 }
 .user-message {
-  color: #555;
-}
-.empty-tip {
-  color: #999;
-  font-size: 1rem;
-  padding: 8px 0;
+  margin: 0;
+  color: #606266;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  word-break: break-word;
 }
 .top-tag {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  background: #ff9800;
-  color: #fff;
-  font-size: 0.85rem;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-weight: bold;
-  z-index: 2;
+  display: inline-block;
+  padding: 0 7px;
+  line-height: 20px;
+  border-radius: 4px;
+  background: #fdf6ec;
+  border: 1px solid #f5dab1;
+  color: #e6a23c;
+  font-size: 0.72rem;
+}
+
+.empty-tip {
+  padding: 40px 0;
+  text-align: center;
+  color: #909399;
+  font-size: 0.92rem;
+}
+
+.skeleton-list {
+  padding: 6px 0;
+}
+.skeleton-item {
+  height: 56px;
+  margin: 14px 0;
+  border-radius: 4px;
+  background: #f5f7fa;
+}
+
+@media (max-width: 800px) {
+  .detail-container {
+    padding: 78px 12px 36px;
+  }
+  .detail-hero h1 {
+    font-size: 1.1rem;
+  }
+  .detail-card {
+    padding: 4px 14px;
+  }
+  .message-item {
+    padding: 12px 0;
+    gap: 10px;
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
+  .user-message {
+    font-size: 0.88rem;
+  }
 }
 </style> 
