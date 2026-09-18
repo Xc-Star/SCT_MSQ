@@ -159,3 +159,5 @@ $RECYCLE.BIN/
 
 # Local development files
 .local-*
+
+.workbuddy-ai

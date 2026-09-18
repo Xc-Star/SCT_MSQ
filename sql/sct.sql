@@ -37,7 +37,7 @@ CREATE TABLE `admin_user`  (
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
-INSERT INTO `admin_user` VALUES (0, 'Super Admin', '$2a$10$D9h9fYn6wcRTojbdTiDCl.LPD0uig6XNhrG/tUh7owtCA2XHE0kpi', NULL, '2025-06-08 03:28:42', '2025-07-02 21:18:30', '2025-06-13 00:11:18', NULL, b'0');
+INSERT INTO `admin_user` VALUES (0, 'admin', '$2a$10$D9h9fYn6wcRTojbdTiDCl.LPD0uig6XNhrG/tUh7owtCA2XHE0kpi', NULL, '2025-06-08 03:28:42', '2025-07-02 21:18:30', '2025-06-13 00:11:18', NULL, b'0');
 -- ----------------------------
 -- Table structure for config
 -- ----------------------------
@@ -53,7 +53,7 @@ CREATE TABLE `config`  (
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   `deleted` bit(1) NULL DEFAULT b'0' COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of config
@@ -72,6 +72,33 @@ INSERT INTO `config` VALUES (11, '是否开启红石问卷', 'redstone_msq', '1'
 INSERT INTO `config` VALUES (12, '是否开启建筑问卷', 'architectural_msq', '1', 3, NULL, '2025-07-02 01:28:32', 'test', b'0');
 INSERT INTO `config` VALUES (13, '是否开启后勤问卷', 'logistics_msq', '1', 3, NULL, '2025-07-02 01:28:32', 'test', b'0');
 INSERT INTO `config` VALUES (14, '是否开启其他问卷', 'other_msq', '1', 3, NULL, '2025-07-02 01:28:29', 'test', b'0');
+INSERT INTO `config` VALUES (15, '留言发布接口密钥', 'message_api_key', '0b6f36caf01fbbc228203574dbb8bf6f', 1, NULL, '2026-09-18 10:20:00', 'admin', b'0');
+-- ----------------------------
+-- Table structure for member_message
+-- ----------------------------
+DROP TABLE IF EXISTS `member_message`;
+CREATE TABLE `member_message`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `player_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '玩家ID（游戏内ID，用于展示名字与头像）',
+  `qq` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'QQ号（对接机器人插件用，不对外展示）',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '留言内容',
+  `top` tinyint NOT NULL DEFAULT 0 COMMENT '是否置顶 0-否 1-是',
+  `status` tinyint NOT NULL DEFAULT 1 COMMENT '状态 0-隐藏 1-正常',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_player_id`(`player_id` ASC) USING BTREE,
+  INDEX `idx_top_create_time`(`top` ASC, `create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '成员留言' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of member_message
+-- ----------------------------
+INSERT INTO `member_message` VALUES (1, 'Chengzi_er_', '100000001', '大家好，这里是SCT！', 1, 1, '2026-09-18 10:20:00', '2026-09-18 10:20:00', 'sample', b'0');
+INSERT INTO `member_message` VALUES (2, 'CNJ233', '100000002', '欢迎来到留言区。', 0, 1, '2026-09-18 10:19:00', '2026-09-18 10:19:00', 'sample', b'0');
+INSERT INTO `member_message` VALUES (3, 'Xc_Star', '100000003', '祝大家天天开心！', 0, 1, '2026-09-18 10:18:00', '2026-09-18 10:18:00', 'sample', b'0');
 -- ----------------------------
 -- Table structure for msq
 -- ----------------------------

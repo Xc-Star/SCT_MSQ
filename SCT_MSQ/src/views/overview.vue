@@ -9,14 +9,16 @@
           <span class="more-link" @click="goToDetail('member')">查看更多 ></span>
         </div>
         <div class="section-content">
-          <ul class="message-list">
+          <ul v-if="memberMessages.length" class="message-list">
             <li v-for="item in memberMessages.slice(0, 3)" :key="item.id" class="message-item" style="position:relative;">
-              <img :src="item.avatar" class="avatar" alt="头像" />
-              <span class="user-name">{{ item.user }} ：</span>
-              <span class="user-message">{{ item.message }}</span>
+              <img :src="item.avatar" class="avatar" alt="头像" @error="handleAvatarError" />
+              <span class="user-name">{{ item.playerId }} ：</span>
+              <span class="user-message">{{ item.content }}</span>
               <span v-if="item.top" class="top-tag">置顶</span>
             </li>
           </ul>
+          <div v-else-if="messageLoadFailed" class="empty-tip">留言加载失败，请稍后再试</div>
+          <div v-else class="empty-tip">还没有留言，快去留言吧~</div>
         </div>
       </section>
       <!-- 机器展览区 -->
@@ -63,15 +65,27 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
+import { getMemberMessageList } from '@/api/MemberMessage'
 
 const router = useRouter()
 
-const memberMessages = [
-  { id: 1, user: 'Chengzi_er_', message: '大家好，这里是SCT！', avatar: 'https://crafthead.net/avatar/Chengzi_er_', top: true },
-  { id: 2, user: 'CNJ233', message: '欢迎来到留言区。', avatar: 'https://crafthead.net/avatar/CNJ233', top: false },
-  { id: 3, user: 'Xc_Star', message: '祝大家天天开心！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
-  { id: 4, user: 'late_maple', message: '新成员报到~', avatar: 'https://crafthead.net/avatar/late_maple', top: true }
-]
+const memberMessages = ref([])
+const messageLoadFailed = ref(false)
+
+async function fetchMemberMessages() {
+  try {
+    const res = await getMemberMessageList()
+    memberMessages.value = Array.isArray(res?.data) ? res.data : []
+    messageLoadFailed.value = false
+  } catch (e) {
+    memberMessages.value = []
+    messageLoadFailed.value = true
+  }
+}
+
+function handleAvatarError(e) {
+  e.target.style.visibility = 'hidden'
+}
 
 const machines = [
   { id: 1, title: '墨鱼塔', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: true },
@@ -150,6 +164,7 @@ function getServerShortName() {
 
 onMounted(async () => {
   document.title = getServerShortName() + '官网'
+  await fetchMemberMessages()
 })
 </script>
 
@@ -245,6 +260,11 @@ onMounted(async () => {
 }
 .user-message {
   color: #555;
+}
+.empty-tip {
+  color: #999;
+  font-size: 1rem;
+  padding: 8px 0;
 }
 .section-header {
   display: flex;

@@ -24,4 +24,16 @@ public class MessageConstant {
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
 
+    /* ---------------- 成员留言 ---------------- */
+    public static final String MESSAGE_PLAYER_ID_EMPTY = "玩家ID不能为空";
+    public static final String MESSAGE_PLAYER_ID_TOO_LONG = "玩家ID不能超过64个字符";
+    public static final String MESSAGE_QQ_TOO_LONG = "QQ号不能超过32个字符";
+    public static final String MESSAGE_CONTENT_EMPTY = "留言内容不能为空";
+    public static final String MESSAGE_CONTENT_TOO_LONG = "留言内容不能超过500个字";
+    public static final String MESSAGE_DUPLICATE_SUBMIT = "和上一条留言内容相同，请勿重复提交";
+    public static final String MESSAGE_PLAYER_NOT_BOUND = "未找到该QQ号对应的玩家，首次发布请带上 playerId";
+    public static final String MESSAGE_API_KEY_NOT_CONFIGURED = "留言发布接口密钥未配置，请先在 config 表中添加 message_api_key";
+    public static final String MESSAGE_API_KEY_INVALID = "接口密钥校验失败";
+    public static final String MESSAGE_NOT_FOUND = "留言不存在";
+
 }

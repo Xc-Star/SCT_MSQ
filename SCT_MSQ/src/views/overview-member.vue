@@ -1,24 +1,45 @@
 <template>
   <div class="detail-container">
-    <h2>成员留言区 - 全部留言</h2>
-    <ul class="message-list">
+    <h2>成员留言区</h2>
+    <ul v-if="memberMessages.length" class="message-list">
       <li v-for="item in memberMessages" :key="item.id" class="message-item" style="position:relative;">
-        <img :src="item.avatar" class="avatar" alt="头像" />
-        <span class="user-name">{{ item.user }}</span>
-        <span class="user-message">{{ item.message }}</span>
+        <img :src="item.avatar" class="avatar" alt="头像" @error="handleAvatarError" />
+        <span class="user-name">{{ item.playerId }}</span>
+        <span class="user-message">{{ item.content }}</span>
         <span v-if="item.top" class="top-tag">置顶</span>
       </li>
     </ul>
+    <div v-else-if="loadFailed" class="empty-tip">留言加载失败，请稍后再试</div>
+    <div v-else-if="!loading" class="empty-tip">还没有留言，快去留言吧~</div>
   </div>
 </template>
 
 <script setup>
-const memberMessages = [
-  { id: 1, user: '小明', message: '大家好，这里是SCT！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: true },
-  { id: 2, user: '小红', message: '欢迎来到留言区。', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
-  { id: 3, user: '小刚', message: '祝大家天天开心！', avatar: 'https://crafthead.net/avatar/Xc_Star', top: false },
-  { id: 4, user: '小李', message: '新成员报到~', avatar: 'https://crafthead.net/avatar/Xc_Star', top: true }
-]
+import { ref, onMounted } from 'vue'
+import { getMemberMessageList } from '@/api/MemberMessage'
+
+const memberMessages = ref([])
+const loading = ref(true)
+const loadFailed = ref(false)
+
+async function fetchMemberMessages() {
+  try {
+    const res = await getMemberMessageList()
+    memberMessages.value = Array.isArray(res?.data) ? res.data : []
+    loadFailed.value = false
+  } catch (e) {
+    memberMessages.value = []
+    loadFailed.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleAvatarError(e) {
+  e.target.style.visibility = 'hidden'
+}
+
+onMounted(fetchMemberMessages)
 </script>
 
 <style scoped>
@@ -70,6 +91,11 @@ const memberMessages = [
 }
 .user-message {
   color: #555;
+}
+.empty-tip {
+  color: #999;
+  font-size: 1rem;
+  padding: 8px 0;
 }
 .top-tag {
   position: absolute;

@@ -11,6 +11,7 @@ import MsqReviewView from '../views/admin/components/MsqReviewView.vue'
 import SubmitSuccess from '../views/SubmitSuccess.vue'
 import AdminManage from '../views/admin/AdminManage.vue'
 import ServerMemberManage from '../views/admin/ServerMemberManage.vue'
+import MessageManage from '../views/admin/MessageManage.vue'
 import BuildTool from '../views/build-tool.vue'
 import Overview from '../views/overview.vue'
 import MsqResultView from '../views/MsqResultView.vue'
@@ -80,6 +81,11 @@ const router = createRouter({
           path: 'server-member-manage',
           name: 'serverMemberManage',
           component: ServerMemberManage
+        },
+        {
+          path: 'message-manage',
+          name: 'messageManage',
+          component: MessageManage
         },
         {
           path: 'msq-review/:id',

@@ -17,24 +17,28 @@
             </div>
             <nav class="nav-menu">
                 <router-link to="/admin/main/questionnaire-review" class="nav-item" @click="handleMenuClick">
-                    <i class="el-icon-document-checked"></i>
+                    <el-icon><DocumentChecked /></el-icon>
                     <span v-show="!isCollapsed">问卷审核</span>
                 </router-link>
                 <router-link to="/admin/main/questionnaire-manage" class="nav-item" @click="handleMenuClick">
-                    <i class="el-icon-document"></i>
+                    <el-icon><Document /></el-icon>
                     <span v-show="!isCollapsed">问卷管理</span>
                 </router-link>
                 <router-link v-if="userInfo.isSuperAdmin" to="/admin/main/system-manage" class="nav-item" @click="handleMenuClick">
-                    <i class="el-icon-picture"></i>
+                    <el-icon><Picture /></el-icon>
                     <span v-show="!isCollapsed">网站管理</span>
                 </router-link>
                 <router-link v-if="userInfo.isSuperAdmin" to="/admin/main/admin-manage" class="nav-item" @click="handleMenuClick">
-                    <i class="el-icon-user"></i>
+                    <el-icon><User /></el-icon>
                     <span v-show="!isCollapsed">账号管理</span>
                 </router-link>
                 <router-link to="/admin/main/server-member-manage" class="nav-item" @click="handleMenuClick">
-                    <i class="el-icon-user-filled"></i>
+                    <el-icon><UserFilled /></el-icon>
                     <span v-show="!isCollapsed">成员管理</span>
+                </router-link>
+                <router-link to="/admin/main/message-manage" class="nav-item" @click="handleMenuClick">
+                    <el-icon><ChatDotSquare /></el-icon>
+                    <span v-show="!isCollapsed">留言管理</span>
                 </router-link>
             </nav>
         </div>
@@ -90,7 +94,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Expand, Fold, ArrowDown } from '@element-plus/icons-vue'
+import { Expand, Fold, ArrowDown, DocumentChecked, Document, Picture, User, UserFilled, ChatDotSquare } from '@element-plus/icons-vue'
 import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElAvatar, ElIcon, ElMessageBox, ElMessage } from 'element-plus'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo'
