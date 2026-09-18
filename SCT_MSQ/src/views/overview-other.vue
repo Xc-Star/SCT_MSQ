@@ -1,5 +1,5 @@
 <template>
-  <ExhibitionGrid category="building" title="建筑展览区" unit="座" />
+  <ExhibitionGrid category="other" title="其他内容" unit="个" />
 </template>
 
 <script setup>

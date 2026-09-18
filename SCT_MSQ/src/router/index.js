@@ -12,12 +12,14 @@ import SubmitSuccess from '../views/SubmitSuccess.vue'
 import AdminManage from '../views/admin/AdminManage.vue'
 import ServerMemberManage from '../views/admin/ServerMemberManage.vue'
 import MessageManage from '../views/admin/MessageManage.vue'
+import ExhibitionManage from '../views/admin/ExhibitionManage.vue'
 import BuildTool from '../views/build-tool.vue'
 import Overview from '../views/overview.vue'
 import MsqResultView from '../views/MsqResultView.vue'
 import OverviewMember from '../views/overview-member.vue'
 import OverviewMachine from '../views/overview-machine.vue'
 import OverviewBuilding from '../views/overview-building.vue'
+import OverviewOther from '../views/overview-other.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +90,11 @@ const router = createRouter({
           component: MessageManage
         },
         {
+          path: 'exhibition-manage',
+          name: 'exhibitionManage',
+          component: ExhibitionManage
+        },
+        {
           path: 'msq-review/:id',
           name: 'msq-review',
           component: MsqReviewView
@@ -118,6 +125,11 @@ const router = createRouter({
       path: '/overview/building',
       name: 'overview-building',
       component: OverviewBuilding
+    },
+    {
+      path: '/overview/other',
+      name: 'overview-other',
+      component: OverviewOther
     },
     {
       path: '/msq/result',

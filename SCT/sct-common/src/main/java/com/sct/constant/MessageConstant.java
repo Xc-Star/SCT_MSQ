@@ -36,4 +36,16 @@ public class MessageConstant {
     public static final String MESSAGE_API_KEY_INVALID = "接口密钥校验失败";
     public static final String MESSAGE_NOT_FOUND = "留言不存在";
 
+    /* ---------------- 展览内容（机器 / 建筑 / 其他） ---------------- */
+    public static final String EXHIBITION_TITLE_EMPTY = "标题不能为空";
+    public static final String EXHIBITION_TITLE_TOO_LONG = "标题不能超过128个字符";
+    public static final String EXHIBITION_CATEGORY_EMPTY = "请选择分类";
+    public static final String EXHIBITION_CATEGORY_INVALID = "分类不合法，只能是红石 / 建筑 / 其他";
+    public static final String EXHIBITION_IMAGE_EMPTY = "请至少上传一张图片";
+    public static final String EXHIBITION_IMAGE_TOO_MANY = "图片数量不能超过30张";
+    public static final String EXHIBITION_IMAGE_URL_TOO_LONG = "图片地址过长，请重新上传";
+    public static final String EXHIBITION_CONTENT_EMPTY = "正文不能为空";
+    public static final String EXHIBITION_CONTENT_TOO_LONG = "正文不能超过5000个字";
+    public static final String EXHIBITION_NOT_FOUND = "展览内容不存在";
+
 }

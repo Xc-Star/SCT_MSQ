@@ -40,6 +40,10 @@
                     <el-icon><ChatDotSquare /></el-icon>
                     <span v-show="!isCollapsed">留言管理</span>
                 </router-link>
+                <router-link to="/admin/main/exhibition-manage" class="nav-item" @click="handleMenuClick">
+                    <el-icon><Collection /></el-icon>
+                    <span v-show="!isCollapsed">展览管理</span>
+                </router-link>
             </nav>
         </div>
         <div class="main-content" :class="{ 'main-content-expanded': isCollapsed }" @click="handleMainContentClick">
@@ -94,7 +98,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Expand, Fold, ArrowDown, DocumentChecked, Document, Picture, User, UserFilled, ChatDotSquare } from '@element-plus/icons-vue'
+import { Expand, Fold, ArrowDown, DocumentChecked, Document, Picture, User, UserFilled, ChatDotSquare, Collection } from '@element-plus/icons-vue'
 import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElAvatar, ElIcon, ElMessageBox, ElMessage } from 'element-plus'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo'

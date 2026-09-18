@@ -32,72 +32,95 @@
         </div>
       </section>
 
-      <!-- 机器展览区 -->
-      <section class="overview-section">
+      <!-- 机器展览区 / 建筑展览区 / 其他内容 -->
+      <section
+        v-for="(section, si) in sections"
+        :key="section.key"
+        class="overview-section"
+      >
         <div class="section-header">
-          <h2>机器展览区</h2>
+          <h2>{{ section.title }}</h2>
           <el-button
-            v-if="machines.length > machinePreviewCountFinal"
+            v-if="section.items.length > visibleCount(section)"
             type="text"
             class="more-link"
-            @click="goToDetail('machine')"
+            @click="goToDetail(section.route)"
           >查看更多</el-button>
         </div>
-        <div class="gallery-grid" ref="machineContainer">
-          <article
-            v-for="item in machines.slice(0, machinePreviewCountFinal)"
-            :key="item.id"
-            class="gallery-card"
-          >
-            <div class="card-media">
-              <img :src="item.img" :alt="item.title" class="card-img" loading="lazy" />
-              <span v-if="item.top" class="top-tag floating">置顶</span>
-            </div>
-            <div class="card-title">{{ item.title }}</div>
-          </article>
-        </div>
-      </section>
 
-      <!-- 建筑展览区 -->
-      <section class="overview-section">
-        <div class="section-header">
-          <h2>建筑展览区</h2>
-          <el-button
-            v-if="buildings.length > buildingPreviewCountFinal"
-            type="text"
-            class="more-link"
-            @click="goToDetail('building')"
-          >查看更多</el-button>
-        </div>
-        <div class="gallery-grid" ref="buildingContainer">
+        <div class="gallery-grid" :ref="el => setContainerRef(el, si)">
           <article
-            v-for="item in buildings.slice(0, buildingPreviewCountFinal)"
+            v-for="item in section.items.slice(0, visibleCount(section))"
             :key="item.id"
             class="gallery-card"
+            @click="openDetail(item)"
           >
             <div class="card-media">
-              <img :src="item.img" :alt="item.title" class="card-img" loading="lazy" />
+              <img :src="item.cover" :alt="item.title" class="card-img" loading="lazy" />
               <span v-if="item.top" class="top-tag floating">置顶</span>
+              <span v-if="item.imageCount > 1" class="count-tag floating">
+                <el-icon><Picture /></el-icon>{{ item.imageCount }}
+              </span>
             </div>
             <div class="card-title">{{ item.title }}</div>
           </article>
+        </div>
+
+        <div v-if="!section.items.length" class="empty-tip">
+          {{ section.failed ? '内容加载失败，请稍后再试' : '暂无内容' }}
         </div>
       </section>
     </div>
+
+    <ExhibitionDetailDialog v-model="detailVisible" :exhibition-id="activeId" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { Picture } from '@element-plus/icons-vue'
 import Navbar from '@/components/Navbar.vue'
+import ExhibitionDetailDialog from '@/components/ExhibitionDetailDialog.vue'
 import { getMemberMessageList } from '@/api/MemberMessage'
+import { getExhibitionList } from '@/api/Exhibition'
 
 const router = useRouter()
 
 const memberMessages = ref([])
 const messageLoadFailed = ref(false)
 const serverShortName = ref('SCT')
+
+/* ---------------- 三个展览区块 ---------------- */
+// key 是后端 category，route 是「查看更多」跳转的路径
+const sections = ref([
+  { key: 'redstone', route: 'machine', title: '机器展览区', items: [], failed: false, previewCount: 3 },
+  { key: 'building', route: 'building', title: '建筑展览区', items: [], failed: false, previewCount: 3 },
+  { key: 'other', route: 'other', title: '其他内容', items: [], failed: false, previewCount: 3 }
+])
+
+const detailVisible = ref(false)
+const activeId = ref(null)
+
+function openDetail(item) {
+  activeId.value = item.id
+  detailVisible.value = true
+}
+
+async function fetchExhibitions() {
+  await Promise.all(
+    sections.value.map(async (section) => {
+      try {
+        const res = await getExhibitionList(section.key)
+        section.items = Array.isArray(res?.data) ? res.data : []
+        section.failed = false
+      } catch (e) {
+        section.items = []
+        section.failed = true
+      }
+    })
+  )
+}
 
 async function fetchMemberMessages() {
   try {
@@ -114,30 +137,15 @@ function handleAvatarError(e) {
   e.target.style.visibility = 'hidden'
 }
 
-const machines = [
-  { id: 1, title: '墨鱼塔', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: true },
-  { id: 2, title: '1.21全物品', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 3, title: '合成站', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 4, title: '女巫塔', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 5, title: '四连鱼塔', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: true }
-]
+/* ---------------- 预览数量按容器宽度自适应 ---------------- */
+const containerRefs = ref([])
+const setContainerRef = (el, index) => {
+  containerRefs.value[index] = el
+}
 
-const buildings = [
-  { id: 1, title: 'SCT主世界大厅', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 2, title: 'SCT地狱大厅', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: true },
-  { id: 3, title: 'Xc_Star的狗窝', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 4, title: '天空之橙', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false },
-  { id: 5, title: 'SCT末地大厅', img: '/profile/upload/2025/07/02/123054495_p2_20250702014641A001.jpg', top: false }
-]
-
-const machinePreviewCount = ref(3)
-const buildingPreviewCount = ref(3)
 // 与 .gallery-grid 的 minmax 最小宽度、gap 保持一致
 const cardMinWidth = 200
 const cardGap = 20
-
-const machineContainer = ref(null)
-const buildingContainer = ref(null)
 
 const isMobile = ref(false)
 
@@ -145,32 +153,19 @@ function checkIsMobile() {
   isMobile.value = window.innerWidth <= 800
 }
 
-function calcPreviewCount(containerRef, countRef) {
-  if (!containerRef.value) return
-  const width = containerRef.value.offsetWidth
-  countRef.value = Math.max(1, Math.floor((width + cardGap) / (cardMinWidth + cardGap)))
-}
-
 function handleResize() {
-  calcPreviewCount(machineContainer, machinePreviewCount)
-  calcPreviewCount(buildingContainer, buildingPreviewCount)
+  checkIsMobile()
+  sections.value.forEach((section, index) => {
+    const el = containerRefs.value[index]
+    if (!el) return
+    const width = el.offsetWidth
+    section.previewCount = Math.max(1, Math.floor((width + cardGap) / (cardMinWidth + cardGap)))
+  })
 }
 
-onMounted(() => {
-  nextTick(() => {
-    handleResize()
-    checkIsMobile()
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('resize', checkIsMobile)
-  })
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
-  window.removeEventListener('resize', checkIsMobile)
-})
-
-const machinePreviewCountFinal = computed(() => isMobile.value ? 4 : machinePreviewCount.value)
-const buildingPreviewCountFinal = computed(() => isMobile.value ? 4 : buildingPreviewCount.value)
+function visibleCount(section) {
+  return isMobile.value ? 4 : section.previewCount
+}
 
 function goToDetail(type) {
   router.push(`/overview/${type}`)
@@ -194,7 +189,18 @@ function getServerShortName() {
 onMounted(async () => {
   serverShortName.value = getServerShortName()
   document.title = serverShortName.value + '官网'
+
   await fetchMemberMessages()
+  await fetchExhibitions()
+
+  nextTick(() => {
+    handleResize()
+    window.addEventListener('resize', handleResize)
+  })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
@@ -317,7 +323,7 @@ onMounted(async () => {
 }
 
 .empty-tip {
-  padding: 32px 0;
+  padding: 32px 20px 12px;
   text-align: center;
   color: #909399;
   font-size: 0.92rem;
@@ -337,9 +343,11 @@ onMounted(async () => {
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 .gallery-card:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 .card-media {
   position: relative;
@@ -378,6 +386,20 @@ onMounted(async () => {
   top: 8px;
   right: 8px;
   background: rgba(253, 246, 236, 0.95);
+}
+.count-tag {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 7px;
+  line-height: 20px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.72rem;
 }
 
 @media (max-width: 800px) {
@@ -423,5 +445,8 @@ onMounted(async () => {
   .user-message {
     font-size: 0.88rem;
   }
+  .empty-tip {
+    padding: 24px 14px 8px;
+  }
 }
-</style> 
+</style>
