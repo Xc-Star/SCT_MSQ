@@ -180,9 +180,9 @@ onMounted(async () => {
   transition: transform 0.3s ease;
 }
 
-.logo-image:hover {
+/* .logo-image:hover {
   transform: scale(1.05);
-}
+} */
 
 .logo {
   font-size: 1.5rem;
