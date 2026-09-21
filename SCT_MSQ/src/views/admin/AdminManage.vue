@@ -11,7 +11,7 @@
                 <el-table
                     v-loading="loading"
                     :data="tableData"
-                    style="width: 100%"
+                    style="width: 100%;"
                     v-if="!isMobile"
                     border
                 >
@@ -314,14 +314,15 @@ onMounted(() => {
 <style scoped>
 .admin-manage {
     padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    background-color: var(--shell);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
 }
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .content {
@@ -346,10 +347,11 @@ h2 {
 }
 
 .mobile-item {
-    background: #fff;
-    border-radius: 8px;
+    background: var(--shell);
+    border-radius: var(--radius-lg);
     padding: 16px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
 }
 
 .mobile-item-header {
@@ -358,7 +360,7 @@ h2 {
     gap: 12px;
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--hair);
 }
 
 .mobile-item-header .username {
@@ -373,7 +375,7 @@ h2 {
 }
 
 .mobile-item-info {
-    color: #666;
+    color: var(--ink-500);
     font-size: 14px;
 }
 
@@ -383,13 +385,13 @@ h2 {
 }
 
 :deep(.el-table) {
-    --el-table-border-color: #ebeef5;
-    --el-table-header-bg-color: #f5f7fa;
+    --el-table-border-color: var(--hair);
+    --el-table-header-bg-color: var(--count-bg);
 }
 
 :deep(.el-table th) {
     font-weight: 600;
-    color: #606266;
+    color: var(--ink-500);
 }
 
 :deep(.el-table td) {

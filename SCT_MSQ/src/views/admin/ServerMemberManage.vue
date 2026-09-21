@@ -15,7 +15,7 @@
                         <el-table :data="memberList" v-loading="loading" class="pc-table">
                             <el-table-column prop="avatar" label="头像" align="center">
                                 <template #default="scope">
-                                    <img :src="scope.row.avatar" style="width:32px;height:32px;border-radius:50%;" />
+                                    <img :src="scope.row.avatar" style="width:32px; height:32px; border-radius:50%;" />
                                 </template>
                             </el-table-column>
                             <el-table-column prop="respondent" label="ID" align="center" />
@@ -97,7 +97,7 @@
                         <el-table :data="removedList" v-loading="loading" class="pc-table">
                             <el-table-column prop="avatar" label="头像" align="center">
                                 <template #default="scope">
-                                    <img :src="scope.row.avatar" style="width:32px;height:32px;border-radius:50%;" />
+                                    <img :src="scope.row.avatar" style="width:32px; height:32px; border-radius:50%;" />
                                 </template>
                             </el-table-column>
                             <el-table-column prop="respondent" label="ID" align="center" />
@@ -381,14 +381,15 @@ onMounted(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .content {
-    background-color: #fff;
+    background-color: var(--shell);
     padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
 }
 
 .operation-bar {
@@ -422,12 +423,12 @@ h2 {
 
     .mobile-list {
         display: block;
-        background: #fff;
+        background: var(--shell-strong);
     }
 
     .mobile-item {
         padding: 6px 8px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--hair);
     }
 
     .mobile-item:last-child {
@@ -455,12 +456,12 @@ h2 {
 
     .user-id {
         font-size: 0.8rem;
-        color: #333;
+        color: var(--ink-900);
     }
 
     .user-uuid {
         font-size: 0.7rem;
-        color: #666;
+        color: var(--ink-500);
         margin-left: 4px;
     }
 
@@ -477,7 +478,7 @@ h2 {
     }
 
     .label {
-        color: #666;
+        color: var(--ink-500);
         width: 60px;
         flex-shrink: 0;
     }

@@ -60,21 +60,6 @@ function setBackgroundImage() {
   }
 }
 
-function getServerShortName() {
-  const CACHE_KEY = 'navbar_config_cache'
-  const cacheStr = localStorage.getItem(CACHE_KEY)
-  if (cacheStr) {
-    try {
-      const cache = JSON.parse(cacheStr)
-      if (cache.data) {
-        const item = cache.data.find(item => item.configKey === 'server_short_name')
-        if (item && item.configValue) return item.configValue
-      }
-    } catch (e) {}
-  }
-  return ''
-}
-
 onMounted(async () => {
   // 强制跳转到指定URL
   // window.location.href = 'http://v4.sctserver.top:81/sctserver'
@@ -83,9 +68,9 @@ onMounted(async () => {
   router.push('/sctserver')
   
   // 以下代码将不会执行，因为页面已经跳转
-  document.title = getServerShortName() + '官网'
   checkDeviceType()
   await fetchConfig()
+  document.title = (configMap.value.server_short_name || '') + '官网'
   getBackgroundImage()
   window.addEventListener('resize', handleResize)
 })

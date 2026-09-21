@@ -538,7 +538,7 @@ onUnmounted(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .card-header {
@@ -584,8 +584,8 @@ h2 {
 .cover-thumb {
     width: 64px;
     height: 48px;
-    border-radius: 4px;
-    background: #f5f7fa;
+    border-radius: var(--radius-md);
+    background: var(--count-bg);
     cursor: zoom-in;
 }
 
@@ -606,11 +606,11 @@ h2 {
 .sub-text {
     margin-top: 2px;
     font-size: 0.7rem;
-    color: #909399;
+    color: var(--ink-500);
 }
 
 .muted {
-    color: #c0c4cc;
+    color: var(--ink-300);
 }
 
 .option-tips {
@@ -649,12 +649,12 @@ h2 {
 
     .mobile-list {
         display: block;
-        background: #fff;
+        background: var(--shell-strong);
     }
 
     .mobile-item {
         padding: 10px 8px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--hair);
     }
 
     .mobile-item:last-child {
@@ -671,10 +671,10 @@ h2 {
     .mobile-cover {
         width: 52px;
         height: 40px;
-        border-radius: 4px;
+        border-radius: var(--radius-md);
         object-fit: cover;
         flex-shrink: 0;
-        background: #f5f7fa;
+        background: var(--count-bg);
     }
 
     .item-meta {
@@ -687,7 +687,7 @@ h2 {
 
     .item-title {
         font-size: 0.85rem;
-        color: #333;
+        color: var(--ink-900);
         font-weight: 500;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -696,7 +696,7 @@ h2 {
 
     .item-sub {
         font-size: 0.72rem;
-        color: #909399;
+        color: var(--ink-500);
     }
 
     .tags {
@@ -715,7 +715,7 @@ h2 {
 
     .time {
         font-size: 0.72rem;
-        color: #909399;
+        color: var(--ink-500);
     }
 
     .actions {

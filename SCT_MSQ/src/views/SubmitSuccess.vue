@@ -30,17 +30,20 @@ const goToHome = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f5f7fa;
+    background-color: transparent;
 }
 
 .success-content {
-    background-color: #fff;
+    background-color: var(--shell);
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
     width: 100%;
     max-width: 500px;
     margin: 20px;
+    outline: 1px solid var(--shell-border);
+    backdrop-filter: blur(2px) saturate(1.8);
+    -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 :deep(.el-result__icon) {
@@ -50,12 +53,12 @@ const goToHome = () => {
 :deep(.el-result__title) {
     margin-top: 20px;
     font-size: 24px;
-    color: #67c23a;
+    color: var(--sct-success);
 }
 
 :deep(.el-result__subtitle) {
     margin-top: 10px;
     font-size: 16px;
-    color: #606266;
+    color: var(--ink-500);
 }
 </style> 

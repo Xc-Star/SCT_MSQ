@@ -23,19 +23,19 @@
         </div>
       </div>
       <form v-else class="msq-form">
-        <div class="title" style="margin-bottom: 64px;">
-          <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: black;">{{ topic.name }}</h2>
-          <span style="text-align: center; color: #666; display: block;">
+        <div class="title">
+          <h2>{{ topic.name }}</h2>
+          <p class="questionnaire-description">
             {{ topic.description }}
-          </span>
+          </p>
         </div>
 
         <div class="msq-topic" v-for="(topic, index) in topic.topics" :key="topic.id">
 
           <div v-if="topic.type === 'input'">
             <div class="input-container">
-              <input required id="input" type="text" v-model="submitData[topic.id]" autocomplete="off" @blur="handleInputBlur($event, topic.id)" />
-              <label class="label" for="input">{{ index + 1 }}. {{ topic.topic }}</label>
+              <label class="label" :for="'input-' + topic.id">{{ index + 1 }}. {{ topic.topic }}</label>
+              <input required :id="'input-' + topic.id" type="text" v-model="submitData[topic.id]" autocomplete="off" @blur="handleInputBlur($event, topic.id)" />
               <div class="underline"></div>
             </div>
             <div v-if="topic.id === -2" class="player-info">
@@ -60,7 +60,6 @@
                 style="cursor: pointer;"
               />
             </div>
-            <div style="height: 50px;"></div>
           </div>
 
           <div v-if="topic.type === 'file'">
@@ -94,13 +93,12 @@
                 <div class="el-upload__tip">支持bmp, gif, jpg, jpeg, png, rar, zip, gz, bz2, litematic, schematic格式，最多3个文件，单文件不超过20MB</div>
               </template>
             </el-upload>
-            <div style="height: 50px;"></div>
           </div>
 
-          <div v-if="topic.type === 'radio'">
-            {{ index + 1 }}. {{ topic.topic }}
+          <div v-if="topic.type === 'radio'" role="group" :aria-labelledby="'question-' + topic.id">
+            <p class="question-label" :id="'question-' + topic.id">{{ index + 1 }}. {{ topic.topic }}</p>
             <div class="radio-button-container">
-              <div class="radio-button" v-for="(option, index) in topic.options">
+              <div class="radio-button" v-for="(option, index) in topic.options" :key="index">
                 <input type="radio" class="radio-button__input" :id="'radio-' + topic.id + '-' + index" :name="'radio-group-' + topic.id" :value="option" v-model="submitData[topic.id]">
                 <label class="radio-button__label" :for="'radio-' + topic.id + '-' + index">
                   <span class="radio-button__custom"></span>
@@ -119,11 +117,10 @@
                 style="cursor: pointer;"
               />
             </div>
-            <div style="height: 32px;"></div>
           </div>
 
-          <div v-if="topic.type === 'checkbox'">
-            {{ index + 1 }}. {{ topic.topic }}
+          <div v-if="topic.type === 'checkbox'" role="group" :aria-labelledby="'question-' + topic.id">
+            <p class="question-label" :id="'question-' + topic.id">{{ index + 1 }}. {{ topic.topic }}</p>
             <div class="checkbox-container">
               <label class="cyberpunk-checkbox-label" v-for="(option, index) in topic.options" :key="index">
                 <input type="checkbox" class="cyberpunk-checkbox" :id="'checkbox-' + topic.id + '-' + index" :name="'checkbox-group-' + topic.id" :value="option" v-model="submitData[topic.id]" @change="handleCheckboxChange($event, topic.id)">
@@ -141,12 +138,13 @@
                 style="cursor: pointer;"
               />
             </div>
-            <div style="height: 32px;"></div>
           </div>
 
         </div>
 
-        <button class="button2" @click="submit">提交</button>
+        <div class="form-actions">
+          <button class="button2" @click="submit">提交</button>
+        </div>
       </form>
     </div>
   </div>
@@ -160,7 +158,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import Navbar from '@/components/Navbar.vue'
-import { getConfig } from '@/api/System'
 
 interface TopicOption {
   id: number
@@ -262,37 +259,10 @@ const errorMessage = ref<string | null>(null);
 const showImageViewer = ref(false)
 const currentImageUrl = ref('')
 
-// 背景图片自适应逻辑
 const msqContainer = ref<HTMLElement | null>(null)
-const backgroundImageUrl = ref('')
-const isMobile = ref(false)
-const configMap = ref({})
 
 const fileUploadList = ref<{ [key: number]: any[] }>({})
 const acceptFileTypes = '.bmp,.gif,.jpg,.jpeg,.png,.rar,.zip,.gz,.bz2,.litematic,.schematic'
-
-function checkDeviceType() {
-  isMobile.value = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-}
-
-function setBackgroundImage() {
-  if (msqContainer.value) {
-    msqContainer.value.style.backgroundImage = `url('${backgroundImageUrl.value}')`
-    msqContainer.value.style.backgroundSize = 'cover'
-    msqContainer.value.style.backgroundPosition = 'center'
-    msqContainer.value.style.backgroundRepeat = 'no-repeat'
-    msqContainer.value.style.backgroundAttachment = 'fixed'
-  }
-}
-
-function getBackgroundImage() {
-  if (isMobile.value) {
-    backgroundImageUrl.value = configMap.value['phone_msq_background'] || ''
-  } else {
-    backgroundImageUrl.value = configMap.value['msq_background'] || ''
-  }
-  setBackgroundImage()
-}
 
 function getImageUrl(url: string) {
   if (!url) return ''
@@ -388,26 +358,6 @@ const retryFetch = () => {
 // 在组件挂载时获取数据
 onMounted(() => {
   document.title = '问卷填写'
-  checkDeviceType()
-  // 获取配置
-  getConfig().then(res => {
-    if (res && res.data) {
-      const map = {}
-      res.data.forEach(item => {
-        map[item.configKey] = item.configValue
-      })
-      configMap.value = map
-    }
-  }).finally(() => {
-    getBackgroundImage()
-  })
-  window.addEventListener('resize', () => {
-    const wasMobile = isMobile.value
-    checkDeviceType()
-    if (wasMobile !== isMobile.value) {
-      getBackgroundImage()
-    }
-  })
   fetchData();
 })
 
@@ -600,33 +550,67 @@ function handleFileRemove(file, fileList, topicId) {
 
 /* 全局文字阴影 */
 * {
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.18), 0 1px 1px rgba(0,0,0,0.10);
+  text-shadow: none;
 }
 
 .container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 60px auto 0;
-  padding: 20px 5%;
-  background-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, .3);
-  border-radius: 5px;
+  width: calc(100% - 48px);
+  max-width: 880px;
+  margin: 84px auto 0;
+  padding: 32px 40px;
+  background-color: var(--shell);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  border-radius: var(--radius-lg);
   box-sizing: border-box;
   margin-bottom: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--shell-border);
 }
 
 .msq-form {
   width: 100%;
+  overflow-wrap: anywhere;
+}
+.title {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--hair);
+}
+.questionnaire-description {
+  margin: 12px 0 0;
+  color: var(--ink-700);
+  line-height: 1.75;
+  white-space: pre-line;
+}
+.msq-topic + .msq-topic {
+  margin-top: 28px;
+}
+.question-label, .input-container label {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--ink-900);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+.form-actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hair);
+}
+.form-actions .button2 {
+  min-width: 160px;
+  min-height: 44px;
+  border-radius: var(--radius-md);
 }
 
 .title h2 {
-  text-align: center;
+  text-align: left;
   font-weight: 700;
-  font-size: clamp(40px, 8vw, 80px);
-  color: black;
+  font-size: 28px;
+  line-height: 1.4;
+  color: var(--ink-900);
   margin: 0;
 }
 
@@ -638,29 +622,20 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .input-container input[type="text"] {
-  font-size: 20px;
+  font-size: 16px;
+  min-height: 44px;
+  box-sizing: border-box;
   width: 100%;
   border: none;
-  border-bottom: 2px solid #555;
+  border-bottom: 2px solid var(--ink-700);
   padding: 5px 0;
   background-color: transparent;
   outline: none;
 }
 
 .input-container .label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: black;
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-
-.input-container input[type="text"]:focus ~ .label,
-.input-container input[type="text"]:valid ~ .label {
-  top: -20px;
-  font-size: 16px;
-  color: #4c8bf5;
+  position: static;
+  color: var(--ink-900);
 }
 
 .input-container .underline {
@@ -669,7 +644,7 @@ function handleFileRemove(file, fileList, topicId) {
   left: 0;
   height: 2px;
   width: 100%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: scaleX(0);
   transition: all 0.3s ease;
 }
@@ -681,10 +656,10 @@ function handleFileRemove(file, fileList, topicId) {
 
 /* From Uiverse.io by gharsh11032000 */ 
 .radio-button-container {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  gap: 8px 24px;
 }
 
 .radio-button {
@@ -701,44 +676,49 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .radio-button__label {
-  display: inline-block;
+  display: block;
   padding-left: 30px;
-  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  min-height: 44px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  line-height: 1.5;
   position: relative;
   font-size: 15px;
-  color: #000;
+  color: var(--ink-900);
   font-weight: 400;
   cursor: pointer;
-  text-transform: uppercase;
+  text-transform: none;
   transition: all 0.3s ease;
 }
 
 .radio-button__custom {
   position: absolute;
-  top: 0;
+  top: 12px;
   left: 0;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #555;
+  border: 2px solid var(--ink-700);
   transition: all 0.3s ease;
 }
 
 .radio-button__input:checked + .radio-button__label .radio-button__custom {
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   border-color: transparent;
   transform: scale(0.8);
-  box-shadow: 0 0 20px #4c8bf580;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .radio-button__input:checked + .radio-button__label {
-  color: #4c8bf5;
+  color: var(--aqua-500);
 }
 
 .radio-button__label:hover .radio-button__custom {
   transform: scale(1.2);
-  border-color: #4c8bf5;
-  box-shadow: 0 0 20px #4c8bf580;
+  border-color: var(--aqua-500);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 /* From Uiverse.io by adamgiebl */ 
@@ -746,8 +726,8 @@ function handleFileRemove(file, fileList, topicId) {
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #555;
-  border-radius: 5px;
+  border: 2px solid var(--ink-700);
+  border-radius: 6px;
   background-color: transparent;
   display: inline-block;
   position: relative;
@@ -757,7 +737,7 @@ function handleFileRemove(file, fileList, topicId) {
 
 .cyberpunk-checkbox:before {
   content: "";
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   display: block;
   position: absolute;
   top: 50%;
@@ -774,21 +754,23 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .cyberpunk-checkbox:checked {
-  border-color: #4c8bf5;
+  border-color: var(--aqua-500);
 }
 
 .cyberpunk-checkbox:checked + .cyberpunk-checkbox-label {
-  color: #4c8bf5;
+  color: var(--aqua-500);
 }
 
 .cyberpunk-checkbox:hover {
-  border-color: #4c8bf5;
-  box-shadow: 0 0 20px #4c8bf580;
+  border-color: var(--aqua-500);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .cyberpunk-checkbox-label {
-  font-size: 18px;
-  color: #000;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 44px;
+  color: var(--ink-900);
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -796,10 +778,10 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .checkbox-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin: 10px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 0;
 }
 
 /* From Uiverse.io by shah1345 */ 
@@ -812,20 +794,20 @@ function handleFileRemove(file, fileList, topicId) {
   position: relative;
   overflow: hidden;
   z-index: 1;
-  color: #090909;
+  color: var(--ink-900);
   padding: 0.3em 1.8em;
   cursor: pointer;
   font-size: 18px;
-  border-radius: 0.5em;
-  background: #e8e8e8;
-  border: 1px solid #eee;
+  border-radius: var(--radius-pill);
+  background: var(--count-bg);
+  border: 1px solid var(--hair);
   /* box-shadow: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff; */
-  box-shadow: 3px 3px 3px rgba(0, 0, 0, .2);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 
 .button2:active {
-  color: #666;
-  box-shadow: inset 4px 4px 12px #c5c5c5, inset -4px -4px 12px #ffffff;
+  color: var(--ink-500);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 
 .button2:before {
@@ -836,7 +818,7 @@ function handleFileRemove(file, fileList, topicId) {
   top: 100%;
   width: 140%;
   height: 180%;
-  background-color: rgba(76, 139, 245, 0.1);
+  background-color: var(--accent-glow);
   border-radius: 50%;
   display: block;
   transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -851,7 +833,7 @@ function handleFileRemove(file, fileList, topicId) {
   top: 180%;
   width: 160%;
   height: 190%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   border-radius: 50%;
   display: block;
   transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -860,32 +842,34 @@ function handleFileRemove(file, fileList, topicId) {
 
 .button2:hover {
   color: #ffffff;
-  border: 1px solid #4c8bf5;
+  border: 1px solid var(--aqua-500);
 }
 
 .button2:hover:before {
   top: -35%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 .button2:hover:after {
   top: -45%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 @media screen and (max-width: 768px) {
-  .radio-button-container {
-    flex-direction: column;
-    align-items: flex-start;
+  .container {
+    width: calc(100% - 24px);
+    margin-top: 76px;
+    padding: 24px 18px;
+  }
+  .title h2 { font-size: 24px; }
+  .radio-button-container, .checkbox-container {
+    grid-template-columns: minmax(0, 1fr);
     gap: 4px;
   }
-
-  .checkbox-container {
-    flex-direction: column;
-    gap: 4px;
-  }
+  .form-actions .button2 { width: 100%; }
+  .questionnaire-list { padding: 0; }
 }
 
 .error-message {
@@ -894,12 +878,12 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .error-message h3 {
-  color: #ff4d4f;
+  color: var(--sct-danger);
   margin-bottom: 16px;
 }
 
 .error-message p {
-  color: #666;
+  color: var(--ink-500);
   margin-bottom: 24px;
 }
 
@@ -915,7 +899,7 @@ function handleFileRemove(file, fileList, topicId) {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #4c8bf5;
+  border-top: 5px solid var(--aqua-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -927,7 +911,7 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .loading-container p {
-  color: #666;
+  color: var(--ink-500);
   font-size: 16px;
 }
 
@@ -938,42 +922,44 @@ function handleFileRemove(file, fileList, topicId) {
 .questionnaire-list h2 {
   text-align: center;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--ink-900);
 }
 
 .questionnaire-items {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 20px;
 }
 
 .questionnaire-item {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--shell);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   cursor: pointer;
   transition: all 0.3s ease;
+  outline: 1px solid var(--shell-border);
 }
 
 .questionnaire-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lift), var(--glass-spec);
 }
 
 .questionnaire-item h3 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: var(--ink-900);
 }
 
 .questionnaire-item p {
   margin: 0;
-  color: #666;
+  color: var(--ink-500);
   font-size: 14px;
 }
 
 .player-info {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-top: 8px;
@@ -981,28 +967,28 @@ function handleFileRemove(file, fileList, topicId) {
 }
 
 .player-tip {
-  color: #666;
+  color: var(--ink-500);
 }
 
 .player-avatar {
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   vertical-align: middle;
 }
 
 .player-username {
-  color: #333;
+  color: var(--ink-900);
   font-weight: 500;
 }
 
 .player-uuid {
-  color: #666;
+  color: var(--ink-500);
   font-family: monospace;
 }
 
 .player-error {
-  color: #ff4d4f;
+  color: var(--sct-danger);
   font-size: 14px;
 }
 
@@ -1028,10 +1014,10 @@ function handleFileRemove(file, fileList, topicId) {
   gap: 12px;
 }
 .topic-image {
-  max-width: 300px;
+  max-width: min(100%, 300px);
   max-height: 200px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   object-fit: contain;
 }
 
@@ -1039,7 +1025,7 @@ function handleFileRemove(file, fileList, topicId) {
   position: fixed;
   z-index: 9999;
   left: 0; top: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1047,8 +1033,9 @@ function handleFileRemove(file, fileList, topicId) {
 .image-viewer-img {
   max-width: 90vw;
   max-height: 90vh;
-  border-radius: 8px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  background: var(--shell-strong);
 }
-</style> 
+</style>
+<style scoped src="../styles/msq-controls.css"></style>

@@ -12,7 +12,7 @@
         </div>
         <form v-else class="msq-form">
           <div class="title" style="margin-bottom: 64px; position: relative;">
-            <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: black;">{{ topic.msqName }}</h2>
+            <h2 style="text-align: center; font-weight: 700; font-size: clamp(40px, 8vw, 80px); color: var(--ink-900);">{{ topic.msqName }}</h2>
             <template v-if="[2,3,4].includes(topic.status)">
               <div class="stamp" :class="getStampClass(topic.status)">
                 {{ getStampText(topic.status) }}
@@ -59,7 +59,7 @@
               </div>
               <div v-if="topic.files && topic.files.length" class="topic-files" style="margin-top: 12px;">
                 <div v-for="(file, fileIndex) in topic.files" :key="fileIndex" style="margin-bottom: 8px;">
-                  <a :href="getImageUrl(file)" target="_blank" style="color: #4c8bf5; text-decoration: underline;">
+                  <a :href="getImageUrl(file)" target="_blank" style="color: var(--aqua-500); text-decoration: underline;">
                     {{ getFileName(file) }}
                   </a>
                 </div>
@@ -433,7 +433,7 @@
     /* align-items: center; */
     /* justify-content: center; */
     min-height: 100vh;
-    background-color: #fff;
+    background-color: transparent;
   }
   
   .container {
@@ -441,10 +441,13 @@
     max-width: 1200px;
     margin: 50px auto;
     padding: 60px 5%;
-    background-color: rgba(255, 255, 255, .3);
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, .3);
-    border-radius: 5px;
+    background-color: var(--shell);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    border-radius: var(--radius-lg);
     box-sizing: border-box;
+    outline: 1px solid var(--shell-border);
+    backdrop-filter: blur(2px) saturate(1.8);
+    -webkit-backdrop-filter: blur(2px) saturate(1.8);
   }
   
   .msq-form {
@@ -455,7 +458,7 @@
     text-align: center;
     font-weight: 700;
     font-size: clamp(40px, 8vw, 80px);
-    color: black;
+    color: var(--ink-900);
     margin: 0;
   }
   
@@ -470,7 +473,7 @@
     font-size: 20px;
     width: 100%;
     border: none;
-    border-bottom: 2px solid #555;
+    border-bottom: 2px solid var(--ink-700);
     padding: 5px 0;
     background-color: transparent;
     outline: none;
@@ -480,7 +483,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    color: black;
+    color: var(--ink-900);
     transition: all 0.3s ease;
     pointer-events: none;
   }
@@ -489,7 +492,7 @@
   .input-container input[type="text"]:valid ~ .label {
     top: -20px;
     font-size: 16px;
-    color: #4c8bf5;
+    color: var(--aqua-500);
   }
   
   .input-container .underline {
@@ -498,7 +501,7 @@
     left: 0;
     height: 2px;
     width: 100%;
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     transform: scaleX(0);
     transition: all 0.3s ease;
   }
@@ -511,20 +514,20 @@
   .input-container input[type="text"]:disabled {
     background-color: transparent;
     cursor: default;
-    color: #666;
-    border-bottom: 2px solid #999;
+    color: var(--ink-500);
+    border-bottom: 2px solid var(--ink-500);
   }
   
   .input-container input[type="text"]:disabled ~ .label {
     top: -20px;
     font-size: 16px;
-    color: #666;
+    color: var(--ink-500);
     cursor: default;
   }
   
   .input-container input[type="text"]:disabled ~ .underline {
     transform: scaleX(1);
-    background-color: #999;
+    background-color: var(--ink-500);
   }
   
   /* From Uiverse.io by gharsh11032000 */ 
@@ -554,7 +557,7 @@
     margin-bottom: 10px;
     position: relative;
     font-size: 15px;
-    color: #000;
+    color: var(--ink-900);
     font-weight: 400;
     cursor: pointer;
     text-transform: uppercase;
@@ -568,25 +571,25 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 2px solid #555;
+    border: 2px solid var(--ink-700);
     transition: all 0.3s ease;
   }
   
   .radio-button__input:checked + .radio-button__label .radio-button__custom {
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     border-color: transparent;
     transform: scale(0.8);
-    box-shadow: 0 0 20px #4c8bf580;
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
   
   .radio-button__input:checked + .radio-button__label {
-    color: #4c8bf5;
+    color: var(--aqua-500);
   }
   
   .radio-button__label:hover .radio-button__custom {
     transform: scale(1.2);
-    border-color: #4c8bf5;
-    box-shadow: 0 0 20px #4c8bf580;
+    border-color: var(--aqua-500);
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
   
   .radio-button__input:disabled + .radio-button__label {
@@ -595,12 +598,12 @@
   }
   
   .radio-button__input:disabled + .radio-button__label .radio-button__custom {
-    border-color: #999;
+    border-color: var(--ink-500);
   }
   
   .radio-button__input:disabled + .radio-button__label:hover .radio-button__custom {
     transform: none;
-    border-color: #999;
+    border-color: var(--ink-500);
     box-shadow: none;
   }
   
@@ -609,8 +612,8 @@
     appearance: none;
     width: 20px;
     height: 20px;
-    border: 2px solid #555;
-    border-radius: 5px;
+    border: 2px solid var(--ink-700);
+    border-radius: 6px;
     background-color: transparent;
     display: inline-block;
     position: relative;
@@ -620,7 +623,7 @@
   
   .cyberpunk-checkbox:before {
     content: "";
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     display: block;
     position: absolute;
     top: 50%;
@@ -637,32 +640,32 @@
   }
   
   .cyberpunk-checkbox:checked {
-    border-color: #4c8bf5;
+    border-color: var(--aqua-500);
   }
   
   .cyberpunk-checkbox:checked + .cyberpunk-checkbox-label {
-    color: #4c8bf5;
+    color: var(--aqua-500);
   }
   
   .cyberpunk-checkbox:hover {
-    border-color: #4c8bf5;
-    box-shadow: 0 0 20px #4c8bf580;
+    border-color: var(--aqua-500);
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
   
   .cyberpunk-checkbox:disabled {
     cursor: default;
     opacity: 0.7;
-    border-color: #999;
+    border-color: var(--ink-500);
   }
   
   .cyberpunk-checkbox:disabled:hover {
-    border-color: #999;
+    border-color: var(--ink-500);
     box-shadow: none;
   }
   
   .cyberpunk-checkbox-label {
     font-size: 18px;
-    color: #000;
+    color: var(--ink-900);
     cursor: pointer;
     user-select: none;
     display: flex;
@@ -686,20 +689,20 @@
     position: relative;
     overflow: hidden;
     z-index: 1;
-    color: #090909;
+    color: var(--ink-900);
     padding: 0.3em 1.8em;
     cursor: pointer;
     font-size: 18px;
-    border-radius: 0.5em;
-    background: #e8e8e8;
-    border: 1px solid #eee;
+    border-radius: var(--radius-pill);
+    background: var(--count-bg);
+    border: 1px solid var(--hair);
     /* box-shadow: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff; */
-    box-shadow: 3px 3px 3px rgba(0, 0, 0, .2);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
   }
   
   .button2:active {
-    color: #666;
-    box-shadow: inset 4px 4px 12px #c5c5c5, inset -4px -4px 12px #ffffff;
+    color: var(--ink-500);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
   }
   
   .button2:before {
@@ -710,7 +713,7 @@
     top: 100%;
     width: 140%;
     height: 180%;
-    background-color: rgba(76, 139, 245, 0.1);
+    background-color: var(--accent-glow);
     border-radius: 50%;
     display: block;
     transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -725,7 +728,7 @@
     top: 180%;
     width: 160%;
     height: 190%;
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     border-radius: 50%;
     display: block;
     transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -734,18 +737,18 @@
   
   .button2:hover {
     color: #ffffff;
-    border: 1px solid #4c8bf5;
+    border: 1px solid var(--aqua-500);
   }
   
   .button2:hover:before {
     top: -35%;
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
   }
   
   .button2:hover:after {
     top: -45%;
-    background-color: #4c8bf5;
+    background-color: var(--aqua-500);
     transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
   }
   
@@ -768,12 +771,12 @@
   }
   
   .error-message h3 {
-    color: #ff4d4f;
+    color: var(--sct-danger);
     margin-bottom: 16px;
   }
   
   .error-message p {
-    color: #666;
+    color: var(--ink-500);
     margin-bottom: 24px;
   }
   
@@ -789,7 +792,7 @@
     width: 50px;
     height: 50px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #4c8bf5;
+    border-top: 5px solid var(--aqua-500);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
@@ -801,7 +804,7 @@
   }
   
   .loading-container p {
-    color: #666;
+    color: var(--ink-500);
     font-size: 16px;
   }
   
@@ -812,7 +815,7 @@
   .questionnaire-list h2 {
     text-align: center;
     margin-bottom: 30px;
-    color: #333;
+    color: var(--ink-900);
   }
   
   .questionnaire-items {
@@ -822,27 +825,28 @@
   }
   
   .questionnaire-item {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--shell);
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
     cursor: pointer;
     transition: all 0.3s ease;
+    outline: 1px solid var(--shell-border);
   }
   
   .questionnaire-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lift), var(--glass-spec);
   }
   
   .questionnaire-item h3 {
     margin: 0 0 10px 0;
-    color: #333;
+    color: var(--ink-900);
   }
   
   .questionnaire-item p {
     margin: 0;
-    color: #666;
+    color: var(--ink-500);
     font-size: 14px;
   }
   
@@ -862,23 +866,23 @@
   }
   
   .review-buttons .approve {
-    background-color: #67c23a;
+    background-color: var(--sct-success);
     color: white;
   }
   
   .review-buttons .approve:hover {
-    background-color: #85ce61;
-    border-color: #85ce61;
+    background-color: var(--sct-success);
+    border-color: var(--sct-success);
   }
   
   .review-buttons .reject {
-    background-color: #f56c6c;
+    background-color: var(--sct-danger);
     color: white;
   }
   
   .review-buttons .reject:hover {
-    background-color: #f78989;
-    border-color: #f78989;
+    background-color: var(--sct-danger);
+    border-color: var(--sct-danger);
   }
   
   .review-buttons .button2:hover {
@@ -899,15 +903,15 @@
   .topic-image {
     max-width: 300px;
     max-height: 200px;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
     object-fit: contain;
   }
   .image-viewer-overlay {
     position: fixed;
     z-index: 9999;
     left: 0; top: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7);
+    background: var(--overlay-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -915,9 +919,9 @@
   .image-viewer-img {
     max-width: 90vw;
     max-height: 90vh;
-    border-radius: 8px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-    background: #fff;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    background: var(--shell-strong);
   }
   .stamp {
     position: absolute;
@@ -927,21 +931,22 @@
     font-size: 2rem;
     font-weight: bold;
     color: #fff;
-    border-radius: 8px;
+    border-radius: var(--radius-pill);
     transform: rotate(12deg);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
     opacity: 0.92;
     z-index: 10;
-    letter-spacing: 6px;
+    letter-spacing: 0;
     user-select: none;
   }
   .stamp-success {
-    background: #67c23a;
+    background: var(--sct-success);
   }
   .stamp-danger {
-    background: #f56c6c;
+    background: var(--sct-danger);
   }
   .stamp-removed {
-    background: #909399;
+    background: var(--ink-500);
   }
-  </style> 
+  </style>
+  <style scoped src="../../../styles/msq-controls.css"></style>

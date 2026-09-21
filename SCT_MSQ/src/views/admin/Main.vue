@@ -163,6 +163,7 @@ const passwordRules = {
 }
 
 import { changePassword } from '@/api/Auth'
+import { getServerShortName } from '@/api/System'
 const handleChangePassword = async () => {
     if (!passwordFormRef.value) return
     
@@ -247,26 +248,11 @@ const handleCommand = (command: string) => {
     }
 }
 
-function getServerShortName() {
-    const CACHE_KEY = 'navbar_config_cache'
-    const cacheStr = localStorage.getItem(CACHE_KEY)
-    if (cacheStr) {
-        try {
-            const cache = JSON.parse(cacheStr)
-            if (cache.data) {
-                const item = cache.data.find(item => item.configKey === 'server_short_name')
-                if (item && item.configValue) return item.configValue
-            }
-        } catch (e) {}
-    }
-    return 'SCT'
-}
-
-onMounted(() => {
-    document.title = getServerShortName() + '后台'
+onMounted(async () => {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     window.addEventListener('scroll', handleScroll)
+    document.title = (await getServerShortName()) + '后台'
 })
 
 onUnmounted(() => {
@@ -283,8 +269,8 @@ onUnmounted(() => {
 
 .sidebar {
     width: 240px;
-    background-color: #304156;
-    color: #fff;
+    background-color: var(--shell);
+    color: var(--ink-700);
     padding: 20px 0;
     transition: all 0.3s;
     position: fixed;
@@ -292,7 +278,10 @@ onUnmounted(() => {
     left: 0;
     height: 100vh;
     z-index: 1000;
-    box-shadow: 2px 0 8px rgba(0,0,0,.08);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
+    backdrop-filter: blur(2px) saturate(1.8);
+    -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 .sidebar-collapsed {
@@ -308,7 +297,7 @@ onUnmounted(() => {
 }
 
 .logo h1 {
-    color: #fff;
+    color: var(--ink-900);
     font-size: 20px;
     margin: 0;
     white-space: nowrap;
@@ -318,7 +307,7 @@ onUnmounted(() => {
 .collapse-btn {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--ink-700);
     padding: 0;
     font-size: 20px;
 }
@@ -330,7 +319,7 @@ onUnmounted(() => {
 
 .nav-item {
     padding: 12px 20px;
-    color: #bfcbd9;
+    color: var(--ink-500);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -339,13 +328,14 @@ onUnmounted(() => {
 }
 
 .nav-item:hover {
-    color: #fff;
-    background-color: #263445;
+    color: var(--ink-900);
+    background-color: var(--tag-bg);
 }
 
 .nav-item.router-link-active {
-    color: #409EFF;
-    background-color: #263445;
+    color: var(--aqua-600);
+    background-color: var(--tag-bg);
+    box-shadow: inset 3px 0 0 var(--aqua-500);
 }
 
 .nav-item i {
@@ -356,7 +346,7 @@ onUnmounted(() => {
 .main-content {
     flex: 1;
     padding: 20px;
-    background-color: #f0f2f5;
+    background-color: transparent;
     transition: all 0.3s;
     margin-left: 240px;
 }
@@ -370,15 +360,15 @@ onUnmounted(() => {
     top: 10px;
     left: 10px;
     z-index: 1001;
-    background-color: #304156;
-    color: #fff;
+    background-color: var(--mist-50);
+    color: var(--ink-900);
     height: 40px;
-    border-radius: 4px;
+    border-radius: var(--radius-pill);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
     transition: all 0.3s ease;
     padding: 0 15px;
 }
@@ -387,13 +377,13 @@ onUnmounted(() => {
     width: 20px;
     padding: 0;
     left: 0;
-    border-radius: 0 4px 4px 0;
-    background-color: rgba(48, 65, 86, 0.9);
+    border-radius: var(--radius-pill);
+    background-color: var(--mist-50);
 }
 
 .menu-icon {
     font-size: 20px;
-    color: white !important;
+    color: var(--ink-900) !important;
 }
 
 .menu-text {
@@ -406,7 +396,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--overlay-bg);
     z-index: 999;
 }
 
@@ -426,16 +416,16 @@ onUnmounted(() => {
     gap: 8px;
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     transition: background-color 0.3s;
 }
 
 .user-dropdown-link:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: var(--count-bg);
 }
 
 .username {
-    color: #606266;
+    color: var(--ink-500);
     font-size: 14px;
 }
 
@@ -445,7 +435,7 @@ onUnmounted(() => {
         height: 100vh;
         z-index: 1000;
         transform: translateX(0);
-        box-shadow: 2px 0 8px rgba(0,0,0,.15);
+        box-shadow: var(--shadow-soft), var(--glass-spec);
     }
     .sidebar-collapsed {
         transform: translateX(-100%);

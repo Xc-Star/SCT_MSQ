@@ -7,7 +7,7 @@
             </div>
             
             <!-- PC端表格 -->
-            <el-table :data="tableData" style="width: 100%" v-loading="loading" class="pc-table">
+            <el-table :data="tableData" style="width: 100%;" v-loading="loading" class="pc-table">
                 <el-table-column prop="id" label="ID" width="80" align="center" />
                 <el-table-column prop="name" label="问卷名称" align="center" />
                 <el-table-column prop="type" label="类型" width="120" align="center">
@@ -277,14 +277,15 @@ onMounted(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .content {
-    background-color: #fff;
+    background-color: var(--shell);
     padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
 }
 
 .operation-bar {
@@ -316,11 +317,12 @@ h2 {
     }
 
     .mobile-item {
-        background: #fff;
-        border-radius: 8px;
+        background: var(--shell);
+        border-radius: var(--radius-lg);
         padding: 15px;
         margin-bottom: 15px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-soft), var(--glass-spec);
+        outline: 1px solid var(--shell-border);
     }
 
     .item-header {
@@ -340,13 +342,13 @@ h2 {
     }
 
     .description {
-        color: #666;
+        color: var(--ink-500);
         margin: 5px 0;
     }
 
     .update-time, .remark {
         font-size: 12px;
-        color: #999;
+        color: var(--ink-500);
         margin: 5px 0;
     }
 
@@ -356,7 +358,7 @@ h2 {
         align-items: center;
         margin-top: 10px;
         padding-top: 10px;
-        border-top: 1px solid #eee;
+        border-top: 1px solid var(--hair);
     }
 
     .operations {
@@ -379,8 +381,8 @@ h2 {
 
 .edit-container {
   padding: 20px;
-  background-color: #fff;
-  border-radius: 4px;
+  background-color: var(--shell-strong);
+  border-radius: var(--radius-lg);
 }
 
 .mobile-dialog :deep(.el-dialog__body) {

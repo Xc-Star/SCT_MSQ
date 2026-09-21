@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" :class="{ 'is-floating': isFloating }">
     <div class="nav-left">
       <img 
         :src="logoUrl" 
@@ -19,13 +19,13 @@
     </div>
     <!-- 手机端汉堡菜单 -->
     <div class="nav-mobile" ref="menuRef">
-      <button class="hamburger-btn" :class="{ open: menuOpen }" @click="toggleMenu" aria-label="菜单">
+      <button class="hamburger-btn" :class="{ open: menuOpen }" @click="toggleMenu" :aria-label="menuOpen ? '关闭菜单' : '打开菜单'" :aria-expanded="menuOpen" aria-controls="mobile-navigation">
         <span></span>
         <span></span>
         <span></span>
       </button>
       <div v-show="menuOpen" class="mobile-menu-mask">
-        <div class="mobile-full-menu auto-height" :class="{ show: menuOpen }">
+        <div id="mobile-navigation" class="mobile-full-menu auto-height" :class="{ show: menuOpen }">
           <div class="mobile-full-menu-content">
             <ul class="mobile-menu">
               <li @click="handleMenuClick(goToHome)">首页</li>
@@ -52,6 +52,12 @@ const showStockListTool = ref(false)
 const router = useRouter()
 const menuOpen = ref(false)
 const menuRef = ref(null)
+const isFloating = ref(false)
+let desktopViewport
+
+function updateFloating() {
+  isFloating.value = desktopViewport?.matches && window.scrollY > 0
+}
 
 function toggleMenu(e) {
   e.stopPropagation()
@@ -79,6 +85,8 @@ watch(menuOpen, (val) => {
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateFloating)
+  desktopViewport?.removeEventListener('change', updateFloating)
   document.removeEventListener('mousedown', handleClickOutside)
   document.removeEventListener('touchstart', handleClickOutside)
 })
@@ -91,25 +99,9 @@ function handleMenuClick(fn) {
 }
 
 async function fetchConfig() {
-  const CACHE_KEY = 'navbar_config_cache'
-  const CACHE_EXPIRE = 10 * 60 * 1000 // 5分钟
-  const cacheStr = localStorage.getItem(CACHE_KEY)
-  if (cacheStr) {
-    try {
-      const cache = JSON.parse(cacheStr)
-      if (Date.now() - cache.time < CACHE_EXPIRE) {
-        applyConfig(cache.data)
-        return
-      }
-    } catch (e) {}
-  }
   try {
     const res = await getConfig()
     if (res && res.data) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        time: Date.now(),
-        data: res.data
-      }))
       applyConfig(res.data)
     }
   } catch (e) {}
@@ -146,6 +138,10 @@ function handleImageError() {
 }
 
 onMounted(async () => {
+  desktopViewport = window.matchMedia('(min-width: 769px)')
+  updateFloating()
+  window.addEventListener('scroll', updateFloating, { passive: true })
+  desktopViewport.addEventListener('change', updateFloating)
   await fetchConfig()
 })
 </script>
@@ -157,15 +153,52 @@ onMounted(async () => {
   align-items: center;
   padding: 0 30px;
   height: 60px;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--shell);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
+  outline: 1px solid var(--shell-border);
+}
+
+@media (min-width: 769px) {
+  .navbar {
+    left: 50%;
+    right: auto;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 0;
+    transform: translate(-50%, 0);
+    transition: width 0.5s var(--ease-out), height 0.5s var(--ease-out),
+      padding 0.5s var(--ease-out), border-radius 0.5s var(--ease-out),
+      transform 0.55s var(--ease-spring), box-shadow 0.3s;
+  }
+  .navbar.is-floating {
+    width: min(1100px, calc(100% - 32px));
+    height: 56px;
+    padding: 0 20px;
+    border-radius: var(--radius-pill);
+    transform: translate(-50%, 12px);
+    box-shadow: var(--shadow-lift), var(--glass-spec);
+  }
+  .nav-left { min-width: 0; }
+  .logo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nav-pc { flex-shrink: 0; }
+}
+@media (min-width: 769px) and (max-width: 1000px) {
+  .navbar .nav-pc { gap: 8px; }
+  .navbar .nav-pc .nav-btn { padding-inline: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar { transition: none; }
 }
 
 .nav-left {
@@ -177,7 +210,7 @@ onMounted(async () => {
 .logo-image {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
   transition: transform 0.3s ease;
@@ -190,14 +223,14 @@ onMounted(async () => {
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #409EFF;
-  letter-spacing: 2px;
+  color: var(--aqua-500);
+  letter-spacing: 0;
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
 .logo:hover {
-  color: #337ecc;
+  color: var(--aqua-600);
 }
 
 .nav-right {
@@ -208,17 +241,22 @@ onMounted(async () => {
 
 .nav-btn {
   font-size: 1rem;
-  color: #606266;
+  color: var(--ink-700);
+  font-weight: 500;
 }
 
 .nav-btn:hover {
-  color: #409EFF;
+  color: var(--ink-900);
+  background: var(--count-bg);
 }
 
 .nav-pc {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+.nav-pc .nav-btn {
+  padding-inline: 14px;
 }
 .nav-mobile {
   display: none;
@@ -245,10 +283,12 @@ onMounted(async () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: transparent;
+  background: var(--sct-button-bg);
   border: none;
-  border-radius: 0;
-  box-shadow: none;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--shell-border), var(--glass-spec);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
   cursor: pointer;
   padding: 0;
   transition: background 0.2s;
@@ -258,30 +298,32 @@ onMounted(async () => {
   -webkit-tap-highlight-color: transparent;
 }
 .hamburger-btn:hover,
-.hamburger-btn:active,
-.hamburger-btn:focus {
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  border: none !important;
+.hamburger-btn:active {
+  background: var(--sct-button-hover-bg);
+  box-shadow: inset 0 0 0 1px var(--aqua-400), var(--glass-spec);
+}
+.hamburger-btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
 }
 .hamburger-btn span {
   display: block;
   width: 22px;
-  height: 3px;
+  height: 2px;
   margin: 3px 0;
-  background: #409EFF;
+  background: var(--ink-700);
   border-radius: 2px;
-  transition: all 0.3s cubic-bezier(.4,2,.6,1);
+  transition: transform 0.25s var(--ease-out), opacity 0.2s;
 }
 .hamburger-btn.open span:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
+  transform: translateY(8px) rotate(45deg);
 }
 .hamburger-btn.open span:nth-child(2) {
   opacity: 0;
 }
 .hamburger-btn.open span:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 /* 菜单弹出动画 */
@@ -318,16 +360,16 @@ onMounted(async () => {
   top: 60px;
   left: 0;
   right: 0;
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--mist-50) 70%, var(--shell));
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
   z-index: 999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  border-radius: 0 0 16px 16px;
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   height: auto;
   min-height: unset;
   max-height: 80vh;
@@ -337,6 +379,7 @@ onMounted(async () => {
   transform: translateY(-30px) scaleY(0.95);
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1);
+  outline: 1px solid var(--shell-border);
 }
 .mobile-full-menu.auto-height.show {
   opacity: 1;
@@ -362,7 +405,7 @@ onMounted(async () => {
 .mobile-menu li {
   padding: 18px 0;
   font-size: 1.15rem;
-  color: #333;
+  color: var(--ink-900);
   text-align: center;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
@@ -370,7 +413,7 @@ onMounted(async () => {
   margin: 0 18px;
 }
 .mobile-menu li:hover {
-  background: #e6f0ff;
-  color: #409EFF;
+  background: var(--shell);
+  color: var(--aqua-600);
 }
 </style> 

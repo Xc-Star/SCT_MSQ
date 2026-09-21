@@ -12,7 +12,7 @@
                         <el-input v-model="searchForm.respondentContact" placeholder="请输入联系方式" clearable />
                     </el-form-item>
                     <el-form-item label="问卷类型">
-                        <el-select v-model="searchForm.type" placeholder="请选择问卷类型" clearable style="width: 100%">
+                        <el-select v-model="searchForm.type" placeholder="请选择问卷类型" clearable style="width: 100%;">
                             <el-option label="红石问卷" :value="1" />
                             <el-option label="建筑问卷" :value="2" />
                             <el-option label="后勤问卷" :value="3" />
@@ -27,7 +27,7 @@
 
                 <!-- PC端表格 -->
                 <div class="pc-table" v-loading="loading">
-                    <el-table :data="tableData" style="width: 100%">
+                    <el-table :data="tableData" style="width: 100%;">
                         <el-table-column type="index" label="编号" width="80" align="center" />
                         <el-table-column prop="msqName" label="问卷名称" align="center" />
                         <el-table-column prop="type" label="类型" align="center">
@@ -398,14 +398,15 @@ onBeforeUnmount(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .content {
-    background-color: #fff;
+    background-color: var(--shell);
     padding: 20px;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+    outline: 1px solid var(--shell-border);
 }
 
 .search-form {
@@ -459,9 +460,9 @@ h2 {
 
     .mobile-list {
         display: block;
-        background: #fff;
-        border-top: 1px solid #eee;
-        border-bottom: 1px solid #eee;
+        background: var(--shell-strong);
+        border-top: 1px solid var(--hair);
+        border-bottom: 1px solid var(--hair);
     }
 
     .list-item {
@@ -476,7 +477,7 @@ h2 {
         right: 8px;
         bottom: 0;
         height: 1px;
-        background-color: #eee;
+        background-color: var(--hair);
     }
 
     .item-header {
@@ -489,7 +490,7 @@ h2 {
     .item-title {
         font-size: 0.9rem;
         font-weight: bold;
-        color: #333;
+        color: var(--ink-900);
     }
 
     .item-content {
@@ -505,7 +506,7 @@ h2 {
     }
 
     .label {
-        color: #666;
+        color: var(--ink-500);
         width: 60px;
         flex-shrink: 0;
     }

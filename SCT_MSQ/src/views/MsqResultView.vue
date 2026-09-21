@@ -2,11 +2,13 @@
   <div class="msq-container" ref="msqContainer">
     <Navbar />
     
-    <el-dialog v-model="showDialog" title="请输入你的ID" :width="dialogWidth" :close-on-click-modal="false" :show-close="true" @close="handleCancel" :class="{'mobile-dialog': isMobile}">
-        <el-input v-model="inputId" placeholder="请输入你的ID" @keyup.enter.native="handleConfirm" spellcheck="false" autocapitalize="off" />
+    <el-dialog v-model="showDialog" class="result-query-dialog" title="请输入你的ID" :width="dialogWidth" :close-on-click-modal="false" :show-close="true" @close="handleCancel" :class="{'mobile-dialog': isMobile}">
+        <el-input v-model="inputId" aria-label="你的ID" placeholder="请输入你的ID" @keyup.enter="handleConfirm" spellcheck="false" autocapitalize="off" />
         <template #footer>
-          <el-button @click="handleCancel">返回</el-button>
-          <el-button @click="handleConfirm" type="primary">确定</el-button>
+          <div class="query-dialog-actions">
+            <el-button @click="handleCancel">返回</el-button>
+            <el-button @click="handleConfirm" type="primary">确定</el-button>
+          </div>
         </template>
       </el-dialog>
     <div v-if="loading" class="loading-container">
@@ -65,7 +67,7 @@
             </div>
             <div v-if="topic.files && topic.files.length" class="topic-files" style="margin-top: 12px;">
               <div v-for="(file, fileIndex) in topic.files" :key="fileIndex" style="margin-bottom: 8px;">
-                <a :href="getImageUrl(file)" target="_blank" style="color: #4c8bf5; text-decoration: underline;">
+                <a :href="getImageUrl(file)" target="_blank" style="color: var(--aqua-500); text-decoration: underline;">
                   {{ getFileName(file) }}
                 </a>
               </div>
@@ -127,12 +129,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getMsqResult } from '@/api/MsqView.js'
 import Navbar from '@/components/Navbar.vue'
-import { getConfig } from '@/api/System.js'
 
 interface TopicResult {
   topicId: number
@@ -168,7 +169,6 @@ const router = useRouter()
 const route = useRoute()
 const showImageViewer = ref(false)
 const currentImageUrl = ref('')
-const configMap = ref({})
 
 const parsedTopics = computed(() => {
   return topic.value.topicResults.map(item => {
@@ -288,60 +288,22 @@ function getStampClass(status: number) {
 
 // 背景图片自适应逻辑
 const msqContainer = ref<HTMLElement | null>(null)
-const backgroundImageUrl = ref('')
 const isMobile = ref(false)
 
 // 新增：弹窗宽度自适应
-const dialogWidth = computed(() => isMobile.value ? '95vw' : '30%')
+const dialogWidth = computed(() => isMobile.value ? 'calc(100vw - 32px)' : '30%')
 
 function checkDeviceType() {
   isMobile.value = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
 
-function setBackgroundImage() {
-  if (msqContainer.value) {
-    msqContainer.value.style.backgroundImage = `url('${backgroundImageUrl.value}')`
-    msqContainer.value.style.backgroundSize = 'cover'
-    msqContainer.value.style.backgroundPosition = 'center'
-    msqContainer.value.style.backgroundRepeat = 'no-repeat'
-    msqContainer.value.style.backgroundAttachment = 'fixed'
-  }
-}
-
-function getBackgroundImage() {
-  if (isMobile.value) {
-    backgroundImageUrl.value = configMap.value['phone_msq_background'] || ''
-  } else {
-    backgroundImageUrl.value = configMap.value['msq_background'] || ''
-  }
-  setBackgroundImage()
-}
-
-onMounted(async () => {
+onMounted(() => {
   document.title = '结果查询'
   checkDeviceType()
-  // 获取配置
-  try {
-    const res = await getConfig()
-    if (res && res.data) {
-      const map = {}
-      res.data.forEach(item => {
-        map[item.configKey] = item.configValue
-      })
-      configMap.value = map
-    }
-  } catch (e) {
-    // 可选：错误处理
-  }
-  getBackgroundImage()
-  window.addEventListener('resize', () => {
-    const wasMobile = isMobile.value
-    checkDeviceType()
-    if (wasMobile !== isMobile.value) {
-      getBackgroundImage()
-    }
-  })
+  window.addEventListener('resize', checkDeviceType)
 })
+
+onBeforeUnmount(() => window.removeEventListener('resize', checkDeviceType))
 
 if (route.query.id) {
   showDialog.value = false
@@ -359,7 +321,7 @@ function getFileName(filePath: string) {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #fff;
+  background-color: transparent;
   /* 背景图片由js动态设置 */
 }
 .container {
@@ -367,12 +329,13 @@ function getFileName(filePath: string) {
   max-width: 1200px;
   margin: 50px auto;
   padding: 60px 5%;
-  background: rgba(255, 255, 255, 0.35);
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, .3);
-  border-radius: 5px;
+  background: var(--shell);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  border-radius: var(--radius-lg);
   box-sizing: border-box;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
+  outline: 1px solid var(--shell-border);
 }
 .msq-form {
   width: 100%;
@@ -381,7 +344,7 @@ function getFileName(filePath: string) {
   text-align: center;
   font-weight: 700;
   font-size: clamp(40px, 8vw, 80px);
-  color: black;
+  color: var(--ink-900);
   margin: 0;
 }
 .input-container {
@@ -393,7 +356,7 @@ function getFileName(filePath: string) {
   font-size: 20px;
   width: 100%;
   border: none;
-  border-bottom: 2px solid #555;
+  border-bottom: 2px solid var(--ink-700);
   padding: 5px 0;
   background-color: transparent;
   outline: none;
@@ -402,7 +365,7 @@ function getFileName(filePath: string) {
   position: absolute;
   top: 0;
   left: 0;
-  color: black;
+  color: var(--ink-900);
   transition: all 0.3s ease;
   pointer-events: none;
 }
@@ -410,7 +373,7 @@ function getFileName(filePath: string) {
 .input-container input[type="text"]:valid ~ .label {
   top: -20px;
   font-size: 16px;
-  color: #4c8bf5;
+  color: var(--aqua-500);
 }
 .input-container .underline {
   position: absolute;
@@ -418,7 +381,7 @@ function getFileName(filePath: string) {
   left: 0;
   height: 2px;
   width: 100%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: scaleX(0);
   transition: all 0.3s ease;
 }
@@ -429,18 +392,18 @@ function getFileName(filePath: string) {
 .input-container input[type="text"]:disabled {
   background-color: transparent;
   cursor: default;
-  color: #666;
-  border-bottom: 2px solid #999;
+  color: var(--ink-500);
+  border-bottom: 2px solid var(--ink-500);
 }
 .input-container input[type="text"]:disabled ~ .label {
   top: -20px;
   font-size: 16px;
-  color: #666;
+  color: var(--ink-500);
   cursor: default;
 }
 .input-container input[type="text"]:disabled ~ .underline {
   transform: scaleX(1);
-  background-color: #999;
+  background-color: var(--ink-500);
 }
 .radio-button-container {
   display: flex;
@@ -465,7 +428,7 @@ function getFileName(filePath: string) {
   margin-bottom: 10px;
   position: relative;
   font-size: 15px;
-  color: #000;
+  color: var(--ink-900);
   font-weight: 400;
   cursor: pointer;
   text-transform: uppercase;
@@ -478,41 +441,41 @@ function getFileName(filePath: string) {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #555;
+  border: 2px solid var(--ink-700);
   transition: all 0.3s ease;
 }
 .radio-button__input:checked + .radio-button__label .radio-button__custom {
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   border-color: transparent;
   transform: scale(0.8);
-  box-shadow: 0 0 20px #4c8bf580;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .radio-button__input:checked + .radio-button__label {
-  color: #4c8bf5;
+  color: var(--aqua-500);
 }
 .radio-button__label:hover .radio-button__custom {
   transform: scale(1.2);
-  border-color: #4c8bf5;
-  box-shadow: 0 0 20px #4c8bf580;
+  border-color: var(--aqua-500);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .radio-button__input:disabled + .radio-button__label {
   cursor: default;
   opacity: 0.7;
 }
 .radio-button__input:disabled + .radio-button__label .radio-button__custom {
-  border-color: #999;
+  border-color: var(--ink-500);
 }
 .radio-button__input:disabled + .radio-button__label:hover .radio-button__custom {
   transform: none;
-  border-color: #999;
+  border-color: var(--ink-500);
   box-shadow: none;
 }
 .cyberpunk-checkbox {
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #555;
-  border-radius: 5px;
+  border: 2px solid var(--ink-700);
+  border-radius: 6px;
   background-color: transparent;
   display: inline-block;
   position: relative;
@@ -521,7 +484,7 @@ function getFileName(filePath: string) {
 }
 .cyberpunk-checkbox:before {
   content: "";
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   display: block;
   position: absolute;
   top: 50%;
@@ -536,27 +499,27 @@ function getFileName(filePath: string) {
   transform: translate(-50%, -50%) scale(1);
 }
 .cyberpunk-checkbox:checked {
-  border-color: #4c8bf5;
+  border-color: var(--aqua-500);
 }
 .cyberpunk-checkbox:checked + .cyberpunk-checkbox-label {
-  color: #4c8bf5;
+  color: var(--aqua-500);
 }
 .cyberpunk-checkbox:hover {
-  border-color: #4c8bf5;
-  box-shadow: 0 0 20px #4c8bf580;
+  border-color: var(--aqua-500);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .cyberpunk-checkbox:disabled {
   cursor: default;
   opacity: 0.7;
-  border-color: #999;
+  border-color: var(--ink-500);
 }
 .cyberpunk-checkbox:disabled:hover {
-  border-color: #999;
+  border-color: var(--ink-500);
   box-shadow: none;
 }
 .cyberpunk-checkbox-label {
   font-size: 18px;
-  color: #000;
+  color: var(--ink-900);
   cursor: pointer;
   user-select: none;
   display: flex;
@@ -575,18 +538,18 @@ function getFileName(filePath: string) {
   position: relative;
   overflow: hidden;
   z-index: 1;
-  color: #090909;
+  color: var(--ink-900);
   padding: 0.3em 1.8em;
   cursor: pointer;
   font-size: 18px;
-  border-radius: 0.5em;
-  background: #e8e8e8;
-  border: 1px solid #eee;
-  box-shadow: 3px 3px 3px rgba(0, 0, 0, .2);
+  border-radius: var(--radius-pill);
+  background: var(--count-bg);
+  border: 1px solid var(--hair);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 .button2:active {
-  color: #666;
-  box-shadow: inset 4px 4px 12px #c5c5c5, inset -4px -4px 12px #ffffff;
+  color: var(--ink-500);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 .button2:before {
   content: "";
@@ -596,7 +559,7 @@ function getFileName(filePath: string) {
   top: 100%;
   width: 140%;
   height: 180%;
-  background-color: rgba(76, 139, 245, 0.1);
+  background-color: var(--accent-glow);
   border-radius: 50%;
   display: block;
   transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -610,7 +573,7 @@ function getFileName(filePath: string) {
   top: 180%;
   width: 160%;
   height: 190%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   border-radius: 50%;
   display: block;
   transition: all 0.5s 0.1s cubic-bezier(0.55, 0, 0.1, 1);
@@ -618,16 +581,16 @@ function getFileName(filePath: string) {
 }
 .button2:hover {
   color: #ffffff;
-  border: 1px solid #4c8bf5;
+  border: 1px solid var(--aqua-500);
 }
 .button2:hover:before {
   top: -35%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 .button2:hover:after {
   top: -45%;
-  background-color: #4c8bf5;
+  background-color: var(--aqua-500);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 @media screen and (max-width: 768px) {
@@ -646,11 +609,11 @@ function getFileName(filePath: string) {
   padding: 40px 20px;
 }
 .error-message h3 {
-  color: #ff4d4f;
+  color: var(--sct-danger);
   margin-bottom: 16px;
 }
 .error-message p {
-  color: #666;
+  color: var(--ink-500);
   margin-bottom: 24px;
 }
 .loading-container {
@@ -664,7 +627,7 @@ function getFileName(filePath: string) {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #4c8bf5;
+  border-top: 5px solid var(--aqua-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -674,7 +637,7 @@ function getFileName(filePath: string) {
   100% { transform: rotate(360deg); }
 }
 .loading-container p {
-  color: #666;
+  color: var(--ink-500);
   font-size: 16px;
 }
 .questionnaire-list {
@@ -683,7 +646,7 @@ function getFileName(filePath: string) {
 .questionnaire-list h2 {
   text-align: center;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--ink-900);
 }
 .questionnaire-items {
   display: grid;
@@ -691,24 +654,25 @@ function getFileName(filePath: string) {
   gap: 20px;
 }
 .questionnaire-item {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--shell);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   cursor: pointer;
   transition: all 0.3s ease;
+  outline: 1px solid var(--shell-border);
 }
 .questionnaire-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lift), var(--glass-spec);
 }
 .questionnaire-item h3 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: var(--ink-900);
 }
 .questionnaire-item p {
   margin: 0;
-  color: #666;
+  color: var(--ink-500);
   font-size: 14px;
 }
 .cyberpunk-checkbox-label {
@@ -724,20 +688,20 @@ function getFileName(filePath: string) {
   min-width: 120px;
 }
 .review-buttons .approve {
-  background-color: #67c23a;
+  background-color: var(--sct-success);
   color: white;
 }
 .review-buttons .approve:hover {
-  background-color: #85ce61;
-  border-color: #85ce61;
+  background-color: var(--sct-success);
+  border-color: var(--sct-success);
 }
 .review-buttons .reject {
-  background-color: #f56c6c;
+  background-color: var(--sct-danger);
   color: white;
 }
 .review-buttons .reject:hover {
-  background-color: #f78989;
-  border-color: #f78989;
+  background-color: var(--sct-danger);
+  border-color: var(--sct-danger);
 }
 .review-buttons .button2:hover {
   color: white;
@@ -755,15 +719,15 @@ function getFileName(filePath: string) {
 .topic-image {
   max-width: 300px;
   max-height: 200px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   object-fit: contain;
 }
 .image-viewer-overlay {
   position: fixed;
   z-index: 9999;
   left: 0; top: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -771,9 +735,9 @@ function getFileName(filePath: string) {
 .image-viewer-img {
   max-width: 90vw;
   max-height: 90vh;
-  border-radius: 8px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  background: var(--shell-strong);
 }
 .stamp {
   position: absolute;
@@ -783,52 +747,63 @@ function getFileName(filePath: string) {
   font-size: 2rem;
   font-weight: bold;
   color: #fff;
-  border-radius: 8px;
+  border-radius: var(--radius-pill);
   transform: rotate(12deg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   opacity: 0.92;
   z-index: 10;
-  letter-spacing: 6px;
+  letter-spacing: 0;
   user-select: none;
 }
 .stamp-success {
-  background: #67c23a;
+  background: var(--sct-success);
 }
 .stamp-danger {
-  background: #f56c6c;
+  background: var(--sct-danger);
 }
 .stamp-removed {
-  background: #909399;
+  background: var(--ink-500);
 }
 .stamp-info {
-  background: #409eff;
-}
-.mobile-dialog .el-dialog {
-  width: 90vw !important;
-  max-width: 95vw;
-  min-width: unset;
-  padding: 0 8px;
-}
-.mobile-dialog .el-dialog__body {
-  padding: 16px 8px;
-}
-.mobile-dialog .el-input__inner {
-  font-size: 18px;
-}
-.mobile-dialog .el-button {
-  font-size: 18px;
-  padding: 8px 0;
-  width: 100%;
+  background: var(--aqua-500);
 }
 @media (max-width: 768px) {
-  .el-dialog {
-    width: 90vw !important;
-    max-width: 95vw;
-    min-width: unset;
-    padding: 0 8px;
+  :global(.result-query-dialog) {
+    padding: 20px;
+    max-width: 440px;
   }
-  .el-dialog__body {
-    padding: 16px 8px;
+  :global(.result-query-dialog .el-dialog__header) {
+    padding-bottom: 20px;
+    padding-right: 32px;
+  }
+  :global(.result-query-dialog .el-dialog__body) {
+    padding: 0;
+  }
+  :global(.result-query-dialog .el-dialog__footer) {
+    padding-top: 20px;
+  }
+  :global(.result-query-dialog .el-input__wrapper) {
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 0 14px;
+  }
+  :global(.result-query-dialog .el-input__inner) {
+    font-size: 16px;
+  }
+  .query-dialog-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .query-dialog-actions .el-button {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    margin: 0;
+    padding: 0 12px;
+    font-size: 16px;
+    border-radius: var(--radius-md);
   }
 }
-</style> 
+</style>
+<style scoped src="../styles/msq-controls.css"></style>

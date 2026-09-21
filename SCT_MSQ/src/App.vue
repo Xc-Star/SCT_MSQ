@@ -2,6 +2,12 @@
   <router-view></router-view>
 </template>
 
+<script setup>
+import { useSiteBackground } from '@/composables/useSiteBackground'
+
+useSiteBackground()
+</script>
+
 <style>
 body {
   margin: 0;
@@ -11,9 +17,9 @@ body {
 }
 
 #app {
-  font-family: Arial, sans-serif;
+  font-family: var(--sct-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: var(--ink-700);
 }
 </style>

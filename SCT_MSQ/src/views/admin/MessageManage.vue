@@ -356,7 +356,7 @@ onUnmounted(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .card-header {
@@ -399,7 +399,7 @@ h2 {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #f2f2f2;
+    background: var(--count-bg);
 }
 
 .content-text {
@@ -412,7 +412,7 @@ h2 {
 }
 
 .muted {
-    color: #c0c4cc;
+    color: var(--ink-300);
 }
 
 .pagination-container {
@@ -445,12 +445,12 @@ h2 {
 
     .mobile-list {
         display: block;
-        background: #fff;
+        background: var(--shell-strong);
     }
 
     .mobile-item {
         padding: 10px 8px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--hair);
     }
 
     .mobile-item:last-child {
@@ -478,13 +478,13 @@ h2 {
 
     .user-id {
         font-size: 0.85rem;
-        color: #333;
+        color: var(--ink-900);
         font-weight: 500;
     }
 
     .user-qq {
         font-size: 0.72rem;
-        color: #909399;
+        color: var(--ink-500);
     }
 
     .tags {
@@ -494,7 +494,7 @@ h2 {
 
     .item-content {
         font-size: 0.85rem;
-        color: #555;
+        color: var(--ink-700);
         line-height: 1.5;
         margin-bottom: 8px;
         word-break: break-all;
@@ -510,7 +510,7 @@ h2 {
 
     .time {
         font-size: 0.72rem;
-        color: #909399;
+        color: var(--ink-500);
     }
 
     .actions {

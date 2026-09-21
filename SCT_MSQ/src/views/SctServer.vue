@@ -8,45 +8,31 @@
         <div class="title-container">
           <h1 class="welcome-title">Welcome</h1>
           <h1 class="main-title">{{ configMap.server_name }}</h1>
-          <p style="color: #000; font-weight: 700; font-size: 1rem;">{{ configMap.main_title }}</p>
-          <p style="color: #000; font-weight: 700; font-size: 1rem;">{{ configMap.main_description }}</p>
+          <p style="color: var(--ink-900); font-weight: 700; font-size: 1rem;">{{ configMap.main_title }}</p>
+          <p style="color: var(--ink-900); font-weight: 700; font-size: 1rem;">{{ configMap.main_description }}</p>
         </div>
         <div class="button-container">
           <p class="instruction-text">请选择以下任意一项进行审核</p>
-          <el-button v-if="configMap.redstone_msq === '1'" type="primary" size="large" @click="goToMsqView('redstone')">红石问卷</el-button>
-          <el-button v-if="configMap.architectural_msq === '1'" type="primary" size="large" @click="goToMsqView('architectural')">建筑问卷</el-button>
-          <el-button v-if="configMap.logistics_msq === '1'" type="primary" size="large" @click="goToMsqView('logistics')">后勤问卷</el-button>
-          <el-button v-if="configMap.other_msq === '1'" type="primary" size="large" @click="goToMsqView('other')">其他问卷</el-button>
+          <el-button v-if="configMap.redstone_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('redstone')">红石问卷</el-button>
+          <el-button v-if="configMap.architectural_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('architectural')">建筑问卷</el-button>
+          <el-button v-if="configMap.logistics_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('logistics')">后勤问卷</el-button>
+          <el-button v-if="configMap.other_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('other')">其他问卷</el-button>
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue'
+  import { ref, onMounted } from 'vue'
   import Navbar from '@/components/Navbar.vue'
   import { getConfig } from '@/api/System'
   
-  const backgroundImageUrl = ref('')
-  const isMobile = ref(false)
   const configMap = ref({})
   const mainPage = ref(null)
   const homeContainer = ref(null)
   
   function goToMsqView(type) {
     window.$router ? window.$router.push(`/msq?type=${type}`) : (location.href = `/msq?type=${type}`)
-  }
-  
-  function handleResize() {
-    const wasMobile = isMobile.value
-    checkDeviceType()
-    if (wasMobile !== isMobile.value) {
-      getBackgroundImage()
-    }
-  }
-  
-  function checkDeviceType() {
-    isMobile.value = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   }
   
   async function fetchConfig() {
@@ -64,50 +50,9 @@
     }
   }
   
-  async function getBackgroundImage() {
-    if (isMobile.value) {
-      backgroundImageUrl.value = configMap.value['phone_main_background'] || ''
-    } else {
-      backgroundImageUrl.value = configMap.value['main_background'] || ''
-    }
-    setBackgroundImage()
-  }
-  
-  function setBackgroundImage() {
-    if (backgroundImageUrl.value && mainPage.value) {
-      mainPage.value.style.backgroundImage = `url('${backgroundImageUrl.value}')`
-      mainPage.value.style.backgroundSize = 'cover'
-      mainPage.value.style.backgroundPosition = 'center'
-      mainPage.value.style.backgroundRepeat = 'no-repeat'
-      mainPage.value.style.backgroundAttachment = 'fixed'
-    }
-  }
-  
-  function getServerShortName() {
-    const CACHE_KEY = 'navbar_config_cache'
-    const cacheStr = localStorage.getItem(CACHE_KEY)
-    if (cacheStr) {
-      try {
-        const cache = JSON.parse(cacheStr)
-        if (cache.data) {
-          const item = cache.data.find(item => item.configKey === 'server_short_name')
-          if (item && item.configValue) return item.configValue
-        }
-      } catch (e) {}
-    }
-    return ''
-  }
-  
   onMounted(async () => {
-    document.title = getServerShortName() + '官网'
-    checkDeviceType()
     await fetchConfig()
-    getBackgroundImage()
-    window.addEventListener('resize', handleResize)
-  })
-  
-  onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize)
+    document.title = (configMap.value.server_short_name || '') + '官网'
   })
   </script>
   
@@ -123,8 +68,7 @@
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: rgba(255,255,255,0.38);
-    backdrop-filter: blur(8px);
+    background: transparent;
     pointer-events: none;
   }
   
@@ -157,32 +101,27 @@
   
   .welcome-title {
     font-size: 2.5rem;
-    color: #409EFF;
+    color: var(--ink-700);
     margin: 0 0 8px 0;
     font-weight: 700;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 8px rgba(64,158,255,0.13);
-    background: linear-gradient(90deg, #409EFF 30%, #66b1ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: 0;
+    text-shadow: none;
   }
   
   .main-title {
     font-size: 3.2rem;
     margin: 0 0 8px 0;
     font-weight: bold;
-    background: linear-gradient(90deg, #409EFF 40%, #a0cfff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 3px 3px 12px rgba(64,158,255,0.10);
+    color: var(--ink-900);
+    text-shadow: none;
   }
   
   .title-container p {
-    color: #222;
+    color: var(--ink-900);
     font-weight: 600;
     font-size: 1.25rem;
     margin: 6px 0;
-    letter-spacing: 1px;
+    letter-spacing: 0;
   }
   
   .button-container {
@@ -196,42 +135,50 @@
   
   .instruction-text {
     font-size: 1.15rem;
-    color: #409EFF;
+    color: var(--ink-700);
     margin: 0 0 12px 0;
     font-weight: 500;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.10);
+    letter-spacing: 0;
+    text-shadow: none;
   }
   
-  .button-container .el-button {
+  .button-container .el-button.questionnaire-entry {
     font-size: 1.15rem;
     padding: 0 30px;
     min-width: 220px;
-    border-radius: 5px;
-    background: unset;
-    color: #222;
-    box-shadow: none;
-    border: unset;
-    transition: all 0.22s cubic-bezier(.4,0,.2,1);
-    font-weight: 600;
-    letter-spacing: 1px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--shell-strong) 50%, var(--count-bg));
+    color: var(--ink-900);
+    box-shadow: 0 4px 12px var(--accent-glow), var(--glass-spec);
+    border: 1px solid var(--shell-border);
+    backdrop-filter: blur(2px) saturate(1.8);
+    -webkit-backdrop-filter: blur(2px) saturate(1.8);
+    transition: transform 0.25s var(--ease-spring), background-color 0.2s, box-shadow 0.2s;
+    font-weight: 500;
+    letter-spacing: 0;
     margin-left: 0 !important;
     margin-right: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.13);
+    text-shadow: none;
     line-height: 1.2;
     height: 56px;
     box-sizing: border-box;
   }
-  .button-container .el-button:hover {
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    /* transform: scale(1.1); */
-    box-shadow: 0 6px 18px 0 rgba(64,158,255,0.13);
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.18);
+  .button-container .el-button.questionnaire-entry:not(.is-disabled):hover {
+    background: var(--sct-button-hover-bg);
+    color: var(--ink-900);
+    border-color: var(--shell-border);
+    transform: none;
+    box-shadow: var(--shadow-soft), var(--glass-spec);
+  }
+  .button-container .el-button.questionnaire-entry:not(.is-disabled):active {
+    transform: scale(0.98);
+  }
+  .button-container .el-button.questionnaire-entry:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 3px;
   }
   
   /* 手机端适配 */
@@ -266,11 +213,10 @@
       font-size: 1rem;
       margin-bottom: 6px;
     }
-    .button-container .el-button {
+    .button-container .el-button.questionnaire-entry {
       font-size: 1rem;
       padding: 10px 8px;
       min-width: 120px;
-      border-radius: 5px;
       height: 40px;
     }
   }
@@ -290,11 +236,10 @@
     .instruction-text {
       font-size: 0.9rem;
     }
-    .button-container .el-button {
+    .button-container .el-button.questionnaire-entry {
       font-size: 0.9rem;
       padding: 8px 4px;
       min-width: 90px;
-      border-radius: 3px;
       height: 34px;
     }
   }
@@ -305,11 +250,10 @@
     .instruction-text {
       font-size: 0.8rem;
     }
-    .button-container .el-button {
+    .button-container .el-button.questionnaire-entry {
       font-size: 0.8rem;
       padding: 6px 2px;
       min-width: 70px;
-      border-radius: 2px;
       height: 28px;
     }
   }

@@ -70,8 +70,8 @@ onMounted(fetchMemberMessages)
 <style scoped>
 .detail-page {
   min-height: 100vh;
-  background: #f5f7fa;
-  color: #303133;
+  background: transparent;
+  color: var(--ink-900);
 }
 
 .detail-container {
@@ -88,24 +88,27 @@ onMounted(fetchMemberMessages)
 .back-btn {
   padding: 0;
   font-size: 0.92rem;
-  color: #409EFF;
+  color: var(--aqua-500);
 }
 .detail-hero h1 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 .count {
   font-size: 0.85rem;
-  color: #909399;
+  color: var(--ink-500);
 }
 
 .detail-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: var(--shell);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   padding: 4px 20px;
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 .message-list {
@@ -118,7 +121,7 @@ onMounted(fetchMemberMessages)
   align-items: flex-start;
   gap: 12px;
   padding: 14px 0;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--hair);
 }
 .message-item:last-child {
   border-bottom: none;
@@ -128,7 +131,7 @@ onMounted(fetchMemberMessages)
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background: #f5f7fa;
+  background: var(--count-bg);
   flex-shrink: 0;
 }
 .message-body {
@@ -144,11 +147,11 @@ onMounted(fetchMemberMessages)
 .user-name {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #303133;
+  color: var(--ink-900);
 }
 .user-message {
   margin: 0;
-  color: #606266;
+  color: var(--ink-500);
   font-size: 0.92rem;
   line-height: 1.6;
   word-break: break-word;
@@ -157,17 +160,17 @@ onMounted(fetchMemberMessages)
   display: inline-block;
   padding: 0 7px;
   line-height: 20px;
-  border-radius: 4px;
-  background: #fdf6ec;
-  border: 1px solid #f5dab1;
-  color: #e6a23c;
+  border-radius: var(--radius-pill);
+  background: var(--tag-bg);
+  border: 1px solid var(--hair);
+  color: var(--aqua-600);
   font-size: 0.72rem;
 }
 
 .empty-tip {
   padding: 40px 0;
   text-align: center;
-  color: #909399;
+  color: var(--ink-500);
   font-size: 0.92rem;
 }
 
@@ -177,8 +180,8 @@ onMounted(fetchMemberMessages)
 .skeleton-item {
   height: 56px;
   margin: 14px 0;
-  border-radius: 4px;
-  background: #f5f7fa;
+  border-radius: var(--radius-md);
+  background: var(--count-bg);
 }
 
 @media (max-width: 800px) {

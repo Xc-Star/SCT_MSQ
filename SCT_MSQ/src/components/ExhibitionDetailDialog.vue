@@ -252,8 +252,8 @@ onBeforeUnmount(() => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: #f7f8fa;
-  border-radius: 8px;
+  background: var(--count-bg);
+  border-radius: var(--radius-md);
   padding: 10px;
   overflow: hidden;
 }
@@ -268,9 +268,12 @@ onBeforeUnmount(() => {
 .mode-switch {
   display: flex;
   padding: 2px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-pill);
+  background: var(--shell-strong);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 .mode-btn {
@@ -279,9 +282,9 @@ onBeforeUnmount(() => {
   gap: 4px;
   padding: 4px 10px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: #606266;
+  color: var(--ink-500);
   font-size: 0.78rem;
   line-height: 1.4;
   cursor: pointer;
@@ -289,13 +292,16 @@ onBeforeUnmount(() => {
 }
 
 .mode-btn:hover {
-  color: #409eff;
+  color: var(--aqua-500);
 }
 
 .mode-btn.active {
-  background: #409eff;
-  color: #fff;
+  background: var(--tag-bg);
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1px var(--aqua-400), var(--glass-spec);
 }
+
+.mode-btn.active:hover { background: var(--sct-button-hover-bg); }
 
 /* 模式一 */
 .single-mode {
@@ -320,7 +326,7 @@ onBeforeUnmount(() => {
 }
 
 .stage-img :deep(img) {
-  border-radius: 6px;
+  /* border-radius: var(--radius-pill); */
 }
 
 .nav-btn {
@@ -335,8 +341,11 @@ onBeforeUnmount(() => {
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+  background: var(--sct-button-bg);
+  color: var(--ink-900);
+  box-shadow: inset 0 0 0 1px var(--shell-border), var(--shadow-soft), var(--glass-spec);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
   font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
@@ -344,7 +353,7 @@ onBeforeUnmount(() => {
 }
 
 .nav-btn:hover {
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--sct-button-hover-bg);
 }
 
 .nav-btn.prev {
@@ -369,8 +378,8 @@ onBeforeUnmount(() => {
   height: 46px;
   padding: 0;
   border: 2px solid transparent;
-  border-radius: 6px;
-  background: #fff;
+  border-radius: var(--radius-md);
+  background: var(--shell-strong);
   overflow: hidden;
   cursor: pointer;
   opacity: 0.65;
@@ -389,7 +398,7 @@ onBeforeUnmount(() => {
 }
 
 .thumb.active {
-  border-color: #409eff;
+  border-color: var(--aqua-500);
   opacity: 1;
 }
 
@@ -409,9 +418,9 @@ onBeforeUnmount(() => {
 .grid-img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #ebeef5;
+  background: var(--hair);
   cursor: zoom-in;
 }
 
@@ -429,8 +438,8 @@ onBeforeUnmount(() => {
   font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.45;
-  color: #303133;
-  letter-spacing: 0.5px;
+  color: var(--ink-900);
+  letter-spacing: 0;
   word-break: break-word;
 }
 
@@ -439,7 +448,7 @@ onBeforeUnmount(() => {
   min-height: 0;
   overflow-y: auto;
   padding-right: 6px;
-  color: #606266;
+  color: var(--ink-500);
   font-size: 0.92rem;
   line-height: 1.8;
   white-space: pre-wrap;
@@ -452,18 +461,18 @@ onBeforeUnmount(() => {
   justify-content: flex-end;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--hair);
 }
 
 .exh-time {
   font-size: 0.82rem;
-  color: #909399;
+  color: var(--ink-500);
 }
 
 .exh-empty {
   padding: 60px 0;
   text-align: center;
-  color: #909399;
+  color: var(--ink-500);
   font-size: 0.92rem;
 }
 

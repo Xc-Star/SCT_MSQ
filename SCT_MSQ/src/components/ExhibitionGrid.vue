@@ -96,8 +96,8 @@ onMounted(fetchList)
 <style scoped>
 .detail-page {
   min-height: 100vh;
-  background: #f5f7fa;
-  color: #303133;
+  background: transparent;
+  color: var(--ink-900);
 }
 
 .detail-container {
@@ -114,24 +114,27 @@ onMounted(fetchList)
 .back-btn {
   padding: 0;
   font-size: 0.92rem;
-  color: #409EFF;
+  color: var(--aqua-500);
 }
 .detail-hero h1 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 .count {
   font-size: 0.85rem;
-  color: #909399;
+  color: var(--ink-500);
 }
 
 .detail-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: var(--shell);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   padding: 20px;
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 .gallery-grid {
@@ -141,21 +144,22 @@ onMounted(fetchList)
 }
 .gallery-card {
   position: relative;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
+  background: var(--shell);
+  border: 1px solid var(--shell-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 .gallery-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift), var(--glass-spec);
+  transform: translateY(-6px) scale(1.015);
 }
 .card-media {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #f5f7fa;
+  background: var(--count-bg);
   overflow: hidden;
 }
 .card-img {
@@ -168,7 +172,7 @@ onMounted(fetchList)
   padding: 10px 12px;
   font-size: 0.92rem;
   font-weight: 500;
-  color: #303133;
+  color: var(--ink-900);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -177,17 +181,17 @@ onMounted(fetchList)
   display: inline-block;
   padding: 0 7px;
   line-height: 20px;
-  border-radius: 4px;
-  background: #fdf6ec;
-  border: 1px solid #f5dab1;
-  color: #e6a23c;
+  border-radius: var(--radius-pill);
+  background: var(--tag-bg);
+  border: 1px solid var(--hair);
+  color: var(--aqua-600);
   font-size: 0.72rem;
 }
 .top-tag.floating {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(253, 246, 236, 0.95);
+  background: var(--tag-bg);
 }
 .count-tag {
   position: absolute;
@@ -198,22 +202,22 @@ onMounted(fetchList)
   gap: 3px;
   padding: 0 7px;
   line-height: 20px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-pill);
+  background: var(--overlay-bg);
   color: #fff;
   font-size: 0.72rem;
 }
 
 .skeleton-card {
   height: 176px;
-  border-radius: 8px;
-  background: #f5f7fa;
+  border-radius: var(--radius-lg);
+  background: var(--count-bg);
 }
 
 .empty-tip {
   padding: 40px 0;
   text-align: center;
-  color: #909399;
+  color: var(--ink-500);
   font-size: 0.92rem;
 }
 

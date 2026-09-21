@@ -29,7 +29,7 @@
       <el-button type="primary" :disabled="!file || loading" @click="handleGenerateExcel" :loading="loading" style="margin-top: 20px;">生成Excel</el-button>
       <div v-if="previewTableData.length" class="preview-window">
         <h3>文件预览：</h3>
-        <el-table :data="previewTableData" style="width: 100%">
+        <el-table :data="previewTableData" style="width: 100%;">
           <el-table-column v-for="col in previewTableColumns" :key="col.prop" :prop="col.prop" :label="col.label" align="center" />
         </el-table>
       </div>
@@ -164,41 +164,44 @@ onMounted(() => {
 
 <style scoped>
 body {
-  background: #f3f6f9;
+  background: var(--canvas);
 }
 
 .build-tool-container {
   min-height: 100vh;
-  background: #f3f6f9;
+  background: transparent;
 }
 
 .content {
   max-width: 600px;
   margin: 80px auto 40px;
   padding: 30px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: var(--shell);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   text-align: center;
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 
 .preview-window {
   margin-top: 30px;
   text-align: left;
-  background: #f7f7f7;
+  background: var(--count-bg);
   padding: 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   max-height: 300px;
   overflow: auto;
 }
 
 .desp p {
-    color: red;
+    color: var(--sct-danger);
 }
 </style>
 
 <style>
 body {
-  background: #f3f6f9;
+  background: var(--canvas);
 }
 </style> 

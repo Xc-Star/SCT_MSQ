@@ -3,13 +3,13 @@
         <form class="form-control" action="">
             <p class="login-title">后台登录</p>
             <div class="input-field">
-                <input required class="input" type="text" v-model="username" @blur="validateUsername" />
-                <label class="label" for="input">账 号</label>
+                <input required id="login-username" class="input" type="text" autocomplete="username" v-model="username" @blur="validateUsername" />
+                <label class="label" for="login-username">账 号</label>
                 <span class="login-error-message" v-if="usernameError">{{ usernameError }}</span>
             </div>
             <div class="input-field">
-                <input required class="input" type="password" v-model="password" @blur="validatePassword" />
-                <label class="label" for="input">密 码</label>
+                <input required id="login-password" class="input" type="password" autocomplete="current-password" v-model="password" @blur="validatePassword" />
+                <label class="label" for="login-password">密 码</label>
                 <span class="login-error-message" v-if="passwordError">{{ passwordError }}</span>
             </div>
             <button class="submit-btn" @click="submit">登录</button>
@@ -20,6 +20,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { login } from '@/api/Auth.js'
+import { getServerShortName } from '@/api/System'
 import { useTokenStore } from '@/stores/token.js';
 import useUserInfoStore from '@/stores/userInfo.js'
 import { useRouter } from 'vue-router'
@@ -69,27 +70,12 @@ const submit = async (e: Event) =>  {
     }
 }
 
-function getServerShortName() {
-  const CACHE_KEY = 'navbar_config_cache'
-  const cacheStr = localStorage.getItem(CACHE_KEY)
-  if (cacheStr) {
-    try {
-      const cache = JSON.parse(cacheStr)
-      if (cache.data) {
-        const item = cache.data.find(item => item.configKey === 'server_short_name')
-        if (item && item.configValue) return item.configValue
-      }
-    } catch (e) {}
-  }
-  return 'SCT'
-}
-
-onMounted(() => {
-    document.title = getServerShortName() + '后台登录'
+onMounted(async () => {
+    document.title = (await getServerShortName()) + '后台登录'
 })
 </script>
 
-<style>
+<style scoped>
 .login-container {
     display: flex;
     justify-content: center;
@@ -102,15 +88,18 @@ onMounted(() => {
 /* From Uiverse.io by VitorBaraoDias */ 
 .form-control {
   margin: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+  background-color: var(--shell);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   width: 400px;
   display: flex;
   justify-content: center;
   flex-direction: column;
   gap: 10px;
   padding: 25px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 .login-title {
   font-size: 28px;
@@ -127,20 +116,21 @@ onMounted(() => {
   margin-top: 15px;
   width: 100%;
   outline: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   height: 45px;
-  border: 1.5px solid #ecedec;
+  border: 1.5px solid var(--hair);
+  color: var(--ink-900);
   background: transparent;
   padding-left: 10px;
 }
 .input:focus {
-  border: 1.5px solid #2d79f3;
+  border: 1.5px solid var(--aqua-500);
 }
 .input-field .label {
   position: absolute;
   top: 25px;
   left: 15px;
-  color: #ccc;
+  color: var(--ink-300);
   transition: all 0.3s ease;
   pointer-events: none;
   z-index: 2;
@@ -150,33 +140,40 @@ onMounted(() => {
   top: 5px;
   left: 5px;
   font-size: 12px;
-  color: #2d79f3;
-  background-color: #ffffff;
+  color: var(--aqua-500);
+  background-color: var(--mist-50);
   padding-left: 5px;
   padding-right: 5px;
 }
 .submit-btn {
   margin-top: 30px;
   height: 55px;
-  background: #f2f2f2;
-  border-radius: 11px;
+  border-radius: var(--radius-pill);
   border: 0;
   outline: none;
-  color: #ffffff;
+  color: var(--ink-900);
   font-size: 18px;
   font-weight: 700;
-  background: linear-gradient(180deg, #363636 0%, #1b1b1b 50%, #000000 100%);
-  box-shadow: 0px 0px 0px 0px #ffffff, 0px 0px 0px 0px #000000;
-  transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);
+  background: var(--sct-button-bg);
+  box-shadow: inset 0 0 0 1px var(--shell-border), var(--shadow-soft), var(--glass-spec);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
+  transition: background-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
 }
 
 .submit-btn:hover {
-  box-shadow: 0px 0px 0px 2px #ffffff, 0px 0px 0px 4px #0000003a;
+  background: var(--sct-button-hover-bg);
+  box-shadow: inset 0 0 0 1px var(--aqua-400), var(--shadow-soft), var(--glass-spec);
+}
+.submit-btn:active { transform: scale(0.96); }
+.submit-btn:focus-visible, .input:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
 }
 
 .login-error-message {
-    color: #ff4d4f;
+    color: var(--sct-danger);
     font-size: 12px;
     position: absolute;
     left: 0;

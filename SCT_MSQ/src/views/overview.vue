@@ -84,6 +84,7 @@ import Navbar from '@/components/Navbar.vue'
 import ExhibitionDetailDialog from '@/components/ExhibitionDetailDialog.vue'
 import { getMemberMessageList } from '@/api/MemberMessage'
 import { getExhibitionList } from '@/api/Exhibition'
+import { getServerShortName } from '@/api/System'
 
 const router = useRouter()
 
@@ -171,23 +172,8 @@ function goToDetail(type) {
   router.push(`/overview/${type}`)
 }
 
-function getServerShortName() {
-  const CACHE_KEY = 'navbar_config_cache'
-  const cacheStr = localStorage.getItem(CACHE_KEY)
-  if (cacheStr) {
-    try {
-      const cache = JSON.parse(cacheStr)
-      if (cache.data) {
-        const item = cache.data.find(item => item.configKey === 'server_short_name')
-        if (item && item.configValue) return item.configValue
-      }
-    } catch (e) {}
-  }
-  return 'SCT'
-}
-
 onMounted(async () => {
-  serverShortName.value = getServerShortName()
+  serverShortName.value = await getServerShortName()
   document.title = serverShortName.value + '官网'
 
   await fetchMemberMessages()
@@ -207,8 +193,8 @@ onBeforeUnmount(() => {
 <style scoped>
 .overview-page {
   min-height: 100vh;
-  background: #f5f7fa;
-  color: #303133;
+  background: transparent;
+  color: var(--ink-900);
 }
 
 .overview-container {
@@ -224,20 +210,20 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 1.75rem;
   font-weight: bold;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, #409EFF 30%, #66b1ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: 0;
+  color: var(--aqua-600);
 }
 
 /* ---------- 区块 ---------- */
 .overview-section {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: var(--shell);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft), var(--glass-spec);
   margin-bottom: 20px;
   padding-bottom: 20px;
+  outline: 1px solid var(--shell-border);
+  backdrop-filter: blur(2px) saturate(1.8);
+  -webkit-backdrop-filter: blur(2px) saturate(1.8);
 }
 .section-header {
   display: flex;
@@ -245,7 +231,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 20px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--hair);
 }
 .section-header h2 {
   display: flex;
@@ -254,20 +240,20 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
-  color: #303133;
-  letter-spacing: 1px;
+  color: var(--ink-900);
+  letter-spacing: 0;
 }
 .section-header h2::before {
   content: '';
   width: 3px;
   height: 16px;
   border-radius: 2px;
-  background: #409EFF;
+  background: var(--aqua-500);
 }
 .more-link {
   flex-shrink: 0;
   font-size: 0.9rem;
-  color: #409EFF;
+  color: var(--ink-700);
   padding: 0;
 }
 
@@ -286,7 +272,7 @@ onBeforeUnmount(() => {
   align-items: flex-start;
   gap: 12px;
   padding: 14px 0;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--hair);
 }
 .message-item:last-child {
   border-bottom: none;
@@ -296,7 +282,7 @@ onBeforeUnmount(() => {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background: #f5f7fa;
+  background: var(--count-bg);
   flex-shrink: 0;
 }
 .message-body {
@@ -312,11 +298,11 @@ onBeforeUnmount(() => {
 .user-name {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #303133;
+  color: var(--ink-900);
 }
 .user-message {
   margin: 0;
-  color: #606266;
+  color: var(--ink-500);
   font-size: 0.92rem;
   line-height: 1.6;
   word-break: break-word;
@@ -325,7 +311,7 @@ onBeforeUnmount(() => {
 .empty-tip {
   padding: 32px 20px 12px;
   text-align: center;
-  color: #909399;
+  color: var(--ink-500);
   font-size: 0.92rem;
 }
 
@@ -338,21 +324,22 @@ onBeforeUnmount(() => {
 }
 .gallery-card {
   position: relative;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
+  background: var(--shell);
+  border: 1px solid var(--shell-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-soft), var(--glass-spec);
 }
 .gallery-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift), var(--glass-spec);
+  transform: translateY(-6px) scale(1.015);
 }
 .card-media {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #f5f7fa;
+  background: var(--count-bg);
   overflow: hidden;
 }
 .card-img {
@@ -365,7 +352,7 @@ onBeforeUnmount(() => {
   padding: 10px 12px;
   font-size: 0.92rem;
   font-weight: 500;
-  color: #303133;
+  color: var(--ink-900);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -375,17 +362,17 @@ onBeforeUnmount(() => {
   display: inline-block;
   padding: 0 7px;
   line-height: 20px;
-  border-radius: 4px;
-  background: #fdf6ec;
-  border: 1px solid #f5dab1;
-  color: #e6a23c;
+  border-radius: var(--radius-pill);
+  background: var(--tag-bg);
+  border: 1px solid var(--hair);
+  color: var(--aqua-600);
   font-size: 0.72rem;
 }
 .top-tag.floating {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(253, 246, 236, 0.95);
+  background: var(--tag-bg);
 }
 .count-tag {
   position: absolute;
@@ -396,8 +383,8 @@ onBeforeUnmount(() => {
   gap: 3px;
   padding: 0 7px;
   line-height: 20px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-pill);
+  background: var(--overlay-bg);
   color: #fff;
   font-size: 0.72rem;
 }

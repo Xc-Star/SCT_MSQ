@@ -4,7 +4,7 @@
         <el-tabs v-model="activeTab" class="config-tabs">
             <el-tab-pane label="文本配置" name="text">
                 <el-card class="config-card">
-                    <el-table :data="textConfigs" style="width: 100%">
+                    <el-table :data="textConfigs" style="width: 100%;">
                         <el-table-column prop="configKey" label="标识" align="center" />
                         <el-table-column prop="configName" label="名称" align="center" />
                         <el-table-column label="值" align="center">
@@ -22,13 +22,13 @@
             </el-tab-pane>
             <el-tab-pane label="图片配置" name="image">
                 <el-card class="config-card">
-                    <el-table :data="imageConfigs" style="width: 100%">
+                    <el-table :data="imageConfigs" style="width: 100%;">
                         <el-table-column prop="configKey" label="标识" align="center" />
                         <el-table-column prop="configName" label="名称" align="center" />
                         <el-table-column label="图片" align="center">
                             <template #default="scope">
-                                <el-image v-if="scope.row.configValue" :src="scope.row.configValue" style="width: 80px; height: 80px; border-radius: 4px" fit="cover" />
-                                <span v-else style="color: #aaa">暂无图片</span>
+                                <el-image v-if="scope.row.configValue" :src="scope.row.configValue" style="width: 80px; height: 80px; border-radius: 4px;" fit="cover" />
+                                <span v-else style="color: #aaa;">暂无图片</span>
                             </template>
                         </el-table-column>
                         <el-table-column label="操作" align="center" width="100">
@@ -41,7 +41,7 @@
             </el-tab-pane>
             <el-tab-pane label="开关配置" name="switch">
                 <el-card class="config-card">
-                    <el-table :data="switchConfigs" style="width: 100%">
+                    <el-table :data="switchConfigs" style="width: 100%;">
                         <el-table-column prop="configKey" label="标识" align="center" />
                         <el-table-column prop="configName" label="名称" align="center" />
                         <el-table-column label="状态" align="center">
@@ -190,7 +190,7 @@ onMounted(() => {
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: var(--ink-900);
 }
 
 .config-tabs {

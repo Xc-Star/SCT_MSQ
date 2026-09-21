@@ -10,14 +10,14 @@
         :closable="false"
         show-icon
       />
-      <el-button type="primary" @click="retryFetch" style="margin-top: 20px">重试</el-button>
+      <el-button type="primary" @click="retryFetch" style="margin-top: 20px;">重试</el-button>
       </div>
     <el-form v-else :model="topic" label-width="80px" class="msq-form">
       <el-form-item label="问卷名称" required>
         <el-input v-model="topic.name" placeholder="请输入问卷名称" />
       </el-form-item>
       <el-form-item label="问卷类型" required>
-        <el-select v-model="topic.type" placeholder="请选择问卷类型" style="width: 200px">
+        <el-select v-model="topic.type" placeholder="请选择问卷类型" style="width: 200px;">
           <el-option label="红石问卷" :value="1" />
           <el-option label="建筑问卷" :value="2" />
           <el-option label="后勤问卷" :value="3" />
@@ -36,7 +36,7 @@
 
       <el-table 
         :data="topic.topics" 
-        style="width: 100%" 
+        style="width: 100%;"
         border
         row-key="id"
         :row-class-name="getRowClassName"
@@ -72,7 +72,7 @@
                 v-for="(img, idx) in scope.row.images"
                 :key="img"
                 :src="img"
-                style="width: 40px; height: 40px; margin-right: 4px; border-radius: 4px; cursor: pointer"
+                style="width: 40px; height: 40px; margin-right: 4px; border-radius: 4px; cursor: pointer;"
                 fit="cover"
                 @click="openImagePreview(scope.row.images, idx)"
               />
@@ -134,7 +134,7 @@
     >
       <el-form :model="questionForm" label-width="100px" class="question-form">
         <el-form-item label="问题类型" required>
-          <el-select v-model="questionForm.type" placeholder="请选择问题类型" style="width: 200px">
+          <el-select v-model="questionForm.type" placeholder="请选择问题类型" style="width: 200px;">
             <el-option label="填空题" value="input" />
             <el-option label="单选题" value="radio" />
             <el-option label="多选题" value="checkbox" />
@@ -194,10 +194,10 @@
     </el-dialog>
 
     <el-dialog v-model="previewVisible" :width="previewDialogWidth" :show-close="true" center class="image-preview-dialog">
-      <div style="text-align:center">
+      <div style="text-align:center;">
         <el-image
           :src="previewImages[previewIndex]"
-          style="max-width: 100%; max-height: 70vh"
+          style="max-width: 100%; max-height: 70vh;"
           fit="contain"
         />
         <div style="margin-top: 10px;">
@@ -205,7 +205,7 @@
             v-if="previewIndex > 0"
             @click="previewIndex--"
             size="small"
-            style="margin-right: 10px"
+            style="margin-right: 10px;"
           >上一张</el-button>
           <el-button
             v-if="previewIndex < previewImages.length - 1"
@@ -665,12 +665,12 @@ const previewDialogWidth = computed(() => {
 }
 
 .disabled-row {
-  background-color: #f5f7fa;
+  background-color: var(--count-bg);
   cursor: not-allowed;
 }
 
 :deep(.disabled-row) {
-  background-color: #f5f7fa;
+  background-color: var(--count-bg);
 }
 
 :deep(.disabled-row .el-button) {
@@ -704,7 +704,7 @@ const previewDialogWidth = computed(() => {
   width: 32px;
   height: 24px;
   padding: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   margin: 0;
 }
 
