@@ -134,7 +134,7 @@ function calculateUnits(total) {
   return [cartons, remainingBoxes, groups, pieces]
 }
 async function handleGenerateExcel() {
-  if (!file.value) return
+  if (!file.value || loading.value) return
   loading.value = true
   try {
     const res = await convertTxtToExcel(file.value)

@@ -1,7 +1,7 @@
 import request from '@/common/request.js'
 
 // 获取管理员列表
-export const getAdminList = (params) => request.get("/admin/user/page", { params })
+export const getAdminList = (params, config = {}) => request.get("/admin/user/page", { ...config, params })
 
 // 新增管理员
 export const addAdmin = (adminData) => request.post("/admin/user/save", adminData)

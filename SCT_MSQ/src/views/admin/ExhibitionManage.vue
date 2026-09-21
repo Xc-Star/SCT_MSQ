@@ -258,6 +258,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import {
@@ -280,6 +281,7 @@ const imageMaxCount = 30
 const displayCover = (row) => row.cover || (row.images || [])[0] || ''
 
 const loading = ref(false)
+const listRequest = useLatestRequest()
 const list = ref([])
 const total = ref(0)
 
@@ -297,6 +299,7 @@ const handleResize = () => {
 }
 
 const getList = async () => {
+    const request = listRequest.start()
     loading.value = true
     try {
         const res = await fetchExhibitionPage({
@@ -305,13 +308,14 @@ const getList = async () => {
             keyword: query.value.keyword || undefined,
             category: query.value.category || undefined,
             status: query.value.status === null || query.value.status === '' ? undefined : query.value.status
-        })
+        }, { signal: request.signal })
+        if (!request.isCurrent()) return
         list.value = res.data.list || []
         total.value = res.data.total || 0
     } catch (error) {
         // 拦截器已提示
     } finally {
-        loading.value = false
+        if (request.isCurrent()) loading.value = false
     }
 }
 

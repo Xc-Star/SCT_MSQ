@@ -11,16 +11,15 @@
           </div>
         </template>
       </el-dialog>
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>加载中...</p>
+    <div v-if="loading" class="container">
+      <ContentSkeleton variant="form" />
     </div>
     <div v-else-if="error" class="error-message">
       <h3>加载失败</h3>
       <p>{{ error }}</p>
       <button class="button2" @click="retryFetch">重试</button>
     </div>
-    <div class="container" v-if="topic.topicResults && topic.topicResults.length">
+    <div class="container" v-if="!loading && !error && topic.topicResults && topic.topicResults.length">
       <form class="msq-form">
         <div class="title" style="margin-bottom: 64px; position: relative;">
           <h2>{{ topic.msqName }}</h2>
@@ -129,6 +128,8 @@
 </template>
 
 <script setup lang="ts">
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -160,6 +161,7 @@ const topic = ref<Topic>({
   topicResults: []
 })
 const loading = ref(false)
+const resultRequest = useLatestRequest()
 const error = ref<string | null>(null)
 const showDialog = ref(true)
 const inputId = ref('')
@@ -200,19 +202,22 @@ const parsedTopics = computed(() => {
 })
 
 const fetchData = async (id: string) => {
+  const request = resultRequest.start()
   loading.value = true
   error.value = null
   try {
-    const res: any = await getMsqResult(id)
+    const res: any = await getMsqResult(id, { signal: request.signal })
+    if (!request.isCurrent()) return
     if (res.code === 0 && res.data) {
       topic.value = res.data
     } else {
       throw new Error(res.message || '获取数据失败')
     }
   } catch (err: any) {
+    if (!request.isCurrent()) return
     error.value = err.message || '获取数据失败，请稍后重试'
   } finally {
-    loading.value = false
+    if (request.isCurrent()) loading.value = false
   }
 }
 

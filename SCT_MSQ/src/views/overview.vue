@@ -15,9 +15,12 @@
         </div>
 
         <div class="section-content">
-          <ul v-if="memberMessages.length" class="message-list">
+          <div v-if="messagesLoading">
+            <ContentSkeleton v-for="n in 3" :key="n" variant="message" />
+          </div>
+          <ul v-else-if="memberMessages.length" class="message-list">
             <li v-for="item in memberMessages.slice(0, 3)" :key="item.id" class="message-item">
-              <img :src="item.avatar" class="avatar" alt="头像" loading="lazy" @error="handleAvatarError" />
+              <LoadingImage :src="item.avatar" class="avatar" :alt="`${item.playerId}的头像`" loading="lazy" />
               <div class="message-body">
                 <div class="message-meta">
                   <span class="user-name">{{ item.playerId }}</span>
@@ -49,14 +52,17 @@
         </div>
 
         <div class="gallery-grid" :ref="el => setContainerRef(el, si)">
+          <template v-if="section.loading">
+            <ContentSkeleton v-for="n in visibleCount(section)" :key="n" />
+          </template>
           <article
-            v-for="item in section.items.slice(0, visibleCount(section))"
+            v-for="item in (section.loading ? [] : section.items.slice(0, visibleCount(section)))"
             :key="item.id"
             class="gallery-card"
             @click="openDetail(item)"
           >
             <div class="card-media">
-              <img :src="item.cover" :alt="item.title" class="card-img" loading="lazy" />
+              <LoadingImage :src="item.cover" :alt="item.title" class="card-img" loading="lazy" />
               <span v-if="item.top" class="top-tag floating">置顶</span>
               <span v-if="item.imageCount > 1" class="count-tag floating">
                 <el-icon><Picture /></el-icon>{{ item.imageCount }}
@@ -66,7 +72,7 @@
           </article>
         </div>
 
-        <div v-if="!section.items.length" class="empty-tip">
+        <div v-if="!section.loading && !section.items.length" class="empty-tip">
           {{ section.failed ? '内容加载失败，请稍后再试' : '暂无内容' }}
         </div>
       </section>
@@ -81,6 +87,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Picture } from '@element-plus/icons-vue'
 import Navbar from '@/components/Navbar.vue'
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
+import LoadingImage from '@/components/LoadingImage.vue'
 import ExhibitionDetailDialog from '@/components/ExhibitionDetailDialog.vue'
 import { getMemberMessageList } from '@/api/MemberMessage'
 import { getExhibitionList } from '@/api/Exhibition'
@@ -90,14 +98,15 @@ const router = useRouter()
 
 const memberMessages = ref([])
 const messageLoadFailed = ref(false)
+const messagesLoading = ref(true)
 const serverShortName = ref('SCT')
 
 /* ---------------- 三个展览区块 ---------------- */
 // key 是后端 category，route 是「查看更多」跳转的路径
 const sections = ref([
-  { key: 'redstone', route: 'machine', title: '机器展览区', items: [], failed: false, previewCount: 3 },
-  { key: 'building', route: 'building', title: '建筑展览区', items: [], failed: false, previewCount: 3 },
-  { key: 'other', route: 'other', title: '其他内容', items: [], failed: false, previewCount: 3 }
+  { key: 'redstone', route: 'machine', title: '机器展览区', items: [], failed: false, loading: true, previewCount: 3 },
+  { key: 'building', route: 'building', title: '建筑展览区', items: [], failed: false, loading: true, previewCount: 3 },
+  { key: 'other', route: 'other', title: '其他内容', items: [], failed: false, loading: true, previewCount: 3 }
 ])
 
 const detailVisible = ref(false)
@@ -118,6 +127,8 @@ async function fetchExhibitions() {
       } catch (e) {
         section.items = []
         section.failed = true
+      } finally {
+        section.loading = false
       }
     })
   )
@@ -131,11 +142,9 @@ async function fetchMemberMessages() {
   } catch (e) {
     memberMessages.value = []
     messageLoadFailed.value = true
+  } finally {
+    messagesLoading.value = false
   }
-}
-
-function handleAvatarError(e) {
-  e.target.style.visibility = 'hidden'
 }
 
 /* ---------------- 预览数量按容器宽度自适应 ---------------- */
@@ -173,16 +182,18 @@ function goToDetail(type) {
 }
 
 onMounted(async () => {
-  serverShortName.value = await getServerShortName()
-  document.title = serverShortName.value + '官网'
+  handleResize()
+  window.addEventListener('resize', handleResize)
+  await Promise.all([
+    getServerShortName().then(name => {
+      serverShortName.value = name
+      document.title = name + '官网'
+    }),
+    fetchMemberMessages(),
+    fetchExhibitions()
+  ])
 
-  await fetchMemberMessages()
-  await fetchExhibitions()
-
-  nextTick(() => {
-    handleResize()
-    window.addEventListener('resize', handleResize)
-  })
+  nextTick(handleResize)
 })
 
 onBeforeUnmount(() => {

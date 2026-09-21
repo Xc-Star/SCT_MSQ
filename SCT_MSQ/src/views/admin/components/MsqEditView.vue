@@ -219,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ref, watch, computed } from 'vue'
 import { adminGetMsqVO } from '@/api/AdminMsq.js'
 import { adminUpdateMsq } from '@/api/AdminMsq.js'
@@ -267,6 +268,7 @@ const topic = ref<Topic>({
 const submitData = ref<SubmitData>({})
 const error = ref<string | null>(null)
 const loading = ref(false)
+const questionnaireRequest = useLatestRequest()
 
 const questionDialogVisible = ref(false)
 const questionDialogType = ref<'add' | 'edit'>('add')
@@ -312,6 +314,7 @@ const getQuestionTypeTag = (type: string): 'primary' | 'success' | 'warning' | '
 
 // 使用异步函数获取数据
 const fetchData = async () => {
+  const request = questionnaireRequest.start()
   if (!props.id) {
     console.warn('No id provided')
     return
@@ -320,7 +323,8 @@ const fetchData = async () => {
   loading.value = true
   error.value = null
   try {
-    const response = await adminGetMsqVO(props.id);
+    const response = await adminGetMsqVO(props.id, { signal: request.signal });
+    if (!request.isCurrent()) return
     if (response && response.data) {
       topic.value = response.data
       // 确保每个题目的 images 字段为图片地址数组，options为数组
@@ -353,10 +357,11 @@ const fetchData = async () => {
       throw new Error('获取数据失败：返回数据格式不正确')
     }
   } catch (err) {
+    if (!request.isCurrent()) return
     console.error('获取数据失败：', err)
     error.value = err.message || '获取数据失败，请稍后重试'
   } finally {
-    loading.value = false
+    if (request.isCurrent()) loading.value = false
   }
 }
 
@@ -365,6 +370,8 @@ watch(() => props.id, (newId) => {
   if (newId && typeof newId === 'number') {
     fetchData()
   } else {
+    questionnaireRequest.cancel()
+    loading.value = false
     error.value = '无效的问卷ID'
   }
 }, { immediate: true })

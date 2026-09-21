@@ -12,7 +12,7 @@
                 <label class="label" for="login-password">密 码</label>
                 <span class="login-error-message" v-if="passwordError">{{ passwordError }}</span>
             </div>
-            <button class="submit-btn" @click="submit">登录</button>
+            <button class="submit-btn" :disabled="submitting" @click="submit">{{ submitting ? '登录中...' : '登录' }}</button>
         </form>
     </div>
 </template>
@@ -33,6 +33,7 @@ const username = ref('')
 const password = ref('')
 const usernameError = ref('')
 const passwordError = ref('')
+const submitting = ref(false)
 const loginData = ref({
     username: '',
     password: ''
@@ -56,6 +57,7 @@ const validatePassword = () => {
 
 const submit = async (e: Event) =>  {
     e.preventDefault()
+  if (submitting.value) return
     validateUsername()
     validatePassword()
     if (!usernameError.value && !passwordError.value) {
@@ -63,10 +65,16 @@ const submit = async (e: Event) =>  {
             username: username.value,
             password: password.value
         }
-        const response = await login(loginData.value)
-        store.setToken(response.data.token)
-        userInfoStore.setInfo(response.data.userInfo)
-        router.push('/admin/main')
+        submitting.value = true
+        try {
+          const response = await login(loginData.value)
+          store.setToken(response.data.token)
+          userInfoStore.setInfo(response.data.userInfo)
+          await router.push('/admin/main')
+        } catch {
+        } finally {
+          submitting.value = false
+        }
     }
 }
 

@@ -152,6 +152,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { adminGetResultPage, deleteMsqResult } from '@/api/AdminMsq'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
@@ -197,6 +198,7 @@ interface SearchForm {
 
 const tableData = ref<TableItem[]>([])
 const loading = ref(false)
+const listRequest = useLatestRequest()
 const searchForm = ref<SearchForm>({
     respondent: undefined,
     respondentContact: undefined,
@@ -215,6 +217,7 @@ const handleResize = () => {
 }
 
 const loadData = async () => {
+    const request = listRequest.start()
     loading.value = true
     try {
         const params = {
@@ -227,8 +230,8 @@ const loadData = async () => {
                 ])
             )
         }
-        console.log(params)
-        const res = await adminGetResultPage(params) as unknown as ApiResponse
+        const res = await adminGetResultPage(params, { signal: request.signal }) as unknown as ApiResponse
+        if (!request.isCurrent()) return
         if (res.code === 0 && res.data) {
             tableData.value = res.data.list
             total.value = res.data.total
@@ -241,9 +244,8 @@ const loadData = async () => {
             ElMessage.error('获取数据失败')
         }
     } catch (error) {
-        ElMessage.error('获取数据失败')
     } finally {
-        loading.value = false
+        if (request.isCurrent()) loading.value = false
     }
 }
 

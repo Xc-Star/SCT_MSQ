@@ -4,7 +4,7 @@ import request from '@/common/request.js'
  * 后台留言分页查询
  * @param {object} params { pageNo, pageSize, keyword, status }
  */
-export const fetchMessagePage = (params) => request.get('/admin/message/page', { params })
+export const fetchMessagePage = (params, config = {}) => request.get('/admin/message/page', { ...config, params })
 
 /**
  * 后台手动新增留言

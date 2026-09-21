@@ -16,8 +16,12 @@
       </div>
     </template>
 
-    <div class="exh-body" v-loading="loading">
-      <div v-if="detail" class="exh-inner">
+    <div class="exh-body" :aria-busy="loading">
+      <div v-if="loading" class="exh-inner">
+        <div class="exh-media"><ContentSkeleton /></div>
+        <div class="exh-text"><ContentSkeleton variant="form" /></div>
+      </div>
+      <div v-else-if="detail" class="exh-inner">
         <!-- 左：图 -->
         <div class="exh-media">
           <!-- 右上角切换显示模式 -->
@@ -55,9 +59,11 @@
                 @click="prev"
               >‹</button>
 
-              <el-image
+              <LoadingImage
+                :key="images[current]"
                 class="stage-img"
                 :src="images[current]"
+                :alt="detail.title"
                 fit="contain"
                 :preview-src-list="images"
                 :initial-index="current"
@@ -83,18 +89,19 @@
                 :class="{ active: i === current }"
                 @click="current = i"
               >
-                <img :src="img" alt="" loading="lazy" />
+                <LoadingImage :src="img" :alt="`第${i + 1}张缩略图`" class="thumb-image" loading="lazy" />
               </button>
             </div>
           </div>
 
           <!-- 模式二：拼接，自适应排列 -->
           <div v-else class="grid-mode">
-            <el-image
+            <LoadingImage
               v-for="(img, i) in images"
               :key="`${i}-${img}`"
               class="grid-img"
               :src="img"
+              :alt="`${detail.title} · ${i + 1}`"
               fit="cover"
               :preview-src-list="images"
               :initial-index="i"
@@ -122,7 +129,10 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { FullScreen, Grid } from '@element-plus/icons-vue'
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
+import LoadingImage from '@/components/LoadingImage.vue'
 import { getExhibitionDetail } from '@/api/Exhibition'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { categorySection, categoryTagType } from '@/constants/exhibition'
 
 const props = defineProps({
@@ -148,6 +158,7 @@ const handleResize = () => {
 
 const loading = ref(false)
 const detail = ref(null)
+const detailRequest = useLatestRequest()
 
 /** 显示模式，默认大图 */
 const mode = ref('single')
@@ -166,19 +177,22 @@ function next() {
 }
 
 async function fetchDetail(id) {
+  const request = detailRequest.start()
   if (id === null || id === undefined || id === '') {
     detail.value = null
+    loading.value = false
     return
   }
   loading.value = true
   detail.value = null
   try {
-    const res = await getExhibitionDetail(id)
+    const res = await getExhibitionDetail(id, { signal: request.signal })
+    if (!request.isCurrent()) return
     detail.value = res?.data || null
   } catch (e) {
-    detail.value = null
+    if (request.isCurrent()) detail.value = null
   } finally {
-    loading.value = false
+    if (request.isCurrent()) loading.value = false
   }
 }
 
@@ -186,7 +200,11 @@ async function fetchDetail(id) {
 watch(
   () => [props.modelValue, props.exhibitionId],
   ([open, id]) => {
-    if (!open) return
+    if (!open) {
+      detailRequest.cancel()
+      loading.value = false
+      return
+    }
     mode.value = 'single'
     current.value = 0
     fetchDetail(id)
@@ -386,7 +404,7 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
 }
 
-.thumb img {
+.thumb-image {
   width: 100%;
   height: 100%;
   object-fit: cover;

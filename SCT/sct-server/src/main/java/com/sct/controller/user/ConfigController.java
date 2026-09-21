@@ -26,6 +26,12 @@ public class ConfigController {
 
     @GetMapping
     public Result<List<Config>> list() {
+//        延迟2秒做骨架屏测试
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         return Result.success(configService.list());
     }
 }

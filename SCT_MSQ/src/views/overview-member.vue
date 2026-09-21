@@ -6,16 +6,16 @@
       <header class="detail-hero">
         <el-button type="text" class="back-btn" @click="goBack">‹ 返回</el-button>
         <h1>成员留言区</h1>
-        <span class="count">共 {{ memberMessages.length }} 条</span>
+        <span v-if="!loading" class="count">共 {{ memberMessages.length }} 条</span>
       </header>
 
       <div class="detail-card">
         <div v-if="loading" class="skeleton-list">
-          <div v-for="n in 4" :key="n" class="skeleton-item"></div>
+          <ContentSkeleton v-for="n in 4" :key="n" variant="message" />
         </div>
         <ul v-else-if="memberMessages.length" class="message-list">
           <li v-for="item in memberMessages" :key="item.id" class="message-item">
-            <img :src="item.avatar" class="avatar" alt="头像" loading="lazy" @error="handleAvatarError" />
+            <LoadingImage :src="item.avatar" class="avatar" :alt="`${item.playerId}的头像`" loading="lazy" />
             <div class="message-body">
               <div class="message-meta">
                 <span class="user-name">{{ item.playerId }}</span>
@@ -36,6 +36,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
+import LoadingImage from '@/components/LoadingImage.vue'
 import { getMemberMessageList } from '@/api/MemberMessage'
 
 const router = useRouter()
@@ -54,10 +56,6 @@ async function fetchMemberMessages() {
   } finally {
     loading.value = false
   }
-}
-
-function handleAvatarError(e) {
-  e.target.style.visibility = 'hidden'
 }
 
 function goBack() {
@@ -176,12 +174,6 @@ onMounted(fetchMemberMessages)
 
 .skeleton-list {
   padding: 6px 0;
-}
-.skeleton-item {
-  height: 56px;
-  margin: 14px 0;
-  border-radius: var(--radius-md);
-  background: var(--count-bg);
 }
 
 @media (max-width: 800px) {

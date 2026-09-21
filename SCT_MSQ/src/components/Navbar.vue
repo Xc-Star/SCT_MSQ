@@ -1,12 +1,15 @@
 <template>
   <nav class="navbar" :class="{ 'is-floating': isFloating }">
     <div class="nav-left">
-      <img 
+      <div v-if="configLoading" class="logo-image logo-loading" role="status" aria-label="Logo加载中">
+        <span class="logo-spinner" aria-hidden="true"></span>
+      </div>
+      <LoadingImage
+        v-else
         :src="logoUrl" 
         alt="Logo" 
         class="logo-image"
         @click="goToHome"
-        @error="handleImageError"
       />
       <div class="logo" @click="goToHome">{{ serverShortName }}</div>
     </div>
@@ -44,8 +47,10 @@
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { getConfig } from '@/api/System'
 import { useRouter } from 'vue-router'
+import LoadingImage from '@/components/LoadingImage.vue'
 
 const configMap = ref({})
+const configLoading = ref(true)
 const logoUrl = ref('')
 const serverShortName = ref('')
 const showStockListTool = ref(false)
@@ -104,7 +109,10 @@ async function fetchConfig() {
     if (res && res.data) {
       applyConfig(res.data)
     }
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    configLoading.value = false
+  }
 }
 
 function applyConfig(data) {
@@ -132,11 +140,6 @@ function goBuildTool() {
 function goToResult() {
   router.push('/msq/result')
 }
-function handleImageError() {
-  // 图片加载失败时的处理
-  console.warn('Logo图片加载失败')
-}
-
 onMounted(async () => {
   desktopViewport = window.matchMedia('(min-width: 769px)')
   updateFloating()
@@ -147,6 +150,27 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.logo-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--count-bg);
+  color: var(--aqua-600);
+  font-size: 24px;
+}
+.logo-spinner {
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 3px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: logo-spin 0.9s linear infinite;
+}
+@keyframes logo-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .logo-spinner { animation: none; }
+}
 .navbar {
   display: flex;
   justify-content: space-between;

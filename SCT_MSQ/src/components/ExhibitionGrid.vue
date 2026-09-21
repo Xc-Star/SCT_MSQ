@@ -6,12 +6,12 @@
       <header class="detail-hero">
         <el-button type="text" class="back-btn" @click="goBack">‹ 返回</el-button>
         <h1>{{ title }}</h1>
-        <span class="count">共 {{ list.length }} {{ unit }}</span>
+        <span v-if="!loading" class="count">共 {{ list.length }} {{ unit }}</span>
       </header>
 
       <div class="detail-card">
         <div v-if="loading" class="gallery-grid">
-          <div v-for="n in 6" :key="n" class="skeleton-card"></div>
+          <ContentSkeleton v-for="n in 6" :key="n" />
         </div>
 
         <div v-else-if="list.length" class="gallery-grid">
@@ -22,7 +22,7 @@
             @click="openDetail(item)"
           >
             <div class="card-media">
-              <img :src="item.cover" :alt="item.title" class="card-img" loading="lazy" />
+              <LoadingImage :src="item.cover" :alt="item.title" class="card-img" loading="lazy" />
               <span v-if="item.top" class="top-tag floating">置顶</span>
               <span v-if="item.imageCount > 1" class="count-tag floating">
                 <el-icon><Picture /></el-icon>{{ item.imageCount }}
@@ -46,6 +46,8 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Picture } from '@element-plus/icons-vue'
 import Navbar from '@/components/Navbar.vue'
+import LoadingImage from '@/components/LoadingImage.vue'
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
 import ExhibitionDetailDialog from '@/components/ExhibitionDetailDialog.vue'
 import { getExhibitionList } from '@/api/Exhibition'
 
@@ -206,12 +208,6 @@ onMounted(fetchList)
   background: var(--overlay-bg);
   color: #fff;
   font-size: 0.72rem;
-}
-
-.skeleton-card {
-  height: 176px;
-  border-radius: var(--radius-lg);
-  background: var(--count-bg);
 }
 
 .empty-tip {

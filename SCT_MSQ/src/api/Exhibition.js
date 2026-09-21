@@ -16,4 +16,4 @@ export const getExhibitionList = (category, limit) => {
  * 展览详情（公开，点开弹窗时调用，带多图与正文）
  * @param {number|string} id
  */
-export const getExhibitionDetail = (id) => request.get(`/exhibition/${id}`)
+export const getExhibitionDetail = (id, config = {}) => request.get(`/exhibition/${id}`, config)

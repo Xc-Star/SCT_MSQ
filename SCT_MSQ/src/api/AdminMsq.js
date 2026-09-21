@@ -1,6 +1,6 @@
 import request from '@/common/request.js'
 
-export const getMsqList = () => request.get("/admin/msq/list")
+export const getMsqList = (config = {}) => request.get("/admin/msq/list", config)
 
 export const addMsq = (msqData) => request.post("/admin/msq/save", msqData)
 
@@ -14,9 +14,9 @@ export const updateStatus = (statusData) => request.put("/admin/msq/updateStatus
 
 export const adminUpdateMsq = (MsqUpdateDTO) => request.put("/admin/topic/update", MsqUpdateDTO)
 
-export const adminGetMsqVO = (msqId) => request.get("/admin/topic/get/" + msqId)
+export const adminGetMsqVO = (msqId, config = {}) => request.get("/admin/topic/get/" + msqId, config)
 
-export const adminGetResultPage = (params) => request.get("/admin/msq/pageResult", { params })
+export const adminGetResultPage = (params, config = {}) => request.get("/admin/msq/pageResult", { ...config, params })
 
 export const getReviewInfo = (msqResultId) => request.get("/admin/topic/getReviewInfo/" + msqResultId)
 

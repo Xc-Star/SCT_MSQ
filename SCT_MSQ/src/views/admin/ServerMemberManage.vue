@@ -181,7 +181,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { fetchMemberList, removeMember } from '@/api/AdminMember';
@@ -218,7 +219,11 @@ const getRoleTagType = (role: number): 'primary' | 'success' | 'warning' | 'info
     return typeMap[role] || 'info'
 }
 
-const loading = ref(false)
+const memberLoading = ref(false)
+const removedLoading = ref(false)
+const loading = computed(() => activeTab.value === 'member' ? memberLoading.value : removedLoading.value)
+const memberRequest = useLatestRequest()
+const removedRequest = useLatestRequest()
 const tableData = ref<ServerMember[]>([])
 const dialogVisible = ref(false)
 const dialogType = ref<'add' | 'edit'>('add')
@@ -292,37 +297,39 @@ const handleSizeChange = (val: number) => {
 
 // 获取成员列表
 const getMemberList = async () => {
-    loading.value = true
+    const request = memberRequest.start()
+    memberLoading.value = true
     try {
         const res = await fetchMemberList({ 
             isRemoved: false, 
             pageNo: memberPage.value, 
             pageSize: pageSize.value 
-        })
+        }, { signal: request.signal })
+        if (!request.isCurrent()) return
         memberList.value = res.data.list
         memberTotal.value = res.data.total
     } catch (error) {
-        ElMessage.error('获取成员列表失败')
     } finally {
-        loading.value = false
+        if (request.isCurrent()) memberLoading.value = false
     }
 }
 
 // 获取被移除成员列表
 const getRemovedList = async () => {
-    loading.value = true
+    const request = removedRequest.start()
+    removedLoading.value = true
     try {
         const res = await fetchMemberList({ 
             isRemoved: true, 
             pageNo: removedPage.value, 
             pageSize: pageSize.value 
-        })
+        }, { signal: request.signal })
+        if (!request.isCurrent()) return
         removedList.value = res.data.list
         removedTotal.value = res.data.total
     } catch (error) {
-        ElMessage.error('获取被移除成员列表失败')
     } finally {
-        loading.value = false
+        if (request.isCurrent()) removedLoading.value = false
     }
 }
 

@@ -4,7 +4,7 @@ import request from '@/common/request.js'
  * 后台展览内容分页查询
  * @param {object} params { pageNo, pageSize, keyword, category, status }
  */
-export const fetchExhibitionPage = (params) => request.get('/admin/exhibition/page', { params })
+export const fetchExhibitionPage = (params, config = {}) => request.get('/admin/exhibition/page', { ...config, params })
 
 /**
  * 后台新增展览内容

@@ -123,6 +123,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getAdminList, addAdmin, updateAdmin, deleteAdmin } from '@/api/AdminUser'
@@ -143,6 +144,7 @@ interface Admin {
 }
 
 const loading = ref(false)
+const listRequest = useLatestRequest()
 const tableData = ref<Admin[]>([])
 const dialogVisible = ref(false)
 const dialogType = ref<'add' | 'edit'>('add')
@@ -180,18 +182,19 @@ const userInfo = userInfoStore.info
 
 // 获取管理员列表
 const fetchAdminList = async () => {
+    const request = listRequest.start()
     loading.value = true
     try {
         const response = await getAdminList({
             pageNo: currentPage.value,
             pageSize: pageSize.value
-        })
+        }, { signal: request.signal })
+        if (!request.isCurrent()) return
         tableData.value = response.data.list
         total.value = response.data.total
     } catch (error) {
-        ElMessage.error('获取管理员列表失败')
     } finally {
-        loading.value = false
+        if (request.isCurrent()) loading.value = false
     }
 }
 

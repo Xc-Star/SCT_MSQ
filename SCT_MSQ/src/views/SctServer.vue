@@ -5,6 +5,12 @@
   
       <!-- 主要内容区域 -->
       <div class="home-container" ref="homeContainer">
+        <ContentSkeleton v-if="configLoading" variant="home" class="home-loading" />
+        <div v-else-if="configFailed" role="alert">
+          <p>页面加载失败</p>
+          <el-button @click="fetchConfig">重新加载</el-button>
+        </div>
+        <template v-else>
         <div class="title-container">
           <h1 class="welcome-title">Welcome</h1>
           <h1 class="main-title">{{ configMap.server_name }}</h1>
@@ -18,6 +24,7 @@
           <el-button v-if="configMap.logistics_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('logistics')">后勤问卷</el-button>
           <el-button v-if="configMap.other_msq === '1'" class="questionnaire-entry" size="large" @click="goToMsqView('other')">其他问卷</el-button>
         </div>
+        </template>
       </div>
     </div>
   </template>
@@ -25,9 +32,12 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import Navbar from '@/components/Navbar.vue'
+  import ContentSkeleton from '@/components/ContentSkeleton.vue'
   import { getConfig } from '@/api/System'
   
   const configMap = ref({})
+  const configLoading = ref(true)
+  const configFailed = ref(false)
   const mainPage = ref(null)
   const homeContainer = ref(null)
   
@@ -36,6 +46,8 @@
   }
   
   async function fetchConfig() {
+    configLoading.value = true
+    configFailed.value = false
     try {
       const res = await getConfig()
       if (res && res.data) {
@@ -44,9 +56,12 @@
           map[item.configKey] = item.configValue
         })
         configMap.value = map
+        document.title = (map.server_short_name || 'SCT') + '官网'
       }
     } catch (e) {
-      // 可选：错误处理
+      configFailed.value = true
+    } finally {
+      configLoading.value = false
     }
   }
   
@@ -57,6 +72,7 @@
   </script>
   
   <style scoped>
+  .home-loading { max-width: calc(100% - 48px); }
   /* 移除卡片感相关样式，优化整体美观度 */
   .main-page {
     min-height: 100vh;

@@ -4,10 +4,7 @@
     <Navbar />
 
     <div class="container">
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>加载中...</p>
-      </div>
+      <ContentSkeleton v-if="loading" variant="form" />
       <div v-else-if="error" class="error-message">
         <h3>加载失败</h3>
         <p>{{ error }}</p>
@@ -41,7 +38,7 @@
             <div v-if="topic.id === -2" class="player-info">
               <template v-if="playerInfo">
                 <span class="player-tip">已查询到正版账号信息：</span>
-                <img :src="playerInfo.avatar" alt="玩家头像" class="player-avatar" />
+                <LoadingImage :src="playerInfo.avatar" alt="玩家头像" class="player-avatar" />
                 <span class="player-username">{{ playerInfo.username }}</span>
                 <span class="player-uuid">{{ playerInfo.id }}</span>
               </template>
@@ -143,7 +140,7 @@
         </div>
 
         <div class="form-actions">
-          <button class="button2" @click="submit">提交</button>
+          <button class="button2" :disabled="submitting || submitted" @click="submit">{{ submitting ? '提交中...' : '提交' }}</button>
         </div>
       </form>
     </div>
@@ -158,6 +155,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import Navbar from '@/components/Navbar.vue'
+import ContentSkeleton from '@/components/ContentSkeleton.vue'
+import LoadingImage from '@/components/LoadingImage.vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 
 interface TopicOption {
   id: number
@@ -241,10 +241,13 @@ const submitData = ref<SubmitData>({})
 const questionnaireList = ref<Questionnaire[]>([])
 const showQuestionnaireList = ref(false)
 
-import { getMsqVO, getOneMsqVO, submitMsq } from '@/api/MsqView.js'
+import { getMsqVO, getOneMsqVO, submitMsq, getPlayer } from '@/api/MsqView.js'
 
 const error = ref<string | null>(null)
 const loading = ref(false)
+const questionnaireRequest = useLatestRequest()
+const submitting = ref(false)
+const submitted = ref(false)
 const router = useRouter()
 const route = useRoute()
 
@@ -272,6 +275,7 @@ function getImageUrl(url: string) {
 
 // 使用异步函数获取数据
 const fetchData = async () => {
+  const request = questionnaireRequest.start()
   loading.value = true
   error.value = null
   try {
@@ -288,7 +292,8 @@ const fetchData = async () => {
     
     const questionnaireType = typeMapping[questionnaireTypeParam] || 1
     
-    const response = await getMsqVO(questionnaireType);
+    const response = await getMsqVO(questionnaireType, { signal: request.signal });
+    if (!request.isCurrent()) return
     if (response && response.data) {
       // 判断响应数据类型
       if (Array.isArray(response.data)) {
@@ -315,17 +320,20 @@ const fetchData = async () => {
       throw new Error('获取数据失败：返回数据格式不正确')
     }
   } catch (err) {
+    if (!request.isCurrent()) return
     console.error('获取数据失败：', err)
     error.value = err.message || '获取数据失败，请稍后重试'
   } finally {
-    loading.value = false
+    if (request.isCurrent()) loading.value = false
   }
 }
 
 const selectQuestionnaire = async (questionnaire: Questionnaire) => {
+  const request = questionnaireRequest.start()
   loading.value = true
   try {
-    const response = await getOneMsqVO(questionnaire.id)
+    const response = await getOneMsqVO(questionnaire.id, { signal: request.signal })
+    if (!request.isCurrent()) return
     if (response && response.data) {
       topic.value = response.data
       showQuestionnaireList.value = false
@@ -344,10 +352,11 @@ const selectQuestionnaire = async (questionnaire: Questionnaire) => {
       throw new Error('获取问卷内容失败：返回数据格式不正确')
     }
   } catch (err) {
+    if (!request.isCurrent()) return
     console.error('获取问卷内容失败：', err)
     error.value = err.message || '获取问卷内容失败，请稍后重试'
   } finally {
-    loading.value = false
+    if (request.isCurrent()) loading.value = false
   }
 }
 
@@ -363,6 +372,17 @@ onMounted(() => {
 
 const submit = async (e: Event) => {
   e.preventDefault()
+  if (submitting.value || submitted.value) return
+  submitting.value = true
+  try {
+    await submitQuestionnaire()
+  } catch {
+  } finally {
+    submitting.value = false
+  }
+}
+
+const submitQuestionnaire = async () => {
   
   // 检查ID为负数的题目是否已填写
   const negativeIdTopics = topic.value.topics.filter(item => item.id < 0)
@@ -383,13 +403,17 @@ const submit = async (e: Event) => {
   // 检查正版账号验证状态
   const genuineIdTopic = topic.value.topics.find(item => item.id === -2)
   if (genuineIdTopic && submitData.value[-2]) {
+    const genuineId = String(submitData.value[-2]).trim()
     try {
-      const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${submitData.value[-2]}`);
-      const data = await response.json();
+      const data = await getPlayer(genuineId)
+      if (genuineId !== String(submitData.value[-2]).trim()) {
+        ElMessage.error('账号ID已修改，请重新提交')
+        return
+      }
       
-      if (data.uuid) {
+      if (data?.uuid) {
         playerInfo.value = {
-          avatar: `https://mc-heads.net/avatar/${submitData.value[-2]}`,
+          avatar: `https://mc-heads.net/avatar/${encodeURIComponent(genuineId)}`,
           username: data.username,
           id: data.uuid
         };
@@ -444,6 +468,7 @@ const submit = async (e: Event) => {
   }
   
   const response = await submitMsq(submitRequest)
+  submitted.value = true
   ElMessage.success('提交成功')
   // 延迟1秒后跳转，让用户看到成功提示
   setTimeout(() => {
@@ -465,12 +490,12 @@ const handleInputBlur = async (event: Event, topicId: number) => {
     
     if (genuineId) {
       try {
-        const response = await fetch(`https://api.ashcon.app/mojang/v2/user/${genuineId}`);
-        const data = await response.json();
+        const data = await getPlayer(genuineId)
+        if (genuineId !== String(submitData.value[-2] || '').trim()) return
         
-        if (data.uuid) {
+        if (data?.uuid) {
           playerInfo.value = {
-            avatar: `https://mc-heads.net/avatar/${genuineId}`,
+            avatar: `https://mc-heads.net/avatar/${encodeURIComponent(genuineId)}`,
             username: data.username,
             id: data.uuid
           };
@@ -480,6 +505,7 @@ const handleInputBlur = async (event: Event, topicId: number) => {
           errorMessage.value = '未查询到正版账号信息';
         }
       } catch (error) {
+        if (genuineId !== String(submitData.value[-2] || '').trim()) return
         console.error('验证玩家ID时出错：', error);
         playerInfo.value = null;
         errorMessage.value = '验证玩家ID时出错，请稍后重试';

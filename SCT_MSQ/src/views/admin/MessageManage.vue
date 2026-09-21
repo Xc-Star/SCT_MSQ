@@ -179,11 +179,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { fetchMessagePage, saveMessage, updateMessage, removeMessage } from '@/api/AdminMemberMessage'
 
 const loading = ref(false)
+const listRequest = useLatestRequest()
 const messageList = ref([])
 const total = ref(0)
 
@@ -200,6 +202,7 @@ const handleResize = () => {
 }
 
 const getMessageList = async () => {
+    const request = listRequest.start()
     loading.value = true
     try {
         const res = await fetchMessagePage({
@@ -207,13 +210,14 @@ const getMessageList = async () => {
             pageSize: query.value.pageSize,
             keyword: query.value.keyword || undefined,
             status: query.value.status === null || query.value.status === '' ? undefined : query.value.status
-        })
+        }, { signal: request.signal })
+        if (!request.isCurrent()) return
         messageList.value = res.data.list || []
         total.value = res.data.total || 0
     } catch (error) {
         // 拦截器已提示
     } finally {
-        loading.value = false
+        if (request.isCurrent()) loading.value = false
     }
 }
 

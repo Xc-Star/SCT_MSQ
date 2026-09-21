@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import MsqEditView from './components/MsqEditView.vue'
 import { ref, onMounted } from 'vue'
+import { useLatestRequest } from '@/composables/useLatestRequest'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import 'element-plus/dist/index.css'
 import {
@@ -165,6 +166,7 @@ const getTypeTagType = (type: number | string): 'primary' | 'success' | 'warning
 }
 
 const loading = ref(false)
+const listRequest = useLatestRequest()
 const tableData = ref<Questionnaire[]>([])
 const dialogVisible = ref(false)
 const dialogType = ref<'add' | 'edit'>('add')
@@ -188,10 +190,15 @@ window.addEventListener('resize', () => {
 
 // 获取问卷列表
 const getList = async () => {
+    const request = listRequest.start()
     loading.value = true
-    const response = await getMsqList()
-    tableData.value = response.data
-    loading.value = false
+    try {
+        const response = await getMsqList({ signal: request.signal })
+        if (request.isCurrent()) tableData.value = response.data
+    } catch {
+    } finally {
+        if (request.isCurrent()) loading.value = false
+    }
 }
 
 // 新增问卷

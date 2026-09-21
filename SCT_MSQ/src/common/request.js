@@ -21,9 +21,27 @@ const instance = axios.create({
   }
 })
 
+const pendingGets = new Map()
+const sendGet = instance.get.bind(instance)
+
+instance.get = (url, config = {}) => {
+    if (config.dedupe === false || Object.keys(config).some(key => !['params', 'dedupe'].includes(key))) {
+        return sendGet(url, config)
+    }
+    const key = JSON.stringify([useTokenStore().token || '', instance.getUri({ url, params: config.params })])
+    if (pendingGets.has(key)) return pendingGets.get(key)
+
+    const pending = sendGet(url, config).finally(() => {
+        if (pendingGets.get(key) === pending) pendingGets.delete(key)
+    })
+    pendingGets.set(key, pending)
+    return pending
+}
+
 //添加请求拦截器
 instance.interceptors.request.use(
     config => {
+        if (!['get', 'head', 'options'].includes(config.method)) pendingGets.clear()
         let tokenStore = useTokenStore();
         // 判断token是否存在
         if(tokenStore.token){
@@ -39,6 +57,7 @@ instance.interceptors.request.use(
 //添加响应拦截器
 instance.interceptors.response.use(
     result => {
+        if (result.config && !['get', 'head', 'options'].includes(result.config.method)) pendingGets.clear()
         // 如果是文件流，直接返回
         if (result.config && result.config.responseType === 'blob') {
             return result.data;
@@ -55,6 +74,7 @@ instance.interceptors.response.use(
         }
     },
     err => {
+        if (axios.isCancel(err)) return Promise.reject(err)
         // 判断响应状态码
         if(err.code === 'ECONNABORTED') {
             ElMessage.error('请求超时，请检查网络连接');
